@@ -411,6 +411,7 @@ struct AirIRGeneratorBase {
     PartialResult WARN_UNUSED_RETURN addArrayNew(uint32_t typeIndex, ExpressionType size, ExpressionType value, ExpressionType& result);
     PartialResult WARN_UNUSED_RETURN addArrayNewDefault(uint32_t index, ExpressionType size, ExpressionType& result);
     PartialResult WARN_UNUSED_RETURN addArrayNewData(uint32_t typeIndex, uint32_t dataIndex, ExpressionType arraySize, ExpressionType offset, ExpressionType& result);
+    PartialResult WARN_UNUSED_RETURN addArrayNewElem(uint32_t typeIndex, uint32_t elemSegmentIndex, ExpressionType arraySize, ExpressionType offset, ExpressionType& result);
     PartialResult WARN_UNUSED_RETURN addArrayGet(ExtGCOpType arrayGetKind, uint32_t typeIndex, ExpressionType arrayref, ExpressionType index, ExpressionType& result);
     PartialResult WARN_UNUSED_RETURN addArraySet(uint32_t typeIndex, ExpressionType arrayref, ExpressionType index, ExpressionType value);
     PartialResult WARN_UNUSED_RETURN addArrayLen(ExpressionType arrayref, ExpressionType& result);
@@ -2502,7 +2503,7 @@ auto AirIRGeneratorBase<Derived, ExpressionType>::addArrayNewDefault(uint32_t ty
 
 template<typename Derived, typename ExpressionType>
 auto AirIRGeneratorBase<Derived, ExpressionType>::addArrayNewData(uint32_t typeIndex, uint32_t dataIndex, ExpressionType arraySize, ExpressionType offset, ExpressionType& result) -> PartialResult
-{
+    {
     Wasm::TypeDefinition& arraySignature = m_info.typeSignatures[typeIndex];
     ASSERT(arraySignature.is<ArrayType>());
 
@@ -2519,6 +2520,28 @@ auto AirIRGeneratorBase<Derived, ExpressionType>::addArrayNewData(uint32_t typeI
 
     // Check for null return value (indicating that this access is out of bounds for the segment)
     emitThrowOnNullReference(result, ExceptionType::OutOfBoundsDataSegmentAccess);
+    return { };
+}
+
+template<typename Derived, typename ExpressionType>
+auto AirIRGeneratorBase<Derived, ExpressionType>::addArrayNewElem(uint32_t typeIndex, uint32_t elemSegmentIndex, ExpressionType arraySize, ExpressionType offset, ExpressionType& result) -> PartialResult
+{
+    Wasm::TypeDefinition& arraySignature = m_info.typeSignatures[typeIndex];
+    ASSERT(arraySignature.is<ArrayType>());
+
+    // The result type is a non-nullable reference to an array
+    result = tmpForType(Wasm::Type { Wasm::TypeKind::Ref, Wasm::TypeInformation::get(arraySignature) });
+
+    emitCCall(&operationWasmArrayNewElem,
+        result,
+        instanceValue(),
+        self().addConstant(Types::I32, typeIndex),
+        self().addConstant(Types::I32, elemSegmentIndex),
+        arraySize,
+        offset);
+
+    // Check for null return value (indicating that this access is out of bounds for the segment)
+    emitThrowOnNullReference(result, ExceptionType::OutOfBoundsElementSegmentAccess);
     return { };
 }
 
