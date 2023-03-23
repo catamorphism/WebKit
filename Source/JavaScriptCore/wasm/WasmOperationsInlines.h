@@ -101,12 +101,21 @@ inline EncodedJSValue arrayNew(Instance* instance, uint32_t typeIndex, uint32_t 
 }
 
 template<typename T>
-EncodedJSValue createArrayFromDataSegment(Instance* instance, FieldType elementType, size_t arraySize,
-    unsigned dataSegmentIndex, unsigned offset, FixedVector<T>&& tempValues, RefPtr<const Wasm::RTT> rtt) {
+EncodedJSValue createArrayValue(Instance* instance, FieldType fieldType, size_t arraySize, FixedVector<T>&& tempValues, RefPtr<const Wasm::RTT> rtt)
+{
     JSWebAssemblyInstance* jsInstance = instance->owner();
     JSGlobalObject* globalObject = jsInstance->globalObject();
-
     VM& vm = globalObject->vm();
+
+    JSWebAssemblyArray* array = JSWebAssemblyArray::create(vm, globalObject->webAssemblyArrayStructure(), fieldType, arraySize, WTFMove(tempValues), rtt);
+
+    return JSValue::encode(JSValue(array));
+}
+
+template<typename T>
+EncodedJSValue createArrayFromDataSegment(Instance* instance, FieldType elementType, size_t arraySize,
+    unsigned dataSegmentIndex, unsigned offset, FixedVector<T>&& tempValues, RefPtr<const Wasm::RTT> rtt)
+{
     // Determine the array length in bytes from the element type and desired array size
     size_t elementSize = elementType.type.elementSize();
 
@@ -128,25 +137,16 @@ EncodedJSValue createArrayFromDataSegment(Instance* instance, FieldType elementT
     }
 
     // Finally, return a JS value representing an array of the values from `tempValues`
-    JSWebAssemblyArray* array = JSWebAssemblyArray::create(vm, globalObject->webAssemblyArrayStructure(), elementType, arraySize, WTFMove(tempValues), rtt);
-    return JSValue::encode(JSValue(array));
+    return createArrayValue(instance, elementType, arraySize, WTFMove(tempValues), rtt);
 }
 
 inline EncodedJSValue createArrayFromElementSegment(Instance* instance, size_t arraySize, unsigned elemSegmentIndex, unsigned offset, FixedVector<uint64_t>&& tempValues, RefPtr<const Wasm::RTT> rtt)
 {
-    JSWebAssemblyInstance* jsInstance = instance->owner();
-    JSGlobalObject* globalObject = jsInstance->globalObject();
-
-    VM& vm = globalObject->vm();
-
     // Copy the data from the segment into the temp `values` vector
     instance->copyElementSegment(instance->module().moduleInformation().elements[elemSegmentIndex], offset, arraySize, tempValues);
 
     // Finally, return a JS value representing an array of the values from `tempValues`
-    JSWebAssemblyArray* array = JSWebAssemblyArray::create(vm, globalObject->webAssemblyArrayStructure(), FieldType { StorageType { Types::I64 }, Mutability::Mutable },
-        arraySize, WTFMove(tempValues), rtt);
-
-    return JSValue::encode(JSValue(array));
+    return createArrayValue(instance, FieldType { StorageType { Types::I64 }, Mutability::Mutable }, arraySize, WTFMove(tempValues), rtt);
 }
 
 inline EncodedJSValue arrayNewData(Instance* instance, uint32_t typeIndex, uint32_t dataSegmentIndex, uint32_t arraySize, uint32_t offset)
