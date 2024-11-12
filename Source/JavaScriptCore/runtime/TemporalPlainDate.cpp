@@ -306,6 +306,76 @@ ISO8601::PlainDate TemporalPlainDate::with(JSGlobalObject* globalObject, JSObjec
     RELEASE_AND_RETURN(scope, TemporalCalendar::isoDateFromFields(globalObject, y, m, d, overflow));
 }
 
+// TODO don't duplicate this
+// https://tc39.es/ecma262/#sec-makeday
+static inline double makeDay(double year, double month, double date)
+{
+    double additionalYears = std::floor(month / 12);
+    double ym = year + additionalYears;
+    if (!std::isfinite(ym))
+        return PNaN;
+    double mm = month - additionalYears * 12;
+    int32_t yearInt32 = toInt32(ym);
+    int32_t monthInt32 = toInt32(mm);
+    if (yearInt32 != ym || monthInt32 != mm)
+        return PNaN;
+    double days = dateToDaysFrom1970(yearInt32, monthInt32, 1);
+    return days + date - 1;
+}
+
+// TODO don't duplicate this
+static inline Int128 makeDate(double day, double time)
+{
+#if COMPILER(CLANG)
+    #pragma STDC FP_CONTRACT OFF
+#endif
+    return (day * msPerDay) + time;
+}
+
+Int128 getUTCEpochNanoseconds(ISO8601::PlainDate isoDate) {
+    double date = makeDay(isoDate.year(), isoDate.month(), isoDate.day());
+    Int128 ms = makeDate(date, 0);
+    return ms * 1000000;
+}
+
+ISO8601::Duration TemporalPlainDate::differenceTemporalPlainDate(JSGlobalObject* globalObject, bool isSince, TemporalPlainDate* other, TemporalUnit smallestUnit, TemporalUnit largestUnit, RoundingMode roundingMode, double increment) {
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    // Steps 1-4 already done
+    // Step 5
+    if (TemporalCalendar::isoDateCompare(plainDate(), other->plainDate()) == 0) {
+        // 5a.
+        return ISO8601::Duration();
+    }
+    // Step 6
+    // TODO: isoDateDifference = CalendarDateUntil?
+    ISO8601::Duration dateDifference = TemporalCalendar::isoDateDifference(globalObject, plainDate(), other->plainDate(), largestUnit);
+    // Step 7
+    std::optional<InternalDuration> maybeDuration = TemporalDuration::combineDateAndTimeDuration(dateDifference, 0);
+    if (!maybeDuration)
+        throwRangeError(globalObject, scope, "Signs do not match"_s);
+    InternalDuration duration = maybeDuration.value();
+    // Step 8.
+    if (smallestUnit != TemporalUnit::Day || increment != 1) {
+        // Step 8a.
+        auto isoDate = plainDate();
+        // Step 8b.
+        auto isoDateOther = other->plainDate();
+        // Step 8c.
+        auto destEpochNs = getUTCEpochNanoseconds(isoDateOther);
+        // Step 8d.
+        TemporalDuration::roundRelativeDuration(
+            duration, destEpochNs, isoDate, largestUnit, increment, smallestUnit, roundingMode);
+    }
+    // Step 9.
+    auto result = TemporalDuration::temporalDurationFromInternal(duration, TemporalUnit::Day);
+    if (isSince) {
+        result = -result;
+    }
+    return result;
+}
+
 ISO8601::Duration TemporalPlainDate::until(JSGlobalObject* globalObject, TemporalPlainDate* other, JSValue optionsValue)
 {
     VM& vm = globalObject->vm();
@@ -326,6 +396,8 @@ ISO8601::Duration TemporalPlainDate::until(JSGlobalObject* globalObject, Tempora
     auto [smallestUnit, largestUnit, roundingMode, increment] = extractDifferenceOptions(globalObject, optionsValue, UnitGroup::Date, TemporalUnit::Day, TemporalUnit::Day);
     RETURN_IF_EXCEPTION(scope, { });
 
+    return differenceTemporalPlainDate(globalObject, false, other, smallestUnit, largestUnit, roundingMode, increment);
+/*
     auto result = TemporalCalendar::isoDateDifference(globalObject, plainDate(), other->plainDate(), largestUnit);
     RETURN_IF_EXCEPTION(scope, { });
 
@@ -344,6 +416,7 @@ ISO8601::Duration TemporalPlainDate::until(JSGlobalObject* globalObject, Tempora
     }
 
     return result;
+*/
 }
 
 ISO8601::Duration TemporalPlainDate::since(JSGlobalObject* globalObject, TemporalPlainDate* other, JSValue optionsValue)
@@ -367,6 +440,8 @@ ISO8601::Duration TemporalPlainDate::since(JSGlobalObject* globalObject, Tempora
     RETURN_IF_EXCEPTION(scope, { });
     roundingMode = negateTemporalRoundingMode(roundingMode);
 
+    return differenceTemporalPlainDate(globalObject, true, other, smallestUnit, largestUnit, roundingMode, increment);
+/*
     auto result = TemporalCalendar::isoDateDifference(globalObject, plainDate(), other->plainDate(), largestUnit);
     RETURN_IF_EXCEPTION(scope, { });
 
@@ -385,6 +460,7 @@ ISO8601::Duration TemporalPlainDate::since(JSGlobalObject* globalObject, Tempora
     }
 
     return -result;
+*/
 }
 
 String TemporalPlainDate::monthCode() const

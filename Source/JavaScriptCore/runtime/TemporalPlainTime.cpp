@@ -517,7 +517,7 @@ ISO8601::PlainTime TemporalPlainTime::with(JSGlobalObject* globalObject, JSObjec
     RELEASE_AND_RETURN(scope, regulateTime(globalObject, WTFMove(duration), overflow));
 }
 
-static ISO8601::Duration differenceTime(ISO8601::PlainTime time1, ISO8601::PlainTime time2)
+static Int128 differenceTime(ISO8601::PlainTime time1, ISO8601::PlainTime time2)
 {
     double hours = static_cast<double>(time2.hour()) - static_cast<double>(time1.hour());
     double minutes = static_cast<double>(time2.minute()) - static_cast<double>(time1.minute());
@@ -527,11 +527,16 @@ static ISO8601::Duration differenceTime(ISO8601::PlainTime time1, ISO8601::Plain
     double nanoseconds = static_cast<double>(time2.nanosecond()) - static_cast<double>(time1.nanosecond());
     dataLogLnIf(TemporalPlainTimeInternal::verbose, "Diff ", hours, " ", minutes, " ", seconds, " ", milliseconds, " ", microseconds, " ", nanoseconds);
     int32_t sign = TemporalDuration::sign(ISO8601::Duration(0, 0, 0, 0, hours, minutes, seconds, milliseconds, microseconds, nanoseconds));
+
+    return TemporalDuration::timeDurationFromComponents(hours * sign, minutes * sign, seconds * sign, milliseconds * sign, microseconds * sign, nanoseconds * sign);
+/*
+
     auto duration = balanceTime(hours * sign, minutes * sign, seconds * sign, milliseconds * sign, microseconds * sign, nanoseconds * sign);
     dataLogLnIf(TemporalPlainTimeInternal::verbose, "Balanced ", duration.days(), " ", duration.hours(), " ", duration.minutes(), " ", duration.seconds(), " ", duration.milliseconds(), " ", duration.microseconds(), " ", duration.nanoseconds());
     if (sign == -1)
         return -duration;
     return duration;
+*/
 }
 
 ISO8601::Duration TemporalPlainTime::until(JSGlobalObject* globalObject, TemporalPlainTime* other, JSValue optionsValue) const
@@ -542,7 +547,19 @@ ISO8601::Duration TemporalPlainTime::until(JSGlobalObject* globalObject, Tempora
     auto [smallestUnit, largestUnit, roundingMode, increment] = extractDifferenceOptions(globalObject, optionsValue, UnitGroup::Time, TemporalUnit::Nanosecond, TemporalUnit::Hour);
     RETURN_IF_EXCEPTION(scope, { });
 
-    auto result = differenceTime(plainTime(), other->plainTime());
+    // DifferenceTemporalPlainTime
+    // 4.
+    Int128 timeDuration = differenceTime(plainTime(), other->plainTime());
+    // 5.
+    timeDuration = TemporalDuration::roundTimeDuration(timeDuration, increment, smallestUnit, roundingMode);
+    // 6.
+    auto duration = TemporalDuration::combineDateAndTimeDuration(ISO8601::Duration(), timeDuration);
+    if (!duration)
+        throwRangeError(globalObject, scope, "date and time have different signs"_s); // FIXME: ??
+    // 7.
+    return TemporalDuration::temporalDurationFromInternal(duration.value(), largestUnit);
+
+/*
     result.setYears(0);
     result.setMonths(0);
     result.setWeeks(0);
@@ -550,6 +567,7 @@ ISO8601::Duration TemporalPlainTime::until(JSGlobalObject* globalObject, Tempora
     TemporalDuration::round(result, increment, smallestUnit, roundingMode);
     TemporalDuration::balance(result, largestUnit);
     return result;
+*/
 }
 
 ISO8601::Duration TemporalPlainTime::since(JSGlobalObject* globalObject, TemporalPlainTime* other, JSValue optionsValue) const
@@ -561,7 +579,22 @@ ISO8601::Duration TemporalPlainTime::since(JSGlobalObject* globalObject, Tempora
     RETURN_IF_EXCEPTION(scope, { });
     roundingMode = negateTemporalRoundingMode(roundingMode);
 
-    auto result = differenceTime(other->plainTime(), plainTime());
+    // 4.
+    auto timeDuration = differenceTime(other->plainTime(), plainTime());
+
+    timeDuration = TemporalDuration::roundTimeDuration(timeDuration, increment, smallestUnit, roundingMode);
+    // 6.
+    auto duration = TemporalDuration::combineDateAndTimeDuration(ISO8601::Duration(), timeDuration);
+   if (!duration)
+        throwRangeError(globalObject, scope, "date and time have different signs"_s); // FIXME: ??
+     // 7.
+    auto result = TemporalDuration::temporalDurationFromInternal(duration.value(), largestUnit);
+    // 8.
+    result = -result;
+    // 9.
+    return result;
+
+/*
     result = -result;
     result.setYears(0);
     result.setMonths(0);
@@ -572,6 +605,7 @@ ISO8601::Duration TemporalPlainTime::since(JSGlobalObject* globalObject, Tempora
     result.setDays(0);
     TemporalDuration::balance(result, largestUnit);
     return result;
+*/
 }
 
 } // namespace JSC

@@ -335,6 +335,10 @@ ISO8601::PlainDate TemporalCalendar::isoDateAdd(JSGlobalObject* globalObject, co
     return result;
 }
 
+ISO8601::Duration dateDuration(double y, double m, double w, double d) {
+    return ISO8601::Duration { y, m, w, d, 0, 0, 0, 0, 0, 0 };
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal-differenceisodate
 ISO8601::Duration TemporalCalendar::isoDateDifference(JSGlobalObject* globalObject, const ISO8601::PlainDate& date1, const ISO8601::PlainDate& date2, TemporalUnit largestUnit)
 {
@@ -349,14 +353,14 @@ ISO8601::Duration TemporalCalendar::isoDateDifference(JSGlobalObject* globalObje
             return { };
 
         double years = date2.year() - date1.year();
-        ISO8601::PlainDate mid = isoDateAdd(globalObject, date1, { years, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, TemporalOverflow::Constrain);
+        ISO8601::PlainDate mid = isoDateAdd(globalObject, date1, dateDuration(years, 0, 0, 0), TemporalOverflow::Constrain);
         RETURN_IF_EXCEPTION(scope, { });
         auto midSign = isoDateCompare(date2, mid);
         if (!midSign) {
             if (largestUnit == TemporalUnit::Month)
-                return { 0, 12 * years, 0, 0, 0, 0, 0, 0, 0, 0 };
+                return dateDuration(0, 12 * years, 0, 0);
 
-            return { years, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            return dateDuration(years, 0, 0, 0);
         }
 
         double months = date2.month() - date1.month();
@@ -364,14 +368,14 @@ ISO8601::Duration TemporalCalendar::isoDateDifference(JSGlobalObject* globalObje
             years -= sign;
             months += 12 * sign;
         }
-        mid = isoDateAdd(globalObject, date1, { years, months, 0, 0, 0, 0, 0, 0, 0, 0 }, TemporalOverflow::Constrain);
+        mid = isoDateAdd(globalObject, date1, dateDuration(years, months, 0, 0), TemporalOverflow::Constrain);
         RETURN_IF_EXCEPTION(scope, { });
         midSign = isoDateCompare(date2, mid);
         if (!midSign) {
             if (largestUnit == TemporalUnit::Month)
-                return { 0, months + 12 * years, 0, 0, 0, 0, 0, 0, 0, 0 };
+                return dateDuration(0, months + 12 * years, 0, 0);
 
-            return { years, months, 0, 0, 0, 0, 0, 0, 0, 0 };
+            return dateDuration(years, months, 0, 0);
         }
 
         if (midSign != sign) {
@@ -380,7 +384,7 @@ ISO8601::Duration TemporalCalendar::isoDateDifference(JSGlobalObject* globalObje
                 years -= sign;
                 months = 11 * sign;
             }
-            mid = isoDateAdd(globalObject, date1, { years, months, 0, 0, 0, 0, 0, 0, 0, 0 }, TemporalOverflow::Constrain);
+            mid = isoDateAdd(globalObject, date1, dateDuration(years, months, 0, 0), TemporalOverflow::Constrain);
             RETURN_IF_EXCEPTION(scope, { });
         }
 
@@ -393,9 +397,9 @@ ISO8601::Duration TemporalCalendar::isoDateDifference(JSGlobalObject* globalObje
             days = date2.day() + (ISO8601::daysInMonth(mid.year(), mid.month()) - mid.day());
 
         if (largestUnit == TemporalUnit::Month)
-            return { 0, months + 12 * years, 0, days, 0, 0, 0, 0, 0, 0 };
+            return dateDuration(0, months + 12 * years, 0, days);
 
-        return { years, months, 0, days, 0, 0, 0, 0, 0, 0 };
+        return dateDuration(years, months, 0, days);
     }
 
     double days = dateToDaysFrom1970(static_cast<int>(date2.year()), static_cast<int>(date2.month() - 1), static_cast<int>(date2.day()))
@@ -407,7 +411,7 @@ ISO8601::Duration TemporalCalendar::isoDateDifference(JSGlobalObject* globalObje
         days = std::fmod(days, 7) + 0.0;
     }
 
-    return { 0, 0, weeks, days, 0, 0, 0, 0, 0, 0 };
+    return dateDuration(0, 0, weeks, days);
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-compareisodate
