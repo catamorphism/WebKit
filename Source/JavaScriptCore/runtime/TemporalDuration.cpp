@@ -655,7 +655,7 @@ std::optional<InternalDuration> TemporalDuration::toInternalDuration(ISO8601::Du
     } else if (largestUnit <= TemporalUnit::Minute) {
         microseconds = std::trunc((double) nanoseconds / 1000);
         nanoseconds = nanoseconds % 1000;
-        milliseconds =- std::trunc(microseconds / 1000);
+        milliseconds = std::trunc(microseconds / 1000);
         microseconds = std::fmod(microseconds, 1000);
         seconds = std::trunc(milliseconds / 1000);
         milliseconds = std::fmod(milliseconds, 1000);
@@ -664,7 +664,7 @@ std::optional<InternalDuration> TemporalDuration::toInternalDuration(ISO8601::Du
     } else if (largestUnit <= TemporalUnit::Second) {
         microseconds = std::trunc((double) nanoseconds / 1000);
         nanoseconds = nanoseconds % 1000;
-        milliseconds =- std::trunc(microseconds / 1000);
+        milliseconds = std::trunc(microseconds / 1000);
         microseconds = std::fmod(microseconds, 1000);
         seconds = std::trunc(milliseconds / 1000);
         milliseconds = std::fmod(milliseconds, 1000);
@@ -735,22 +735,22 @@ static Int128 totalTimeDuration(Int128 timeDuration, TemporalUnit unit) {
 Int128 TemporalDuration::roundTimeDuration(Int128 timeDuration, double increment, TemporalUnit unit, RoundingMode mode) {
     // TODO: refactor
     Int128 divisor = 1;
-    if (unit >= TemporalUnit::Microsecond) {
+    if (unit <= TemporalUnit::Microsecond) {
         divisor *= 1000;  
     }
-    if (unit >= TemporalUnit::Millisecond) {
+    if (unit <= TemporalUnit::Millisecond) {
         divisor *= 1000;
     }
-    if (unit >= TemporalUnit::Second) {
+    if (unit <= TemporalUnit::Second) {
         divisor *= 1000;
     }
-    if (unit >= TemporalUnit::Minute) {
+    if (unit <= TemporalUnit::Minute) {
         divisor *= 60;
     }
-    if (unit >= TemporalUnit::Hour) {
+    if (unit <= TemporalUnit::Hour) {
         divisor *= 60;
     }
-    if (unit >= TemporalUnit::Day) {
+    if (unit <= TemporalUnit::Day) {
         divisor *= 24;
     }
     return roundNumberToIncrement(timeDuration, divisor * ((Int128) (std::trunc(increment))), mode);
