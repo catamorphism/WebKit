@@ -1655,33 +1655,99 @@ std::optional<ExactTime> ExactTime::add(Duration duration) const
     return result;
 }
 
-Int128 ExactTime::round(Int128 quantity, unsigned increment, TemporalUnit unit, RoundingMode roundingMode)
+Int128 roundNumberToIncrementAsIfPositive(Int128 x, Int128 increment, RoundingMode roundingMode)
 {
-    Int128 incrementNs { increment };
+// The following code follows the polyfill rather than the spec, because we don't have float128.
+// ApplyUnsignedRoundingMode is inlined here in order to allow it to be used elsewhere
+// with the type that it has in the spec.
+    Int128 quotient = x / increment;
+    Int128 remainder = x % increment;
+    auto unsignedRoundingMode = getUnsignedRoundingMode(roundingMode, false);
+    auto r1 = quotient;
+    auto r2 = quotient + 1;
+    if (x < 0) {
+        r1 = quotient - 1;
+        r2 = quotient;
+    }
+    auto doubleRemainder = absInt128(remainder * 2);
+    auto cmp = doubleRemainder < increment ? -1 : doubleRemainder == increment ? 0 : 1;
+    auto even = r1 % 2 == 0;
+    if (quotient * increment == x)
+        return x;
+    if (unsignedRoundingMode == UnsignedRoundingMode::Zero)
+        return r1 * increment;
+    if (unsignedRoundingMode == UnsignedRoundingMode::Infinity)
+        return r2 * increment;
+    if (cmp < 0)
+        return r1 * increment;
+    if (cmp > 0)
+        return r2 * increment;
+    if (unsignedRoundingMode == UnsignedRoundingMode::HalfZero)
+        return r1 * increment;
+    if (unsignedRoundingMode == UnsignedRoundingMode::HalfInfinity)
+        return r2 * increment;
+    return even ? r1 * increment : r2 * increment;
+}
+
+Int128 roundTemporalInstant(Int128 ns, unsigned increment, TemporalUnit unit, RoundingMode roundingMode) {
+    auto unitLength = lengthInNanoseconds(unit);
+    auto incrementNs = increment * unitLength;
+    return roundNumberToIncrementAsIfPositive(ns, incrementNs, roundingMode);
+}
+
+// TODO: don't duplicate this
+static constexpr double nanosecondsPerDay = 24.0 * 60 * 60 * 1000 * 1000 * 1000;
+
+// https://tc39.es/proposal-temporal/#sec-validatetemporalroundingincrement
+bool validateTemporalRoundingIncrement(Int128 increment, Int128 dividend, bool inclusive) {
+    Int128 maximum = 0;
+    if (inclusive)
+        maximum = dividend;
+    else {
+        ASSERT(dividend > 1);
+        maximum = dividend - 1;
+    }
+    if (increment > maximum)
+        return false;
+    if (dividend % increment != 0) {
+        return false;
+    }
+    return true;
+}
+
+std::optional<Int128> ExactTime::round(Int128 quantity, unsigned increment, TemporalUnit unit, RoundingMode roundingMode)
+{
+    Int128 maximum = 0;
     switch (unit) {
-    case TemporalUnit::Hour: incrementNs *= ExactTime::nsPerHour; break;
-    case TemporalUnit::Minute: incrementNs *= ExactTime::nsPerMinute; break;
-    case TemporalUnit::Second: incrementNs *= ExactTime::nsPerSecond; break;
-    case TemporalUnit::Millisecond: incrementNs *= ExactTime::nsPerMillisecond; break;
-    case TemporalUnit::Microsecond: incrementNs *= ExactTime::nsPerMicrosecond; break;
-    case TemporalUnit::Nanosecond: break;
+    case TemporalUnit::Hour: maximum = WTF::hoursPerDay; break;
+    case TemporalUnit::Minute: maximum = minutesPerHour * WTF::hoursPerDay; break;
+    case TemporalUnit::Second: maximum = secondsPerMinute * minutesPerHour * WTF::hoursPerDay; break;
+    case TemporalUnit::Millisecond: maximum = msPerDay; break;
+    case TemporalUnit::Microsecond: maximum = msPerDay * 1000; break;
+    case TemporalUnit::Nanosecond: maximum = nanosecondsPerDay; break;
     default:
         ASSERT_NOT_REACHED();
     }
-    return roundNumberToIncrement(quantity, incrementNs, roundingMode);
+    if (!validateTemporalRoundingIncrement(increment, maximum, true)) {
+        return std::nullopt;
+    }
+    return roundTemporalInstant(quantity, increment, unit, roundingMode);
 }
 
 // DifferenceInstant ( ns1, ns2, roundingIncrement, smallestUnit, roundingMode )
 // https://tc39.es/proposal-temporal/#sec-temporal-differenceinstant
-Int128 ExactTime::difference(ExactTime other, unsigned increment, TemporalUnit unit, RoundingMode roundingMode) const
+std::optional<Int128> ExactTime::difference(ExactTime other, unsigned increment, TemporalUnit unit, RoundingMode roundingMode) const
 {
     Int128 diff = other.m_epochNanoseconds - m_epochNanoseconds;
     return round(diff, increment, unit, roundingMode);
 }
 
-ExactTime ExactTime::round(unsigned increment, TemporalUnit unit, RoundingMode roundingMode) const
+std::optional<ExactTime> ExactTime::round(unsigned increment, TemporalUnit unit, RoundingMode roundingMode) const
 {
-    return ExactTime { round(m_epochNanoseconds, increment, unit, roundingMode) };
+    auto maybeRounded = round(m_epochNanoseconds, increment, unit, roundingMode);
+    if (!maybeRounded)
+        return std::nullopt;
+    return ExactTime { maybeRounded.value() };
 }
 
 ExactTime ExactTime::now()

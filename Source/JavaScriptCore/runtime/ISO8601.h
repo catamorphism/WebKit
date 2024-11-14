@@ -170,8 +170,8 @@ public:
     }
 
     std::optional<ExactTime> add(Duration) const;
-    Int128 difference(ExactTime other, unsigned increment, TemporalUnit, RoundingMode) const;
-    ExactTime round(unsigned increment, TemporalUnit, RoundingMode) const;
+    std::optional<Int128> difference(ExactTime other, unsigned increment, TemporalUnit, RoundingMode) const;
+    std::optional<ExactTime> round(unsigned increment, TemporalUnit, RoundingMode) const;
 
     static ExactTime now();
 
@@ -183,7 +183,7 @@ private:
         builder.append(static_cast<LChar>(static_cast<unsigned>(value % 10) + '0'));
     }
 
-    static Int128 round(Int128 quantity, unsigned increment, TemporalUnit, RoundingMode);
+    static std::optional<Int128> round(Int128 quantity, unsigned increment, TemporalUnit, RoundingMode);
 
     Int128 m_epochNanoseconds { };
 };

@@ -259,7 +259,12 @@ ISO8601::Duration TemporalInstant::difference(JSGlobalObject* globalObject, Temp
     unsigned increment = temporalRoundingIncrement(globalObject, options, maxIncrement, false);
     RETURN_IF_EXCEPTION(scope, { });
 
-    Int128 roundedDiff = exactTime().difference(other->exactTime(), increment, smallestUnit, roundingMode);
+    std::optional<Int128> maybeRoundedDiff = exactTime().difference(other->exactTime(), increment, smallestUnit, roundingMode);
+    if (!maybeRoundedDiff) {
+        throwRangeError(globalObject, scope, "rounding increment out of range (1)"_s);
+        return { };
+    }
+    auto roundedDiff = maybeRoundedDiff.value();
     // NOTE: Duration fields are currently doubles, and the total number of
     // nanoseconds may not fit in a double. This may need to change if the
     // internal representation of Duration changes.
@@ -332,7 +337,12 @@ ISO8601::ExactTime TemporalInstant::round(JSGlobalObject* globalObject, JSValue 
     double increment = temporalRoundingIncrement(globalObject, options, maximumIncrement(smallestUnit), true);
     RETURN_IF_EXCEPTION(scope, { });
 
-    return exactTime().round(increment, smallestUnit, roundingMode);
+    auto result = exactTime().round(increment, smallestUnit, roundingMode);
+    if (!result) {
+        throwRangeError(globalObject, scope, "rounding increment out of range (2)"_s);
+        return { };
+    }
+    return result.value();
 }
 
 // Temporal.Instant.prototype.toString( [ options ] )
@@ -366,7 +376,12 @@ String TemporalInstant::toString(JSGlobalObject* globalObject, JSValue optionsVa
     if (std::get<0>(data.precision) == Precision::Auto && roundingMode == RoundingMode::Trunc)
         return toString(timeZone);
 
-    ISO8601::ExactTime newExactTime { exactTime().round(data.increment, data.unit, roundingMode) };
+    auto maybeRounded = exactTime().round(data.increment, data.unit, roundingMode);
+    if (!maybeRounded) {
+        throwRangeError(globalObject, scope, "rounding increment out of range (3)"_s);
+        return { };
+    }
+    ISO8601::ExactTime newExactTime { maybeRounded.value() };
 
     // FIXME: Missing, relies on TimeZone:
     // 1. Let roundedInstant be ! CreateTemporalInstant(roundedNs).

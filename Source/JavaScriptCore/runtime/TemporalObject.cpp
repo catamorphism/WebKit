@@ -482,7 +482,8 @@ UnsignedRoundingMode getUnsignedRoundingMode(RoundingMode roundingMode, bool isN
 
 // https://tc39.es/proposal-temporal/#sec-applyunsignedroundingmode
 // ApplyUnsignedRoundingMode ( x, r1, r2, unsignedRoundingMode )
-Int128 applyUnsignedRoundingMode(Int128 x, Int128 r1, Int128 r2, UnsignedRoundingMode unsignedRoundingMode) {
+Int128 applyUnsignedRoundingMode(Int128 x, Int128 r1, Int128 r2, UnsignedRoundingMode unsignedRoundingMode)
+{
     if (x == r1)
         return r1;
     ASSERT(r1 < x && x < r2);
@@ -647,57 +648,44 @@ double roundNumberToIncrement(double x, double increment, RoundingMode mode)
     RELEASE_ASSERT_NOT_REACHED();
 }
 
-// RoundNumberToIncrementAsIfPositive ( x, increment, roundingMode )
-// https://tc39.es/proposal-temporal/#sec-temporal-roundnumbertoincrementasifpositive
+Int128 lengthInNanoseconds(TemporalUnit unit)
+{
+    switch (unit) {
+        case TemporalUnit::Nanosecond:
+            return 1;
+        case TemporalUnit::Microsecond:
+            return 1000;
+        case TemporalUnit::Millisecond:
+            return 1000000;
+        case TemporalUnit::Second:
+            return 1000000000;
+        case TemporalUnit::Minute:
+            return 60.0 * 1000000000;
+        case TemporalUnit::Hour:
+            return 60.0 * 60 * 1000000000;
+        default:
+            break;
+    }
+    RELEASE_ASSERT_NOT_REACHED();
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-roundnumbertoincrement
 Int128 roundNumberToIncrement(Int128 x, Int128 increment, RoundingMode mode)
 {
-    ASSERT(increment);
-
-    if (increment == 1)
-        return x;
-
     Int128 quotient = x / increment;
-    Int128 remainder = x % increment;
-    if (!remainder)
-        return x;
-
-    bool sign = remainder < 0;
-    switch (mode) {
-    case RoundingMode::Ceil:
-    case RoundingMode::Expand:
-        if (!sign)
-            quotient++;
-        break;
-    case RoundingMode::Floor:
-    case RoundingMode::Trunc:
-        if (sign)
-            quotient--;
-        break;
-    case RoundingMode::HalfCeil:
-    case RoundingMode::HalfExpand:
-        // "half toward infinity"
-        if (!sign && remainder * 2 >= increment)
-            quotient++;
-        else if (sign && -remainder * 2 > increment)
-            quotient--;
-        break;
-    case RoundingMode::HalfFloor:
-    case RoundingMode::HalfTrunc:
-        // "half toward zero"
-        if (!sign && remainder * 2 > increment)
-            quotient++;
-        else if (sign && -remainder * 2 >= increment)
-            quotient--;
-        break;
-    case RoundingMode::HalfEven:
-        // "half toward even multiple of increment"
-        if (!sign && (remainder * 2 > increment || (remainder * 2 == increment && quotient % 2 == 1)))
-            quotient++;
-        else if (sign && (-remainder * 2 > increment || (-remainder * 2 == increment && -quotient % 2 == 1)))
-            quotient--;
-        break;
+    bool isNegative = false;
+    if (quotient < 0) {
+        isNegative = true;
+        quotient = -quotient;
     }
-    return quotient * increment;
+    auto unsignedRoundingMode = getUnsignedRoundingMode(mode, isNegative);
+    Int128 r1 = quotient;
+    Int128 r2 = quotient + 1;
+    Int128 rounded = applyUnsignedRoundingMode(quotient, r1, r2, unsignedRoundingMode);
+    if (isNegative) {
+        rounded = -rounded;
+    }
+    return rounded * increment;
 }
 
 TemporalOverflow toTemporalOverflow(JSGlobalObject* globalObject, JSObject* options)

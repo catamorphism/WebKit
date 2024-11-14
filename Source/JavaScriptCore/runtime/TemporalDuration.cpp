@@ -711,22 +711,22 @@ ISO8601::Duration TemporalDuration::subtract(JSGlobalObject* globalObject, JSVal
 
 static Int128 totalTimeDuration(Int128 timeDuration, TemporalUnit unit) {
     Int128 divisor = 1;
-    if (unit >= TemporalUnit::Microsecond) {
+    if (unit <= TemporalUnit::Microsecond) {
         divisor *= 1000;  
     }
-    if (unit >= TemporalUnit::Millisecond) {
+    if (unit <= TemporalUnit::Millisecond) {
         divisor *= 1000;
     }
-    if (unit >= TemporalUnit::Second) {
+    if (unit <= TemporalUnit::Second) {
         divisor *= 1000;
     }
-    if (unit >= TemporalUnit::Minute) {
+    if (unit <= TemporalUnit::Minute) {
         divisor *= 60;
     }
-    if (unit >= TemporalUnit::Hour) {
+    if (unit <= TemporalUnit::Hour) {
         divisor *= 60;
     }
-    if (unit >= TemporalUnit::Day) {
+    if (unit <= TemporalUnit::Day) {
         divisor *= 24;
     }
     return timeDuration / divisor;
@@ -859,10 +859,10 @@ static Nudged nudgeToCalendarUnit(JSGlobalObject* globalObject, int32_t sign, co
     ASSERT(0 <= progress && progress <= 1);
     auto isNegative = sign < 0;
     UnsignedRoundingMode unsignedRoundingMode = getUnsignedRoundingMode(roundingMode, isNegative);
-    auto roundedUnit = std::abs(r2);
+    auto roundedUnit = absInt128(r2);
     if (progress != 1) {
-        ASSERT(std::abs(r1) <= std::abs(total) && std::abs(total) < std::abs(r2));
-        roundedUnit = applyUnsignedRoundingMode(std::abs(total), std::abs(r1), std::abs(r2), unsignedRoundingMode);
+        ASSERT(absInt128(r1) <= absInt128(total) && absInt128(total) < absInt128(r2));
+        roundedUnit = applyUnsignedRoundingMode(absInt128(total), absInt128(r1), absInt128(r2), unsignedRoundingMode);
     }
     bool didExpandCalendarUnit = true;
     ISO8601::Duration resultDuration = endDuration;
