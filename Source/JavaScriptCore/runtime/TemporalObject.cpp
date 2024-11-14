@@ -669,22 +669,48 @@ Int128 lengthInNanoseconds(TemporalUnit unit)
     RELEASE_ASSERT_NOT_REACHED();
 }
 
+// TODO don't duplicate this
+static constexpr Int128 absInt128(const Int128& value)
+{
+    if (value < 0)
+        return -value;
+    return value;
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal-roundnumbertoincrement
 Int128 roundNumberToIncrement(Int128 x, Int128 increment, RoundingMode mode)
 {
+// This follows the polyfill code rather than the spec, in order to work around
+// being unable to apply floating-point division in x / increment.
+// TODO: factor out ApplyUnsignedRoundingMode code
     Int128 quotient = x / increment;
-    bool isNegative = false;
-    if (quotient < 0) {
-        isNegative = true;
-        quotient = -quotient;
-    }
+    Int128 remainder = x % increment;
+    bool isNegative = x < 0;
+    Int128 r1 = absInt128(quotient);
+    Int128 r2 = r1 + 1;
+    Int128 compareQuantity = absInt128(remainder * 2) - increment;
+    int32_t cmp = compareQuantity < 0 ? -1 : compareQuantity == 0 ? 0 : 1;
+    bool even = r1 % 2 == 0;
     auto unsignedRoundingMode = getUnsignedRoundingMode(mode, isNegative);
-    Int128 r1 = quotient;
-    Int128 r2 = quotient + 1;
-    Int128 rounded = applyUnsignedRoundingMode(quotient, r1, r2, unsignedRoundingMode);
-    if (isNegative) {
+    Int128 rounded = 0;
+    if (absInt128(x) == r1 * increment)
+        rounded = r1;
+    else if (unsignedRoundingMode == UnsignedRoundingMode::Zero)
+        rounded = r1;
+    else if (unsignedRoundingMode == UnsignedRoundingMode::Infinity)
+        rounded = r2;
+    else if (cmp < 0)
+        rounded = r1;
+    else if (cmp > 0)
+        rounded = r2;
+    else if (unsignedRoundingMode == UnsignedRoundingMode::HalfZero)
+        rounded = r1;
+    else if (unsignedRoundingMode == UnsignedRoundingMode::HalfInfinity)
+        rounded = r2;
+    else
+        rounded = even ? r1 : r2;
+    if (isNegative)
         rounded = -rounded;
-    }
     return rounded * increment;
 }
 

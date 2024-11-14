@@ -641,7 +641,7 @@ std::optional<InternalDuration> TemporalDuration::toInternalDuration(ISO8601::Du
         minutes = std::fmod(minutes, 60);
         days = std::trunc(hours / 24);
         hours = std::fmod(hours, 24);
-    } else if (largestUnit <= TemporalUnit::Hour) {
+    } else if (largestUnit == TemporalUnit::Hour) {
         microseconds = std::trunc((double) nanoseconds / 1000);
         nanoseconds = nanoseconds % 1000;
         milliseconds = std::trunc(microseconds / 1000);
@@ -652,7 +652,7 @@ std::optional<InternalDuration> TemporalDuration::toInternalDuration(ISO8601::Du
         seconds = std::fmod(seconds, 60);
         hours = std::trunc(minutes / 60);
         minutes = std::fmod(minutes, 60);
-    } else if (largestUnit <= TemporalUnit::Minute) {
+    } else if (largestUnit == TemporalUnit::Minute) {
         microseconds = std::trunc((double) nanoseconds / 1000);
         nanoseconds = nanoseconds % 1000;
         milliseconds = std::trunc(microseconds / 1000);
@@ -661,19 +661,19 @@ std::optional<InternalDuration> TemporalDuration::toInternalDuration(ISO8601::Du
         milliseconds = std::fmod(milliseconds, 1000);
         minutes = std::trunc(seconds / 60);
         seconds = std::fmod(seconds, 60);
-    } else if (largestUnit <= TemporalUnit::Second) {
-        microseconds = std::trunc((double) nanoseconds / 1000);
+    } else if (largestUnit == TemporalUnit::Second) {
+        microseconds = std::trunc((double) (nanoseconds / 1000)); // FIXME: fix the other cases
         nanoseconds = nanoseconds % 1000;
         milliseconds = std::trunc(microseconds / 1000);
         microseconds = std::fmod(microseconds, 1000);
         seconds = std::trunc(milliseconds / 1000);
         milliseconds = std::fmod(milliseconds, 1000);
-    } else if (largestUnit <= TemporalUnit::Millisecond) {
+    } else if (largestUnit == TemporalUnit::Millisecond) {
         microseconds = std::trunc((double) nanoseconds / 1000);
         nanoseconds = nanoseconds % 1000;
         milliseconds = std::fma(seconds, 3, std::trunc(microseconds / 1000));
         microseconds = std::fmod(microseconds, 1000);
-    } else if (largestUnit <= TemporalUnit::Microsecond) {
+    } else if (largestUnit == TemporalUnit::Microsecond) {
         microseconds = std::fma(seconds, 6, std::trunc((double) nanoseconds / 1000));
         nanoseconds = nanoseconds % 1000;
     } else { // Nanoseconds
@@ -709,8 +709,8 @@ ISO8601::Duration TemporalDuration::subtract(JSGlobalObject* globalObject, JSVal
     return result;
 }
 
-static Int128 totalTimeDuration(Int128 timeDuration, TemporalUnit unit) {
-    Int128 divisor = 1;
+static double totalTimeDuration(Int128 timeDuration, TemporalUnit unit) {
+    double divisor = 1;
     if (unit <= TemporalUnit::Microsecond) {
         divisor *= 1000;  
     }
@@ -1211,8 +1211,7 @@ double TemporalDuration::total(JSGlobalObject* globalObject, JSValue optionsValu
     auto internalDuration = toInternalDurationRecordWith24HourDays(m_duration);
     if (!internalDuration)
         throwRangeError(globalObject, scope, "date and time have different signs"_s); // FIXME: ??
-    // FIXME: shouldn't cast from Int128 to double here, probably
-    return ((double) totalTimeDuration(internalDuration->m_time, unit));
+    return totalTimeDuration(internalDuration->m_time, unit);
 /*
     ISO8601::Duration newDuration = m_duration;
     auto infiniteResult = balance(newDuration, unit);
@@ -1240,7 +1239,8 @@ String TemporalDuration::toString(JSGlobalObject* globalObject, JSValue optionsV
         throwRangeError(globalObject, scope, "smallestUnit must not be \"minute\""_s);
         return { };
     }
-
+    auto smallestUnit = data.unit;
+  
     auto roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::Trunc);
     RETURN_IF_EXCEPTION(scope, { });
 
@@ -1252,9 +1252,9 @@ String TemporalDuration::toString(JSGlobalObject* globalObject, JSValue optionsV
     if (!maybeInternalDuration)
         throwRangeError(globalObject, scope, "date and time signs don't match"_s); // FIXME: ??
     auto internalDuration = maybeInternalDuration.value();
-    auto timeDuration = roundTimeDuration(internalDuration.m_time, data.increment, data.unit, roundingMode);
+    auto timeDuration = roundTimeDuration(internalDuration.m_time, data.increment, smallestUnit, roundingMode);
     internalDuration.m_time = timeDuration;
-    auto roundedLargestUnit = data.unit;
+    auto roundedLargestUnit = std::min(largestSubduration(m_duration), TemporalUnit::Second);
     auto roundedDuration = temporalDurationFromInternal(internalDuration, roundedLargestUnit);
     RELEASE_AND_RETURN(scope, toString(globalObject, roundedDuration, data.precision));
 }
