@@ -33,6 +33,13 @@
 
 namespace JSC {
 
+class PlainYearMonth final {
+public:
+    double year;
+    double month;
+    PlainYearMonth(double y, double m) : year(y), month(m) {}
+};
+
 class TemporalCalendar final : public JSNonFinalObject {
 public:
     using Base = JSNonFinalObject;
@@ -52,8 +59,10 @@ public:
     static JSObject* getTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, JSObject*, TemporalOverflow);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, double year, double month, double day, TemporalOverflow);
+    static ISO8601::PlainDate addDurationToDate(JSGlobalObject*, const ISO8601::PlainDate&, const ISO8601::Duration&, TemporalOverflow);
     static ISO8601::PlainDate isoDateAdd(JSGlobalObject*, const ISO8601::PlainDate&, const ISO8601::Duration&, TemporalOverflow);
-    static ISO8601::Duration isoDateDifference(JSGlobalObject*, const ISO8601::PlainDate&, const ISO8601::PlainDate&, TemporalUnit);
+    static PlainYearMonth balanceISOYearMonth(double, double);
+    static ISO8601::Duration calendarDateUntil(JSGlobalObject*, const ISO8601::PlainDate&, const ISO8601::PlainDate&, TemporalUnit);
     static int32_t isoDateCompare(const ISO8601::PlainDate&, const ISO8601::PlainDate&);
 
     CalendarID identifier() const { return m_identifier; }

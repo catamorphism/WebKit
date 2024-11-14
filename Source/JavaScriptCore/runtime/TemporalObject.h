@@ -97,6 +97,14 @@ enum class RoundingMode : uint8_t {
     HalfEven
 };
 
+enum class UnsignedRoundingMode : uint8_t {
+    Infinity,
+    Zero,
+    HalfInfinity,
+    HalfZero,
+    HalfEven
+};
+
 enum class Precision : uint8_t {
     Minute,
     Fixed,
@@ -127,12 +135,14 @@ std::optional<unsigned> temporalFractionalSecondDigits(JSGlobalObject*, JSObject
 PrecisionData secondsStringPrecision(JSGlobalObject*, JSObject* options);
 RoundingMode temporalRoundingMode(JSGlobalObject*, JSObject*, RoundingMode);
 RoundingMode negateTemporalRoundingMode(RoundingMode);
+UnsignedRoundingMode getUnsignedRoundingMode(RoundingMode, bool);
 void formatSecondsStringFraction(StringBuilder&, unsigned fraction, std::tuple<Precision, unsigned>);
 void formatSecondsStringPart(StringBuilder&, unsigned second, unsigned fraction, PrecisionData);
 std::optional<double> maximumRoundingIncrement(TemporalUnit);
 double temporalRoundingIncrement(JSGlobalObject*, JSObject* options, std::optional<double> dividend, bool inclusive);
 double roundNumberToIncrement(double, double increment, RoundingMode);
 Int128 roundNumberToIncrement(Int128, Int128 increment, RoundingMode);
+Int128 applyUnsignedRoundingMode(Int128, Int128, Int128, UnsignedRoundingMode);
 void rejectObjectWithCalendarOrTimeZone(JSGlobalObject*, JSObject*);
 
 enum class TemporalOverflow : bool {
@@ -141,5 +151,12 @@ enum class TemporalOverflow : bool {
 };
 
 TemporalOverflow toTemporalOverflow(JSGlobalObject*, JSObject*);
+
+enum class TemporalDisambiguation : uint8_t {
+    Compatible,
+    Earlier,
+    Later,
+    Reject,
+};
 
 } // namespace JSC

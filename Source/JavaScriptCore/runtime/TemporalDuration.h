@@ -56,12 +56,18 @@ class DateDuration final {
 class InternalDuration final {
 public:
     InternalDuration(ISO8601::Duration d, Int128 t) : m_date_duration(d), m_time(t) {}
+    InternalDuration() : m_date_duration(ISO8601::Duration()), m_time(0) {}
+
+    int32_t sign() const;
 
     int32_t timeDurationSign() const {
         return m_time < 0 ? -1 : m_time == 0 ? 0 : 1;
     }
 
     Int128 time() const { return m_time; }
+
+    ISO8601::Duration dateDuration() const { return m_date_duration; }
+
 private:
     friend class TemporalDuration;
 
@@ -70,6 +76,22 @@ private:
 
 /* A time duration is an integer in the inclusive interval from -maxTimeDuration to maxTimeDuration, where maxTimeDuration = 2**53 × 10**9 - 1 = 9,007,199,254,740,991,999,999,999 It represents the portion of a Temporal.Duration object that deals with time units, but as a combined value of total nanoseconds.  */
     Int128 m_time;
+};
+
+class NudgeResult final {
+    public:
+    InternalDuration m_duration;
+    Int128 m_nudged_epoch_ns;
+    bool m_did_expand_calendar_unit;
+    NudgeResult() {}
+    NudgeResult(InternalDuration d, Int128 ns, bool expanded)
+        : m_duration(d), m_nudged_epoch_ns(ns), m_did_expand_calendar_unit(expanded) {}
+};
+
+class Nudged final {
+    public:
+    NudgeResult m_nudge_result;
+    Int128 m_total;
 };
 
 class TemporalDuration final : public JSNonFinalObject {
@@ -123,8 +145,10 @@ public:
 
     static int sign(const ISO8601::Duration&);
     static std::optional<InternalDuration> round(InternalDuration, double increment, TemporalUnit, RoundingMode);
-    static void roundRelativeDuration(InternalDuration&, double, ISO8601::PlainDate, TemporalUnit, double, TemporalUnit, RoundingMode);
+    static void roundRelativeDuration(JSGlobalObject*, InternalDuration&, double, ISO8601::PlainDate, TemporalUnit, double, TemporalUnit, RoundingMode);
     static Int128 roundTimeDuration(Int128, double, TemporalUnit, RoundingMode);
+    static std::optional<ISO8601::PlainDate> regulateISODate(double, double, double, TemporalOverflow);
+    static std::optional<ISO8601::Duration> toDateDurationRecordWithoutTime(const ISO8601::Duration&);
     static std::optional<double> balance(ISO8601::Duration&, TemporalUnit largestUnit);
 
 private:

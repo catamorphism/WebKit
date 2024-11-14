@@ -332,8 +332,9 @@ static inline Int128 makeDate(double day, double time)
     return (day * msPerDay) + time;
 }
 
+// https://tc39.es/proposal-temporal/#sec-getutcepochnanoseconds
 Int128 getUTCEpochNanoseconds(ISO8601::PlainDate isoDate) {
-    double date = makeDay(isoDate.year(), isoDate.month(), isoDate.day());
+    double date = makeDay(isoDate.year(), isoDate.month() - 1, isoDate.day());
     Int128 ms = makeDate(date, 0);
     return ms * 1000000;
 }
@@ -350,7 +351,7 @@ ISO8601::Duration TemporalPlainDate::differenceTemporalPlainDate(JSGlobalObject*
     }
     // Step 6
     // TODO: isoDateDifference = CalendarDateUntil?
-    ISO8601::Duration dateDifference = TemporalCalendar::isoDateDifference(globalObject, plainDate(), other->plainDate(), largestUnit);
+    ISO8601::Duration dateDifference = TemporalCalendar::calendarDateUntil(globalObject, plainDate(), other->plainDate(), largestUnit);
     // Step 7
     std::optional<InternalDuration> maybeDuration = TemporalDuration::combineDateAndTimeDuration(dateDifference, 0);
     if (!maybeDuration)
@@ -366,7 +367,8 @@ ISO8601::Duration TemporalPlainDate::differenceTemporalPlainDate(JSGlobalObject*
         auto destEpochNs = getUTCEpochNanoseconds(isoDateOther);
         // Step 8d.
         TemporalDuration::roundRelativeDuration(
-            duration, destEpochNs, isoDate, largestUnit, increment, smallestUnit, roundingMode);
+            globalObject, duration, destEpochNs, isoDate, largestUnit,
+            increment, smallestUnit, roundingMode);
     }
     // Step 9.
     auto result = TemporalDuration::temporalDurationFromInternal(duration, TemporalUnit::Day);

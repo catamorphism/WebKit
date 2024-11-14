@@ -457,6 +457,55 @@ RoundingMode negateTemporalRoundingMode(RoundingMode roundingMode)
     }
 }
 
+UnsignedRoundingMode getUnsignedRoundingMode(RoundingMode roundingMode, bool isNegative) {
+    switch (roundingMode) {
+        case RoundingMode::Ceil:
+            return isNegative ? UnsignedRoundingMode::Zero : UnsignedRoundingMode::Infinity;
+        case RoundingMode::Floor:
+            return isNegative ? UnsignedRoundingMode::Infinity : UnsignedRoundingMode::Zero;
+        case RoundingMode::Expand:
+            return UnsignedRoundingMode::Infinity;
+        case RoundingMode::Trunc:
+            return UnsignedRoundingMode::Zero;
+        case RoundingMode::HalfCeil:
+            return isNegative ? UnsignedRoundingMode::HalfZero : UnsignedRoundingMode::HalfInfinity;
+        case RoundingMode::HalfFloor:
+            return isNegative ? UnsignedRoundingMode::HalfInfinity : UnsignedRoundingMode::HalfZero;
+        case RoundingMode::HalfExpand:
+            return UnsignedRoundingMode::HalfInfinity;
+        case RoundingMode::HalfTrunc:
+            return UnsignedRoundingMode::HalfZero;
+        default:
+            return UnsignedRoundingMode::HalfEven;
+    }
+}
+
+// https://tc39.es/proposal-temporal/#sec-applyunsignedroundingmode
+// ApplyUnsignedRoundingMode ( x, r1, r2, unsignedRoundingMode )
+Int128 applyUnsignedRoundingMode(Int128 x, Int128 r1, Int128 r2, UnsignedRoundingMode unsignedRoundingMode) {
+    if (x == r1)
+        return r1;
+    ASSERT(r1 < x && x < r2);
+    if (unsignedRoundingMode == UnsignedRoundingMode::Zero)
+        return r1;
+    if (unsignedRoundingMode == UnsignedRoundingMode::Infinity)
+        return r2;
+    auto d1 = x - r1;
+    auto d2 = r2 - x;
+    if (d1 < d2)
+        return r1;
+    if (d2 < d1)
+        return r2;
+    ASSERT(d1 == d2);
+    if (unsignedRoundingMode == UnsignedRoundingMode::HalfZero)
+        return r1;
+    if (unsignedRoundingMode == UnsignedRoundingMode::HalfInfinity)
+        return r2;
+    ASSERT(unsignedRoundingMode == UnsignedRoundingMode::HalfEven);
+    auto cardinality = (r1 / (r2 - r1)) % 2;
+    return cardinality == 0 ? r1 : r2;
+}
+
 void formatSecondsStringFraction(StringBuilder& builder, unsigned fraction, std::tuple<Precision, unsigned> precision)
 {
     auto [precisionType, precisionValue] = precision;
