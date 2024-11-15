@@ -526,86 +526,38 @@ static Int128 differenceTime(ISO8601::PlainTime time1, ISO8601::PlainTime time2)
     double microseconds = static_cast<double>(time2.microsecond()) - static_cast<double>(time1.microsecond());
     double nanoseconds = static_cast<double>(time2.nanosecond()) - static_cast<double>(time1.nanosecond());
     dataLogLnIf(TemporalPlainTimeInternal::verbose, "Diff ", hours, " ", minutes, " ", seconds, " ", milliseconds, " ", microseconds, " ", nanoseconds);
-    int32_t sign = TemporalDuration::sign(ISO8601::Duration(0, 0, 0, 0, hours, minutes, seconds, milliseconds, microseconds, nanoseconds));
 
-    return TemporalDuration::timeDurationFromComponents(hours * sign, minutes * sign, seconds * sign, milliseconds * sign, microseconds * sign, nanoseconds * sign);
-/*
+    return TemporalDuration::timeDurationFromComponents(hours, minutes, seconds, milliseconds, microseconds, nanoseconds);
+}
 
-    auto duration = balanceTime(hours * sign, minutes * sign, seconds * sign, milliseconds * sign, microseconds * sign, nanoseconds * sign);
-    dataLogLnIf(TemporalPlainTimeInternal::verbose, "Balanced ", duration.days(), " ", duration.hours(), " ", duration.minutes(), " ", duration.seconds(), " ", duration.milliseconds(), " ", duration.microseconds(), " ", duration.nanoseconds());
-    if (sign == -1)
-        return -duration;
-    return duration;
-*/
+// https://tc39.es/proposal-temporal/#sec-temporal-differencetemporalplaintime
+// DifferenceTemporalPlainTime ( operation, temporalTime, other, options )
+ISO8601::Duration TemporalPlainTime::differenceTemporalPlainTime(bool isSince, JSGlobalObject* globalObject, TemporalPlainTime* other, JSValue optionsValue) const
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto [smallestUnit, largestUnit, roundingMode, increment] = extractDifferenceOptions(globalObject, optionsValue, UnitGroup::Time, TemporalUnit::Nanosecond, TemporalUnit::Hour);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    Int128 timeDuration = differenceTime(plainTime(), other->plainTime());
+    timeDuration = TemporalDuration::roundTimeDuration(timeDuration, increment, smallestUnit, roundingMode);
+    auto duration = TemporalDuration::combineDateAndTimeDuration(ISO8601::Duration(), timeDuration);
+    ASSERT(duration); // sign of date duration is zero => no error is possible
+    auto result = TemporalDuration::temporalDurationFromInternal(duration.value(), largestUnit);
+    if (isSince)
+        result = -result;
+    return result;
 }
 
 ISO8601::Duration TemporalPlainTime::until(JSGlobalObject* globalObject, TemporalPlainTime* other, JSValue optionsValue) const
 {
-    VM& vm = globalObject->vm();
-    auto scope = DECLARE_THROW_SCOPE(vm);
-
-    auto [smallestUnit, largestUnit, roundingMode, increment] = extractDifferenceOptions(globalObject, optionsValue, UnitGroup::Time, TemporalUnit::Nanosecond, TemporalUnit::Hour);
-    RETURN_IF_EXCEPTION(scope, { });
-
-    // DifferenceTemporalPlainTime
-    // 4.
-    Int128 timeDuration = differenceTime(plainTime(), other->plainTime());
-    // 5.
-    timeDuration = TemporalDuration::roundTimeDuration(timeDuration, increment, smallestUnit, roundingMode);
-    // 6.
-    auto duration = TemporalDuration::combineDateAndTimeDuration(ISO8601::Duration(), timeDuration);
-    if (!duration)
-        throwRangeError(globalObject, scope, "date and time have different signs"_s); // FIXME: ??
-    // 7.
-    return TemporalDuration::temporalDurationFromInternal(duration.value(), largestUnit);
-
-/*
-    result.setYears(0);
-    result.setMonths(0);
-    result.setWeeks(0);
-    result.setDays(0);
-    TemporalDuration::round(result, increment, smallestUnit, roundingMode);
-    TemporalDuration::balance(result, largestUnit);
-    return result;
-*/
+    return differenceTemporalPlainTime(false, globalObject, other, optionsValue);
 }
 
 ISO8601::Duration TemporalPlainTime::since(JSGlobalObject* globalObject, TemporalPlainTime* other, JSValue optionsValue) const
 {
-    VM& vm = globalObject->vm();
-    auto scope = DECLARE_THROW_SCOPE(vm);
-
-    auto [smallestUnit, largestUnit, roundingMode, increment] = extractDifferenceOptions(globalObject, optionsValue, UnitGroup::Time, TemporalUnit::Nanosecond, TemporalUnit::Hour);
-    RETURN_IF_EXCEPTION(scope, { });
-    roundingMode = negateTemporalRoundingMode(roundingMode);
-
-    // 4.
-    auto timeDuration = differenceTime(other->plainTime(), plainTime());
-
-    timeDuration = TemporalDuration::roundTimeDuration(timeDuration, increment, smallestUnit, roundingMode);
-    // 6.
-    auto duration = TemporalDuration::combineDateAndTimeDuration(ISO8601::Duration(), timeDuration);
-   if (!duration)
-        throwRangeError(globalObject, scope, "date and time have different signs"_s); // FIXME: ??
-     // 7.
-    auto result = TemporalDuration::temporalDurationFromInternal(duration.value(), largestUnit);
-    // 8.
-    result = -result;
-    // 9.
-    return result;
-
-/*
-    result = -result;
-    result.setYears(0);
-    result.setMonths(0);
-    result.setWeeks(0);
-    result.setDays(0);
-    TemporalDuration::round(result, increment, smallestUnit, roundingMode);
-    result = -result;
-    result.setDays(0);
-    TemporalDuration::balance(result, largestUnit);
-    return result;
-*/
+    return differenceTemporalPlainTime(true, globalObject, other, optionsValue);
 }
 
 } // namespace JSC

@@ -497,30 +497,9 @@ ISO8601::Duration TemporalDuration::add(JSGlobalObject* globalObject, JSValue ot
         throwRangeError(globalObject, scope, "Times sum to more than the maximum time duration"_s);
         return { };
     }
-/*
-    ISO8601::Duration result {
-        0, 0, 0, days() + other.days(),
-        hours() + other.hours(), minutes() + other.minutes(), seconds() + other.seconds(),
-        milliseconds() + other.milliseconds(), microseconds() + other.microseconds(), nanoseconds() + other.nanoseconds()
-    };
-
-    balance(result, largestUnit);
-    return result;
-*/
 
     return result.value();
 }
-
-/*
-std::optional<Int128> addTimeDuration(Int128 one, Int128 two) {
-    Int128 result = one + two;
-    if (int128abs(result) > maxTimeDuration) {
-        // Step 2. If abs(result) > maxTimeDuration, throw a RangeError exception.
-        return std::nullopt;
-    }
-    return result;
-}
-*/
 
 std::optional<InternalDuration> TemporalDuration::combineDateAndTimeDuration(ISO8601::Duration dateDuration, Int128 timeDuration) {
     int32_t dateSign = dateDurationSign(dateDuration);
