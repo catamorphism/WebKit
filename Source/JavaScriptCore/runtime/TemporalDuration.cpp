@@ -538,16 +538,23 @@ std::optional<InternalDuration> TemporalDuration::combineDateAndTimeDuration(ISO
 }
 
 Int128 TemporalDuration::timeDurationFromComponents(double hours, double minutes, double seconds, double milliseconds, double microseconds, double nanoseconds) {
-    Int128 min = minutes + hours * 60;
-    Int128 sec = seconds + min * 60;
-    Int128 millis = milliseconds + sec * 1000;
-    Int128 micros = microseconds + millis * 1000;
-    Int128 nanos = nanoseconds + micros * 1000;
+    Int128 min = ((Int128) minutes) + ((Int128) hours) * 60;
+    Int128 sec = ((Int128) seconds) + min * 60;
+    Int128 millis = ((Int128) milliseconds) + sec * 1000;
+    Int128 micros = ((Int128) microseconds) + millis * 1000;
+    Int128 nanos = ((Int128) nanoseconds) + micros * 1000;
     return nanos; // TODO: overflow check?
 }
 
 Int128 add24HourDaysToTimeDuration(Int128 d, double days) {
-    Int128 result = d + days * nanosecondsPerDay;
+    Int128 nsPerDay = 24;
+    nsPerDay *= 60;
+    nsPerDay *= 60;
+    nsPerDay *= 1000;
+    nsPerDay *= 1000;
+    nsPerDay *= 1000;
+    Int128 daysInNanoseconds = ((Int128) days) * nsPerDay;
+    Int128 result = d + daysInNanoseconds;
     // TODO: overflow check?
     return result;
 }
@@ -597,8 +604,8 @@ std::optional<InternalDuration> TemporalDuration::toInternalDuration(ISO8601::Du
     double hours = 0;
     double minutes = 0;
     double seconds = 0;
-    double milliseconds = 0;
-    double microseconds = 0;
+    Int128 milliseconds = 0;
+    Int128 microseconds = 0;
 
     // 2. Let sign be TimeDurationSign(internalDuration.[[Time]]).
     int32_t sign = internalDuration.timeDurationSign();
@@ -608,12 +615,12 @@ std::optional<InternalDuration> TemporalDuration::toInternalDuration(ISO8601::Du
 
     // 4. If TemporalUnitCategory(largestUnit) is DATE, then
     if (largestUnit <= TemporalUnit::Day) {
-        microseconds = std::trunc((double) nanoseconds / 1000);
+        microseconds = nanoseconds / 1000;
         nanoseconds = nanoseconds % 1000;
-        milliseconds = std::trunc(microseconds / 1000);
-        microseconds = std::fmod(microseconds, 1000);
-        seconds = std::trunc(milliseconds / 1000);
-        milliseconds = std::fmod(milliseconds, 1000);
+        milliseconds = microseconds / 1000;
+        microseconds = microseconds % 1000;
+        seconds = (double) (milliseconds / 1000);
+        milliseconds = milliseconds % 1000;
         minutes = std::trunc(seconds / 60);
         seconds = std::fmod(seconds, 60);
         hours = std::trunc(minutes / 60);
@@ -621,45 +628,58 @@ std::optional<InternalDuration> TemporalDuration::toInternalDuration(ISO8601::Du
         days = std::trunc(hours / 24);
         hours = std::fmod(hours, 24);
     } else if (largestUnit == TemporalUnit::Hour) {
-        microseconds = std::trunc((double) nanoseconds / 1000);
+        microseconds = nanoseconds / 1000;
         nanoseconds = nanoseconds % 1000;
-        milliseconds = std::trunc(microseconds / 1000);
-        microseconds = std::fmod(microseconds, 1000);
-        seconds = std::trunc(milliseconds / 1000);
-        milliseconds = std::fmod(milliseconds, 1000);
+        milliseconds = microseconds / 1000;
+        microseconds = microseconds % 1000;
+        seconds = (double) (milliseconds / 1000);
+        milliseconds = milliseconds % 1000;
         minutes = std::trunc(seconds / 60);
         seconds = std::fmod(seconds, 60);
         hours = std::trunc(minutes / 60);
         minutes = std::fmod(minutes, 60);
     } else if (largestUnit == TemporalUnit::Minute) {
-        microseconds = std::trunc((double) nanoseconds / 1000);
+        microseconds = nanoseconds / 1000;
         nanoseconds = nanoseconds % 1000;
-        milliseconds = std::trunc(microseconds / 1000);
-        microseconds = std::fmod(microseconds, 1000);
-        seconds = std::trunc(milliseconds / 1000);
-        milliseconds = std::fmod(milliseconds, 1000);
+        milliseconds = microseconds / 1000;
+        microseconds = microseconds % 1000;
+        seconds = (double) (milliseconds / 1000);
+        milliseconds = milliseconds % 1000;
         minutes = std::trunc(seconds / 60);
         seconds = std::fmod(seconds, 60);
     } else if (largestUnit == TemporalUnit::Second) {
-        microseconds = std::trunc((double) (nanoseconds / 1000)); // FIXME: fix the other cases
+        microseconds = nanoseconds / 1000;
         nanoseconds = nanoseconds % 1000;
-        milliseconds = std::trunc(microseconds / 1000);
-        microseconds = std::fmod(microseconds, 1000);
-        seconds = std::trunc(milliseconds / 1000);
-        milliseconds = std::fmod(milliseconds, 1000);
+        milliseconds = microseconds / 1000;
+        microseconds = microseconds % 1000;
+        seconds = (double) (milliseconds / 1000);
+        milliseconds = milliseconds % 1000;
     } else if (largestUnit == TemporalUnit::Millisecond) {
-        microseconds = std::trunc((double) nanoseconds / 1000);
+        microseconds = nanoseconds / 1000;
         nanoseconds = nanoseconds % 1000;
-        milliseconds = std::fma(seconds, 3, std::trunc(microseconds / 1000));
-        microseconds = std::fmod(microseconds, 1000);
+        milliseconds = microseconds / 1000;
+        microseconds = microseconds % 1000;
     } else if (largestUnit == TemporalUnit::Microsecond) {
-        microseconds = std::fma(seconds, 6, std::trunc((double) nanoseconds / 1000));
+        microseconds = std::fma(seconds, 6, std::trunc((double) (nanoseconds / 1000)));
         nanoseconds = nanoseconds % 1000;
     } else { // Nanoseconds
         nanoseconds = std::fma(seconds, 9, nanoseconds);
     }
 
-    return ISO8601::Duration { internalDuration.m_date_duration.years(), internalDuration.m_date_duration.months(), internalDuration.m_date_duration.weeks(), internalDuration.m_date_duration.days() + days * sign, hours * sign, minutes * sign, seconds * sign, milliseconds * sign, microseconds * sign, (double) nanoseconds * sign };
+    // Avoid negative 0
+    if (hours != 0)
+        hours *= sign;
+    if (minutes != 0)
+        minutes *= sign;
+    if (seconds != 0)
+        seconds *= sign;
+    if (milliseconds != 0)
+        milliseconds *= sign;
+    if (microseconds != 0)
+        microseconds *= sign;
+    if (nanoseconds != 0)
+        nanoseconds *= sign;
+    return ISO8601::Duration { internalDuration.m_date_duration.years(), internalDuration.m_date_duration.months(), internalDuration.m_date_duration.weeks(), internalDuration.m_date_duration.days() + days * sign, hours, minutes, (double) seconds, (double) milliseconds, (double) microseconds, (double) nanoseconds };
 }
 
 
