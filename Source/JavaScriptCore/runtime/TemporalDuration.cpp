@@ -109,16 +109,6 @@ ISO8601::Duration TemporalDuration::fromDurationLike(JSGlobalObject* globalObjec
     return result;
 }
 
-/*
-DateDuration TemporalDuration::toDateDuration(ISO8601::Duration d) {
-    return DateDuration(d.years(), d.months(), d.weeks(), d.days());
-}
-
-ISO8601::Duration TemporalDuration::fromDateDuration(const DateDuration& d) {
-    return ISO8601::Duration { d.m_years, d.m_months, d.m_weeks, d.m_days, 0, 0, 0, 0, 0, 0 };
-}
-*/
-
 // ToLimitedTemporalDuration ( temporalDurationLike, disallowedFields )
 // https://tc39.es/proposal-temporal/#sec-temporal-tolimitedtemporalduration
 ISO8601::Duration TemporalDuration::toISO8601Duration(JSGlobalObject* globalObject, JSValue itemValue)
@@ -1050,7 +1040,7 @@ InternalDuration bubbleRelativeDuration(JSGlobalObject* globalObject, int32_t si
 std::optional<InternalDuration> TemporalDuration::round(InternalDuration internalDuration, double increment, TemporalUnit unit, RoundingMode mode)
 {
     ASSERT(unit >= TemporalUnit::Day);
- 
+
     // 31.
     if (unit == TemporalUnit::Day) {
         // 31a.
@@ -1239,7 +1229,7 @@ String TemporalDuration::toString(JSGlobalObject* globalObject, JSValue optionsV
         return { };
     }
     auto smallestUnit = data.unit;
-  
+
     auto roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::Trunc);
     RETURN_IF_EXCEPTION(scope, { });
 
@@ -1280,6 +1270,19 @@ static void appendInteger(JSGlobalObject* globalObject, StringBuilder& builder, 
     builder.append(string);
 }
 
+TemporalUnit defaultTemporalLargestUnit(const ISO8601::Duration& duration) {
+    if (duration.years() != 0) return TemporalUnit::Year;
+    if (duration.months() != 0) return TemporalUnit::Month;
+    if (duration.weeks() != 0) return TemporalUnit::Week;
+    if (duration.days() != 0) return TemporalUnit::Day;
+    if (duration.hours() != 0) return TemporalUnit::Hour;
+    if (duration.minutes() != 0) return TemporalUnit::Minute;
+    if (duration.seconds() != 0) return TemporalUnit::Second;
+    if (duration.milliseconds() != 0) return TemporalUnit::Millisecond;
+    if (duration.microseconds() != 0) return TemporalUnit::Microsecond;
+    return TemporalUnit::Nanosecond;
+}
+
 // TemporalDurationToString ( years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds, precision )
 // https://tc39.es/proposal-temporal/#sec-temporal-temporaldurationtostring
 String TemporalDuration::toString(JSGlobalObject* globalObject, const ISO8601::Duration& duration, std::tuple<Precision, unsigned> precision)
@@ -1289,20 +1292,13 @@ String TemporalDuration::toString(JSGlobalObject* globalObject, const ISO8601::D
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    auto balancedMicroseconds = duration.microseconds() + std::trunc(duration.nanoseconds() / 1000);
-    auto balancedNanoseconds = std::fmod(duration.nanoseconds(), 1000);
-    auto balancedMilliseconds = duration.milliseconds() + std::trunc(balancedMicroseconds / 1000);
-    balancedMicroseconds = std::fmod(balancedMicroseconds, 1000);
-    auto balancedSeconds = duration.seconds() + std::trunc(balancedMilliseconds / 1000);
-    balancedMilliseconds = std::fmod(balancedMilliseconds, 1000);
-
     StringBuilder builder;
-
     auto sign = TemporalDuration::sign(duration);
     if (sign < 0)
         builder.append('-');
 
     builder.append('P');
+
     if (duration.years()) {
         appendInteger(globalObject, builder, duration.years());
         RETURN_IF_EXCEPTION(scope, { });
@@ -1324,9 +1320,9 @@ String TemporalDuration::toString(JSGlobalObject* globalObject, const ISO8601::D
         builder.append('D');
     }
 
-    // The zero value is displayed in seconds.
-    auto usesSeconds = balancedSeconds || balancedMilliseconds || balancedMicroseconds || balancedNanoseconds || !sign || std::get<0>(precision) != Precision::Auto;
-    if (!duration.hours() && !duration.minutes() && !usesSeconds)
+    auto secondsDuration = timeDurationFromComponents(0, 0, duration.seconds(), duration.milliseconds(), duration.microseconds(), duration.nanoseconds());
+
+    if (!duration.hours() && !duration.minutes() && !secondsDuration && sign && std::get<0>(precision) == Precision::Auto)
         return builder.toString();
 
     builder.append('T');
@@ -1340,22 +1336,14 @@ String TemporalDuration::toString(JSGlobalObject* globalObject, const ISO8601::D
         RETURN_IF_EXCEPTION(scope, { });
         builder.append('M');
     }
-    if (usesSeconds) {
-        // TEMPORARY! (pending spec discussion about rebalancing @ https://github.com/tc39/proposal-temporal/issues/2195)
-        // Although we must be able to display Number values beyond MAX_SAFE_INTEGER, it does not seem reasonable
-        // to require that calculations be performed outside of double space purely to support a case like
-        // `Temporal.Duration.from({ microseconds: Number.MAX_VALUE, nanoseconds: Number.MAX_VALUE }).toString()`.
-        if (UNLIKELY(!std::isfinite(balancedSeconds))) {
-            throwRangeError(globalObject, scope, "Cannot display infinite seconds!"_s);
-            return { };
-        }
 
-        appendInteger(globalObject, builder, balancedSeconds);
-        RETURN_IF_EXCEPTION(scope, { });
+    bool zeroMinutesAndHigher = defaultTemporalLargestUnit(duration) >= TemporalUnit::Second;
 
-        auto fraction = std::abs(balancedMilliseconds) * 1e6 + std::abs(balancedMicroseconds) * 1e3 + std::abs(balancedNanoseconds);
-        formatSecondsStringFraction(builder, fraction, precision);
-
+    if (secondsDuration != 0 || (zeroMinutesAndHigher || std::get<0>(precision) != Precision::Auto)) {
+        double secondsPart = std::abs(std::trunc((double) (secondsDuration / 1000000000)));
+        double subSecondsPart = std::abs((double) (secondsDuration % 1000000000));
+        appendInteger(globalObject, builder, secondsPart);
+        formatSecondsStringFraction(builder, subSecondsPart, precision);
         builder.append('S');
     }
 
