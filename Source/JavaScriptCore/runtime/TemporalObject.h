@@ -143,7 +143,7 @@ std::optional<double> maximumRoundingIncrement(TemporalUnit);
 double temporalRoundingIncrement(JSGlobalObject*, JSObject* options, std::optional<double> dividend, bool inclusive);
 double roundNumberToIncrement(double, double increment, RoundingMode);
 Int128 roundNumberToIncrement(Int128, Int128 increment, RoundingMode);
-Int128 applyUnsignedRoundingMode(Int128, Int128, Int128, UnsignedRoundingMode);
+Int128 applyUnsignedRoundingMode(double, Int128, Int128, UnsignedRoundingMode);
 void rejectObjectWithCalendarOrTimeZone(JSGlobalObject*, JSObject*);
 
 enum class TemporalOverflow : bool {

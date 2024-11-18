@@ -843,7 +843,7 @@ static Nudged nudgeToCalendarUnit(JSGlobalObject* globalObject, int32_t sign, co
     // See 18. NOTE
     Int128 progressNumerator = destEpochNs - startEpochNs;
     Int128 progressDenominator = endEpochNs - startEpochNs;
-    double total = r1 + (progressNumerator / progressDenominator) * increment * sign;
+    double total = r1 + (((double) progressNumerator) / ((double) progressDenominator)) * increment * sign;
     Int128 progress = progressNumerator / progressDenominator;
     ASSERT(0 <= progress && progress <= 1);
     auto isNegative = sign < 0;
@@ -851,7 +851,7 @@ static Nudged nudgeToCalendarUnit(JSGlobalObject* globalObject, int32_t sign, co
     auto roundedUnit = absInt128(r2);
     if (progress != 1) {
         ASSERT(absInt128(r1) <= absInt128(total) && absInt128(total) < absInt128(r2));
-        roundedUnit = applyUnsignedRoundingMode(absInt128(total), absInt128(r1), absInt128(r2), unsignedRoundingMode);
+        roundedUnit = applyUnsignedRoundingMode(std::abs(total), absInt128(r1), absInt128(r2), unsignedRoundingMode);
     }
     bool didExpandCalendarUnit = true;
     ISO8601::Duration resultDuration = endDuration;

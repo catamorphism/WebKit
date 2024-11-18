@@ -482,7 +482,7 @@ UnsignedRoundingMode getUnsignedRoundingMode(RoundingMode roundingMode, bool isN
 
 // https://tc39.es/proposal-temporal/#sec-applyunsignedroundingmode
 // ApplyUnsignedRoundingMode ( x, r1, r2, unsignedRoundingMode )
-Int128 applyUnsignedRoundingMode(Int128 x, Int128 r1, Int128 r2, UnsignedRoundingMode unsignedRoundingMode)
+Int128 applyUnsignedRoundingMode(double x, Int128 r1, Int128 r2, UnsignedRoundingMode unsignedRoundingMode)
 {
     if (x == r1)
         return r1;
