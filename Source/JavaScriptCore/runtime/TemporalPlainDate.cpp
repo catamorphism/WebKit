@@ -364,7 +364,7 @@ ISO8601::Duration TemporalPlainDate::differenceTemporalPlainDate(JSGlobalObject*
         // Step 8b.
         auto isoDateOther = other->plainDate();
         // Step 8c.
-        auto destEpochNs = getUTCEpochNanoseconds(isoDateOther);
+        Int128 destEpochNs = getUTCEpochNanoseconds(isoDateOther);
         // Step 8d.
         TemporalDuration::roundRelativeDuration(
             globalObject, duration, destEpochNs, isoDate, largestUnit,

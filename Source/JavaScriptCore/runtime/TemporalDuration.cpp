@@ -550,9 +550,11 @@ Int128 add24HourDaysToTimeDuration(Int128 d, double days) {
 }
 
 double unitLengthInNanoseconds(TemporalUnit unit) {
-    ASSERT(unit > TemporalUnit::Day);
+    ASSERT(unit >= TemporalUnit::Day);
 
     switch (unit) {
+        case TemporalUnit::Day:
+            return nanosecondsPerDay;
         case TemporalUnit::Hour:
             return 3.6 * 1000000000000;
         case TemporalUnit::Minute:
@@ -833,6 +835,7 @@ static Nudged nudgeToCalendarUnit(JSGlobalObject* globalObject, int32_t sign, co
     ASSERT(sign != -1 || (r1 <= 0 && r1 > r2));
     auto start = TemporalCalendar::isoDateAdd(globalObject, isoDate, startDuration, TemporalOverflow::Constrain);
     auto end = TemporalCalendar::isoDateAdd(globalObject, isoDate, endDuration, TemporalOverflow::Constrain);
+    RETURN_IF_EXCEPTION(scope, { });
     auto startDateTime = combineISODateAndTimeRecord(start, ISO8601::PlainTime());
     auto endDateTime = combineISODateAndTimeRecord(end, ISO8601::PlainTime());
     Int128 startEpochNs = getEpochNanosecondsFor(startDateTime, TemporalDisambiguation::Compatible);
@@ -1011,9 +1014,9 @@ InternalDuration bubbleRelativeDuration(JSGlobalObject* globalObject, int32_t si
 // RoundRelativeDuration ( duration, destEpochNs, isoDateTime, timeZone, calendar, largestUnit, increment, smallestUnit, roundingMode )
 // https://tc39.es/proposal-temporal/#sec-temporal-roundrelativeduration
 // TODO: calendar and time zone
- void TemporalDuration::roundRelativeDuration(JSGlobalObject* globalObject, InternalDuration& duration, double destEpochNs, ISO8601::PlainDate isoDate, TemporalUnit largestUnit, double increment, TemporalUnit smallestUnit, RoundingMode roundingMode) {
+ void TemporalDuration::roundRelativeDuration(JSGlobalObject* globalObject, InternalDuration& duration, Int128 destEpochNs, ISO8601::PlainDate isoDate, TemporalUnit largestUnit, double increment, TemporalUnit smallestUnit, RoundingMode roundingMode) {
      // 1, 2
-     bool irregularLengthUnit = smallestUnit <= TemporalUnit::Day;
+     bool irregularLengthUnit = smallestUnit <= TemporalUnit::Week;
      // 3 elided (no time zones)
      // 4
      int32_t sign = duration.sign() < 0 ? -1 : 1;

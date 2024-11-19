@@ -145,7 +145,7 @@ public:
 
     static int sign(const ISO8601::Duration&);
     static std::optional<InternalDuration> round(InternalDuration, double increment, TemporalUnit, RoundingMode);
-    static void roundRelativeDuration(JSGlobalObject*, InternalDuration&, double, ISO8601::PlainDate, TemporalUnit, double, TemporalUnit, RoundingMode);
+    static void roundRelativeDuration(JSGlobalObject*, InternalDuration&, Int128, ISO8601::PlainDate, TemporalUnit, double, TemporalUnit, RoundingMode);
     static Int128 roundTimeDuration(Int128, double, TemporalUnit, RoundingMode);
     static std::optional<ISO8601::PlainDate> regulateISODate(double, double, double, TemporalOverflow);
     static std::optional<ISO8601::Duration> toDateDurationRecordWithoutTime(const ISO8601::Duration&);
