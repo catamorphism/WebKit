@@ -535,61 +535,49 @@ static bool canBeCalendar(const StringParsingBuffer<CharacterType>& buffer)
     //  Let key be the source text matched by the AnnotationKey Parse Node contained within annotation
 
     // https://tc39.es/proposal-temporal/#prod-Annotation
-    // Annotation :::
-    //     [ AnnotationCriticalFlag_opt AnnotationKey = AnnotationValue ]
+    //     Annotation :::
+    //         [ AnnotationCriticalFlag_opt AnnotationKey = AnnotationValue ]
 
     // https://tc39.es/proposal-temporal/#prod-AnnotationCriticalFlag
-    // AnnotationCriticalFlag :::
-    //     !
+    //     AnnotationCriticalFlag :::
+    //         !
 
     // https://tc39.es/proposal-temporal/#prod-AnnotationKey
-    // AnnotationKey :::
-    //     AKeyLeadingChar
-    //     AnnotationKey AKeyChar
+    //     AnnotationKey :::
+    //         AKeyLeadingChar
+    //         AnnotationKey AKeyChar
 
     // https://tc39.es/proposal-temporal/#prod-AKeyLeadingChar
-    // AKeyLeadingChar :::
-    //     LowercaseAlpha
-    //     _
+    //     AKeyLeadingChar :::
+    //         LowercaseAlpha
+    //         _
 
     // https://tc39.es/proposal-temporal/#prod-AKeyChar
-    // AKeyChar :::
-    //     AKeyLeadingChar
-    //     DecimalDigit
-    //     -
+    //     AKeyChar :::
+    //         AKeyLeadingChar
+    //         DecimalDigit
+    //         -
 
     // This just checks for '[', followed by an optional '!' (critical flag),
     // followed by a valid key, followed by an '='.
 
     size_t length = buffer.lengthRemaining();
-    if (!length)
+    // Because of `[`, `=`, `]`, `AnnotationKey`, and `AnnotationValue`,
+    // the annotation must have length >= 5.
+    if (length < 5)
         return false;
-    // Parse Annotation
-    size_t i = 0;
-    if (i < length) {
-        // Parse '[' in Annotation
-        if (buffer[i] != '[')
-            return false;
-        i++;
-    }
-    if (i < length) {
-        // Parse AnnotationCriticalFlag_opt
-        if (buffer[i] == '!')
-            i++;
-    }
-    // Parse AKeyLeadingChar
-    // '_' allowed as first char
-    if (i < length) {
-        if (buffer[i] == '_')
-            i++;
-    }
-    // Parse '=' in Annotation
-    while (i < length) {
-        if (buffer[i] == '=')
+    if (*buffer != '[')
+        return false;
+    size_t index = 1;
+    if (buffer[index] == '!')
+        ++index;
+    if (buffer[index] == '_')
+        ++index;
+    while (index < length) {
+        if (buffer[index] == '=')
             return true;
-        // Parse AKeyLeadingChar or AKeyChar
-        if (isASCIILower(buffer[i]) || isASCIIDigit(buffer[i]) || buffer[i] == '-')
-            i++;
+        if (isASCIILower(buffer[index]) || isASCIIDigit(buffer[index]) || buffer[index] == '-')
+            ++index;
         else
             return false;
     }
