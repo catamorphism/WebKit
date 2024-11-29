@@ -455,26 +455,26 @@ test/intl402/DateTimeFormat/canonicalize-calendar.js:
   default: 'Test262Error: calendar ID is canonicalized (option) Expected SameValue(«"islamicc"», «"islamic-civil"») to be true'
   strict mode: 'Test262Error: calendar ID is canonicalized (option) Expected SameValue(«"islamicc"», «"islamic-civil"») to be true'
 test/intl402/DateTimeFormat/prototype/format/temporal-objects-not-overlapping-options.js:
-  default: "TypeError: undefined is not a constructor (evaluating 'new Temporal.PlainMonthDay(9, 19)')"
-  strict mode: "TypeError: undefined is not a constructor (evaluating 'new Temporal.PlainMonthDay(9, 19)')"
+  default: 'TypeError: Temporal.PlainDateTime.prototype.valueOf must not be called. To compare PlainDateTime values, use Temporal.PlainDateTime.compare'
+  strict mode: 'TypeError: Temporal.PlainDateTime.prototype.valueOf must not be called. To compare PlainDateTime values, use Temporal.PlainDateTime.compare'
 test/intl402/DateTimeFormat/prototype/format/temporal-zoneddatetime-not-supported.js:
   default: "TypeError: undefined is not a constructor (evaluating 'new Temporal.ZonedDateTime(0n, timeZone)')"
   strict mode: "TypeError: undefined is not a constructor (evaluating 'new Temporal.ZonedDateTime(0n, timeZone)')"
 test/intl402/DateTimeFormat/prototype/formatRange/temporal-objects-not-overlapping-options.js:
-  default: "TypeError: undefined is not a constructor (evaluating 'new Temporal.PlainMonthDay(9, 19)')"
-  strict mode: "TypeError: undefined is not a constructor (evaluating 'new Temporal.PlainMonthDay(9, 19)')"
+  default: 'TypeError: Temporal.PlainDateTime.prototype.valueOf must not be called. To compare PlainDateTime values, use Temporal.PlainDateTime.compare'
+  strict mode: 'TypeError: Temporal.PlainDateTime.prototype.valueOf must not be called. To compare PlainDateTime values, use Temporal.PlainDateTime.compare'
 test/intl402/DateTimeFormat/prototype/formatRange/temporal-zoneddatetime-not-supported.js:
   default: "TypeError: undefined is not a constructor (evaluating 'new Temporal.ZonedDateTime(0n, timeZone)')"
   strict mode: "TypeError: undefined is not a constructor (evaluating 'new Temporal.ZonedDateTime(0n, timeZone)')"
 test/intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-objects-not-overlapping-options.js:
-  default: "TypeError: undefined is not a constructor (evaluating 'new Temporal.PlainMonthDay(9, 19)')"
-  strict mode: "TypeError: undefined is not a constructor (evaluating 'new Temporal.PlainMonthDay(9, 19)')"
+  default: 'TypeError: Temporal.PlainDateTime.prototype.valueOf must not be called. To compare PlainDateTime values, use Temporal.PlainDateTime.compare'
+  strict mode: 'TypeError: Temporal.PlainDateTime.prototype.valueOf must not be called. To compare PlainDateTime values, use Temporal.PlainDateTime.compare'
 test/intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-zoneddatetime-not-supported.js:
   default: "TypeError: undefined is not a constructor (evaluating 'new Temporal.ZonedDateTime(0n, timeZone)')"
   strict mode: "TypeError: undefined is not a constructor (evaluating 'new Temporal.ZonedDateTime(0n, timeZone)')"
 test/intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-not-overlapping-options.js:
-  default: TypeError: undefined is not a constructor (evaluating 'new Temporal.PlainMonthDay(9, 19)')
-  strict mode: TypeError: undefined is not a constructor (evaluating 'new Temporal.PlainMonthDay(9, 19)')
+  default: 'TypeError: Temporal.PlainDateTime.prototype.valueOf must not be called. To compare PlainDateTime values, use Temporal.PlainDateTime.compare'
+  strict mode: 'TypeError: Temporal.PlainDateTime.prototype.valueOf must not be called. To compare PlainDateTime values, use Temporal.PlainDateTime.compare'
 test/intl402/DateTimeFormat/prototype/formatToParts/temporal-zoneddatetime-not-supported.js:
   default: "TypeError: undefined is not a constructor (evaluating 'new Temporal.ZonedDateTime(0n, timeZone)')"
   strict mode: "TypeError: undefined is not a constructor (evaluating 'new Temporal.ZonedDateTime(0n, timeZone)')"
