@@ -553,6 +553,14 @@ static bool canBeCalendar(const StringParsingBuffer<CharacterType>& buffer)
     //                 AKeyLeadingChar
     //                 DecimalDigit
     //                 -
+    //
+    //         AnnotationValue :::
+    //             AnnotationValueComponent
+    //             AnnotationValueComponent - AnnotationValue
+    //
+    //             AnnotationValueComponent :::
+    //                 Alpha AnnotationValueComponent[opt]
+    //                 DecimalDigit AnnotationValueComponent[opt]
 
     // This just checks for '[', followed by an optional '!' (critical flag),
     // followed by a valid key, followed by an '='.
