@@ -533,25 +533,25 @@ static bool canBeCalendar(const StringParsingBuffer<CharacterType>& buffer)
     // https://tc39.es/proposal-temporal/#sec-temporal-parseisodatetime
     // Step 4(a)(ii)(2)(a):
     //  Let key be the source text matched by the AnnotationKey Parse Node contained within annotation
-
+    //
     // https://tc39.es/proposal-temporal/#prod-Annotation
     //     Annotation :::
     //         [ AnnotationCriticalFlag_opt AnnotationKey = AnnotationValue ]
-
+    //
     // https://tc39.es/proposal-temporal/#prod-AnnotationCriticalFlag
     //     AnnotationCriticalFlag :::
     //         !
-
+    //
     // https://tc39.es/proposal-temporal/#prod-AnnotationKey
     //     AnnotationKey :::
     //         AKeyLeadingChar
     //         AnnotationKey AKeyChar
-
+    //
     // https://tc39.es/proposal-temporal/#prod-AKeyLeadingChar
     //     AKeyLeadingChar :::
     //         LowercaseAlpha
     //         _
-
+    //
     // https://tc39.es/proposal-temporal/#prod-AKeyChar
     //     AKeyChar :::
     //         AKeyLeadingChar
