@@ -536,27 +536,23 @@ static bool canBeCalendar(const StringParsingBuffer<CharacterType>& buffer)
     //
     // https://tc39.es/proposal-temporal/#prod-Annotation
     //     Annotation :::
-    //         [ AnnotationCriticalFlag_opt AnnotationKey = AnnotationValue ]
+    //         [ AnnotationCriticalFlag[opt] AnnotationKey = AnnotationValue ]
     //
-    // https://tc39.es/proposal-temporal/#prod-AnnotationCriticalFlag
-    //     AnnotationCriticalFlag :::
-    //         !
+    //         AnnotationCriticalFlag :::
+    //             !
     //
-    // https://tc39.es/proposal-temporal/#prod-AnnotationKey
-    //     AnnotationKey :::
-    //         AKeyLeadingChar
-    //         AnnotationKey AKeyChar
+    //         AnnotationKey :::
+    //             AKeyLeadingChar
+    //             AnnotationKey AKeyChar
     //
-    // https://tc39.es/proposal-temporal/#prod-AKeyLeadingChar
-    //     AKeyLeadingChar :::
-    //         LowercaseAlpha
-    //         _
+    //             AKeyLeadingChar :::
+    //                 LowercaseAlpha
+    //                 _
     //
-    // https://tc39.es/proposal-temporal/#prod-AKeyChar
-    //     AKeyChar :::
-    //         AKeyLeadingChar
-    //         DecimalDigit
-    //         -
+    //             AKeyChar :::
+    //                 AKeyLeadingChar
+    //                 DecimalDigit
+    //                 -
 
     // This just checks for '[', followed by an optional '!' (critical flag),
     // followed by a valid key, followed by an '='.
