@@ -231,4 +231,22 @@ enum class TemporalDateFormat : uint8_t {
     MonthDay
 };
 
+enum class TemporalOffsetBehavior : uint8_t {
+    Option,
+    Exact,
+    Wall,
+};
+
+enum class TemporalOffsetOption : uint8_t {
+    Ignore,
+    Use,
+    Prefer,
+    Reject,
+};
+
+enum class TemporalMatchBehavior : bool {
+    Exactly,
+    Minutes,
+};
+
 } // namespace JSC
