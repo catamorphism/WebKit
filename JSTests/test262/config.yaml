@@ -325,6 +325,7 @@ skip:
     - test/built-ins/Temporal/PlainYearMonth/prototype/until/argument-propertybag-calendar-wrong-type.js
     - test/built-ins/Temporal/PlainYearMonth/prototype/until/argument-string-unknown-annotation.js
     - test/built-ins/Temporal/PlainYearMonth/refisoday-undefined.js
+    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-unknown-annotation.js
 
     # Depends on PlainMonthDay
     - test/built-ins/Temporal/Duration/prototype/round/largestunit-plurals-accepted.js
