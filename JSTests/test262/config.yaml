@@ -125,6 +125,7 @@ skip:
     - test/built-ins/Temporal/Duration/prototype/round/relativeto-string-zoneddatetime.js
     - test/built-ins/Temporal/Duration/prototype/round/relativeto-sub-minute-offset.js
     - test/built-ins/Temporal/Duration/prototype/round/relativeto-wrong-type.js
+    - test/built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-slots.js
     - test/built-ins/Temporal/Duration/prototype/round/roundingmode-ceil.js
     - test/built-ins/Temporal/Duration/prototype/round/roundingmode-expand.js
     - test/built-ins/Temporal/Duration/prototype/round/roundingmode-floor.js
@@ -158,6 +159,7 @@ skip:
     - test/built-ins/Temporal/Duration/prototype/total/relativeto-string-zoneddatetime.js
     - test/built-ins/Temporal/Duration/prototype/total/relativeto-sub-minute-offset.js
     - test/built-ins/Temporal/Duration/prototype/total/relativeto-wrong-type.js
+    - test/built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-with-fractional-days.js
     - test/built-ins/Temporal/Duration/prototype/total/total-of-each-unit-relativeto.js
     - test/built-ins/Temporal/Duration/prototype/total/unit-plurals-accepted.js
     - test/built-ins/Temporal/PlainDateTime/datetime-math.js
@@ -447,46 +449,6 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/argument-string-calendar-annotation.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/argument-string-unknown-annotation.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-unknown-annotation.js
-
-    # Depends on Temporal.ZonedDateTime
-    - test/built-ins/Temporal/Duration/compare/relativeto-zoneddatetime-negative-epochnanoseconds.js
-    - test/built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-negative-epochnanoseconds.js
-    - test/built-ins/Temporal/Duration/prototype/round/relativeto-zoneddatetime-slots.js
-    - test/built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-negative-epochnanoseconds.js
-    - test/built-ins/Temporal/Duration/prototype/total/relativeto-zoneddatetime-with-fractional-days.js
-    - test/built-ins/Temporal/Instant/compare/argument-zoneddatetime.js
-    - test/built-ins/Temporal/Instant/from/argument-zoneddatetime.js
-    - test/built-ins/Temporal/Instant/prototype/equals/argument-zoneddatetime.js
-    - test/built-ins/Temporal/Instant/prototype/since/argument-zoneddatetime.js
-    - test/built-ins/Temporal/Instant/prototype/until/argument-zoneddatetime.js
-    - test/built-ins/Temporal/PlainDate/compare/argument-zoneddatetime-slots.js
-    - test/built-ins/Temporal/PlainDate/compare/argument-zoneddatetime.js
-    - test/built-ins/Temporal/PlainDate/from/argument-zoneddatetime-slots.js
-    - test/built-ins/Temporal/PlainDate/from/argument-zoneddatetime.js
-    - test/built-ins/Temporal/PlainDate/from/overflow-invalid-string.js
-    - test/built-ins/Temporal/PlainDate/prototype/equals/argument-zoneddatetime-slots.js
-    - test/built-ins/Temporal/PlainDate/prototype/since/argument-zoneddatetime-slots.js
-    - test/built-ins/Temporal/PlainDate/prototype/toPlainDateTime/argument-zoneddatetime-balance-negative-time-units.js
-    - test/built-ins/Temporal/PlainDate/prototype/toPlainDateTime/argument-zoneddatetime-negative-epochnanoseconds.js
-    - test/built-ins/Temporal/PlainDate/prototype/until/argument-zoneddatetime-slots.js
-    - test/built-ins/Temporal/PlainDateTime/compare/argument-zoneddatetime-negative-epochnanoseconds.js
-    - test/built-ins/Temporal/PlainDateTime/from/argument-zoneddatetime-balance-negative-time-units.js
-    - test/built-ins/Temporal/PlainDateTime/from/argument-zoneddatetime-negative-epochnanoseconds.js
-    - test/built-ins/Temporal/PlainDateTime/prototype/equals/argument-zoneddatetime-balance-negative-time-units.js
-    - test/built-ins/Temporal/PlainDateTime/prototype/equals/argument-zoneddatetime-negative-epochnanoseconds.js
-    - test/built-ins/Temporal/PlainDateTime/prototype/withPlainTime/argument-zoneddatetime-balance-negative-time-units.js
-    - test/built-ins/Temporal/PlainDateTime/prototype/withPlainTime/argument-zoneddatetime-negative-epochnanoseconds.js
-    - test/built-ins/Temporal/PlainMonthDay/from/calendar-temporal-object.js
-    - test/built-ins/Temporal/PlainMonthDay/prototype/equals/calendar-temporal-object.js
-    - test/built-ins/Temporal/PlainTime/compare/argument-zoneddatetime-negative-epochnanoseconds.js
-    - test/built-ins/Temporal/PlainTime/from/argument-zoneddatetime-balance-negative-time-units.js
-    - test/built-ins/Temporal/PlainTime/from/argument-zoneddatetime-negative-epochnanoseconds.js
-    - test/built-ins/Temporal/PlainTime/prototype/equals/argument-zoneddatetime-balance-negative-time-units.js
-    - test/built-ins/Temporal/PlainTime/prototype/equals/argument-zoneddatetime-negative-epochnanoseconds.js
-    - test/built-ins/Temporal/PlainTime/prototype/since/argument-zoneddatetime-balance-negative-time-units.js
-    - test/built-ins/Temporal/PlainTime/prototype/since/argument-zoneddatetime-negative-epochnanoseconds.js
-    - test/built-ins/Temporal/PlainTime/prototype/until/argument-zoneddatetime-balance-negative-time-units.js
-    - test/built-ins/Temporal/PlainTime/prototype/until/argument-zoneddatetime-negative-epochnanoseconds.js
 
     # Depends on support for named time zones
     - test/intl402/DateTimeFormat/prototype/format/temporal-zoneddatetime-not-supported.js
