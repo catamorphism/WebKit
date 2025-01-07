@@ -487,3 +487,16 @@ skip:
     - test/built-ins/Temporal/PlainTime/prototype/since/argument-zoneddatetime-negative-epochnanoseconds.js
     - test/built-ins/Temporal/PlainTime/prototype/until/argument-zoneddatetime-balance-negative-time-units.js
     - test/built-ins/Temporal/PlainTime/prototype/until/argument-zoneddatetime-negative-epochnanoseconds.js
+
+    # Depends on support for named time zones
+    - test/intl402/DateTimeFormat/prototype/format/temporal-zoneddatetime-not-supported.js
+    - test/intl402/DateTimeFormat/prototype/formatRange/temporal-zoneddatetime-not-supported.js
+    - test/intl402/DateTimeFormat/prototype/formatToParts/temporal-zoneddatetime-not-supported.js
+    - test/intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-zoneddatetime-not-supported.js
+    - test/intl402/Temporal/Duration/compare/twenty-five-hour-day.js
+    - test/intl402/Temporal/Duration/prototype/round/adjust-rounded-duration-days.js
+    - test/intl402/Temporal/Duration/prototype/round/dst-balancing-result.js
+    - test/intl402/Temporal/Duration/prototype/round/dst-rounding-result.js
+    - test/intl402/Temporal/Duration/prototype/total/dst-balancing-result.js
+    - test/intl402/Temporal/Duration/prototype/total/dst-day-length.js
+    - test/intl402/Temporal/Duration/prototype/total/dst-rounding-result.js
