@@ -831,7 +831,7 @@ static std::optional<CalendarRecord> parseOneCalendar(StringParsingBuffer<Charac
     unsigned keyLength = 0;
     while (buffer[keyLength] != '=')
         keyLength++;
-    if (keyLength == 0)
+    if (!keyLength)
         return std::nullopt;
     auto key(buffer.span().first(keyLength));
     buffer.advanceBy(keyLength);
