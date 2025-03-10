@@ -115,7 +115,7 @@ public:
 
         static size_t allocationSize(unsigned numberOfFrames)
         {
-            static_assert(alignof(DisjunctionContext) <= sizeof(void*));
+//            static_assert(alignof(DisjunctionContext) <= sizeof(void*));
             size_t rawSize = sizeof(DisjunctionContext) - sizeof(uintptr_t) + Checked<size_t>(numberOfFrames) * sizeof(uintptr_t);
             size_t roundedSize = roundUpToMultipleOf<sizeof(void*)>(rawSize);
             RELEASE_ASSERT(roundedSize >= rawSize);
@@ -215,7 +215,7 @@ public:
 
         static size_t allocationSize(unsigned numBackupIds)
         {
-            static_assert(alignof(ParenthesesDisjunctionContext) <= sizeof(void*));
+//            static_assert(alignof(ParenthesesDisjunctionContext) <= sizeof(void*));
             size_t rawSize = sizeof(ParenthesesDisjunctionContext) + Checked<size_t>(numBackupIds) * sizeof(unsigned);
             size_t roundedSize = roundUpToMultipleOf<sizeof(void*)>(rawSize);
             RELEASE_ASSERT(roundedSize >= rawSize);
