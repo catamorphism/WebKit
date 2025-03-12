@@ -245,7 +245,35 @@ ISO8601::Duration TemporalInstant::difference(JSGlobalObject* globalObject, Temp
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    auto [smallestUnit, largestUnit, roundingMode, increment] = extractDifferenceOptions(globalObject, optionsValue, UnitGroup::Time, TemporalUnit::Nanosecond, TemporalUnit::Second);
+    JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    auto smallest = temporalSmallestUnit(globalObject, options, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day });
+    RETURN_IF_EXCEPTION(scope, { });
+    TemporalUnit smallestUnit = smallest.value_or(TemporalUnit::Nanosecond);
+
+    TemporalUnit defaultLargestUnit = std::min(smallestUnit, TemporalUnit::Second);
+    auto largest = temporalLargestUnit(globalObject, options, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day }, defaultLargestUnit);
+    RETURN_IF_EXCEPTION(scope, { });
+    TemporalUnit largestUnit = defaultLargestUnit;
+    if (largest) {
+        ASSERT(std::holds_alternative<TemporalUnit>(largest.value()));
+        largestUnit = std::get<TemporalUnit>(largest.value());
+    }
+
+    if (smallest && largest && smallest < largestUnit) {
+        throwRangeError(globalObject, scope, "smallestUnit must be smaller than largestUnit"_s);
+        return { };
+    }
+
+    RoundingMode roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::Trunc);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    std::optional<double> maxIncrement = maximumRoundingIncrement(smallestUnit);
+    ASSERT(maxIncrement && *maxIncrement <= 1000); // unbounded increments are impossible with Temporal.Instant
+    double incrementDouble = doubleNumberOption(globalObject, options, vm.propertyNames->roundingIncrement, 1);
+    RETURN_IF_EXCEPTION(scope, { });
+    unsigned increment = temporalRoundingIncrement(globalObject, incrementDouble, maxIncrement, false);
     RETURN_IF_EXCEPTION(scope, { });
 
     ISO8601::InternalDuration internalDuration = exactTime().difference(globalObject, other->exactTime(), increment, smallestUnit, roundingMode);

@@ -67,6 +67,7 @@ public:
     static std::optional<ISO8601::TimeZone> getAvailableNamedTimeZoneIdentifier(JSGlobalObject*, TimeZoneID);
     static std::optional<ISO8601::TimeZone> getAvailableNamedTimeZoneIdentifier(JSGlobalObject*,
         const Vector<Latin1Character>&);
+
     static std::optional<TimeZone> parseTemporalTimeZoneString(StringView);
     static std::optional<ISO8601::TimeZone> parseTimeZoneIdentifier(StringView);
     static ISO8601::TimeZone toTemporalTimeZoneIdentifier(JSGlobalObject*, JSValue);

@@ -269,9 +269,9 @@ std::optional<TemporalUnit> temporalUnitType(StringView unit)
     return std::nullopt;
 }
 
-
-// https://tc39.es/proposal-temporal/#sec-temporal-gettemporalunitvaluedoption
-Variant<TemporalAuto, std::optional<TemporalUnit>> getTemporalUnitValuedOption(JSGlobalObject* globalObject, JSObject* options, PropertyName key)
+// ToLargestTemporalUnit ( normalizedOptions, disallowedUnits, fallback [ , autoValue ] )
+// https://tc39.es/proposal-temporal/#sec-temporal-tolargesttemporalunit
+std::optional<TemporalLargestUnit> temporalLargestUnit(JSGlobalObject* globalObject, JSObject* options, std::initializer_list<TemporalUnit> disallowedUnits, std::optional<TemporalUnit> autoValue)
 {
 
     VM& vm = globalObject->vm();
@@ -283,8 +283,11 @@ Variant<TemporalAuto, std::optional<TemporalUnit>> getTemporalUnitValuedOption(J
     if (!unit)
         return std::nullopt;
 
-    if (unit == "auto"_s)
+    if (largestUnit == "auto"_s) {
+        if (autoValue)
+            return autoValue.value();
         return TemporalAuto::Auto;
+    }
 
     auto unitType = temporalUnitType(unit);
     if (!unitType) [[unlikely]] {
@@ -407,6 +410,11 @@ std::tuple<TemporalUnit, TemporalUnit, RoundingMode, double> extractDifferenceOp
         largestUnit = largestUnitOptional.value();
     }
 
+    TemporalUnit largestUnit = defaultLargestUnit;
+    if (largest) {
+        ASSERT(std::holds_alternative<TemporalUnit>(largest.value()));
+        largestUnit = std::get<TemporalUnit>(largest.value());
+    }
     if (smallestUnit < largestUnit) [[unlikely]] {
         throwRangeError(globalObject, scope, "smallestUnit must be smaller than largestUnit"_s);
         return { };

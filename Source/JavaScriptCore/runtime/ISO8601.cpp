@@ -428,6 +428,11 @@ std::optional<int64_t> parseUTCOffset(StringView string, bool parseSubMinutePrec
     });
 }
 
+std::optional<int64_t> parseDateTimeUTCOffset(StringView string)
+{
+    return parseUTCOffset(string, true);
+}
+
 template<typename CharacterType>
 static std::optional<int64_t> parseUTCOffsetInMinutes(StringParsingBuffer<CharacterType>& buffer)
 {
@@ -2034,7 +2039,7 @@ Int128 roundTimeDuration(JSGlobalObject* globalObject, Int128 timeDuration, unsi
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-datedurationsign
-static int32_t dateDurationSign(const Duration& d)
+int32_t dateDurationSign(const Duration& d)
 {
     if (d.years() > 0)
         return 1;

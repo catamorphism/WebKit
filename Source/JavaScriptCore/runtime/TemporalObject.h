@@ -97,6 +97,8 @@ enum class TemporalAuto : bool {
     Auto
 };
 
+using TemporalLargestUnit = Variant<TemporalUnit, TemporalAuto>;
+
 enum class RoundingMode : uint8_t {
     Ceil,
     Floor,
@@ -241,9 +243,9 @@ Variant<TemporalAuto, std::optional<TemporalUnit>>
 getTemporalUnitValuedOption(JSGlobalObject*, JSObject*, PropertyName);
 void validateTemporalUnitValue(JSGlobalObject*, Variant<TemporalAuto, std::optional<TemporalUnit>>, UnitGroup, AllowedUnit, StringView);
 std::tuple<TemporalUnit, TemporalUnit, RoundingMode, double> extractDifferenceOptions(JSGlobalObject*, JSValue, UnitGroup, TemporalUnit, TemporalUnit);
-std::optional<TemporalUnit> temporalLargestUnit(JSGlobalObject*, JSObject* options, std::initializer_list<TemporalUnit> disallowedUnits, TemporalUnit autoValue);
-std::optional<String> temporalSmallestUnit(JSGlobalObject*, JSObject*);
 std::optional<TemporalUnit> validateSmallestUnit(JSGlobalObject*, std::optional<String>, std::initializer_list<TemporalUnit>);
+std::optional<TemporalLargestUnit> temporalLargestUnit(JSGlobalObject*, JSObject* options, std::initializer_list<TemporalUnit> disallowedUnits, std::optional<TemporalUnit> autoValue);
+std::optional<TemporalUnit> temporalSmallestUnit(JSGlobalObject*, Variant<JSObject*, TemporalUnit>, std::initializer_list<TemporalUnit>);
 std::tuple<TemporalUnit, TemporalUnit, RoundingMode, double> extractDifferenceOptions(JSGlobalObject*, JSValue, UnitGroup, TemporalUnit defaultSmallestUnit, TemporalUnit defaultLargestUnit);
 TemporalShowCalendar getTemporalShowCalendarNameOption(JSGlobalObject*, JSObject*);
 TemporalShowOffset getTemporalShowOffsetOption(JSGlobalObject*, JSObject*);
