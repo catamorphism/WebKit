@@ -31,7 +31,7 @@
 namespace JSC {
 
 class NudgeResult final {
-    public:
+public:
     ISO8601::InternalDuration m_duration;
     Int128 m_nudgedEpochNs;
     bool m_didExpandCalendarUnit;
@@ -41,12 +41,25 @@ class NudgeResult final {
 };
 
 class Nudged final {
-    public:
+public:
     NudgeResult m_nudgeResult;
     double m_total;
     Nudged() { }
     Nudged(NudgeResult n, double t)
         : m_nudgeResult(n), m_total(t) { }
+};
+
+class NudgeWindow final {
+public:
+    double m_r1;
+    double m_r2;
+    Int128 m_startEpochNs;
+    Int128 m_endEpochNs;
+    ISO8601::InternalDuration m_startDuration;
+    ISO8601::InternalDuration m_endDuration;
+    NudgeWindow() { };
+    NudgeWindow(double r1, double r2, Int128 startEpochNs, Int128 endEpochNs, ISO8601::InternalDuration startDuration, ISO8601::InternalDuration endDuration)
+        : m_r1(r1), m_r2(r2), m_startEpochNs(startEpochNs), m_endEpochNs(endEpochNs), m_startDuration(startDuration), m_endDuration(endDuration) { }
 };
 
 class TemporalDuration final : public JSNonFinalObject {
@@ -68,7 +81,7 @@ public:
     static TemporalDuration* toTemporalDuration(JSGlobalObject*, JSValue);
     static ISO8601::Duration toLimitedDuration(JSGlobalObject*, JSValue, std::initializer_list<TemporalUnit> disallowedUnits);
     static TemporalDuration* from(JSGlobalObject*, JSValue);
-    static JSValue compare(JSGlobalObject*, JSValue, JSValue);
+    static JSValue compare(JSGlobalObject*, JSValue, JSValue, JSValue);
 
 #define JSC_DEFINE_TEMPORAL_DURATION_FIELD(name, capitalizedName) \
     double name##s() const { return m_duration.name##s(); } \
@@ -93,6 +106,9 @@ public:
     ISO8601::Duration addDurations(JSGlobalObject*, AddOrSubtract, ISO8601::Duration, TemporalUnit) const;
     static ISO8601::Duration temporalDurationFromInternal(ISO8601::InternalDuration, TemporalUnit);
     static Int128 timeDurationFromComponents(double, double, double, double, double, double);
+    static double totalRelativeDuration(JSGlobalObject*, const ISO8601::InternalDuration&,
+        Int128, Int128, const ISO8601::PlainDateTime&, std::optional<ISO8601::TimeZone>,
+        TemporalUnit);
 
     static ISO8601::Duration fromDurationLike(JSGlobalObject*, JSObject*);
     static ISO8601::Duration toISO8601Duration(JSGlobalObject*, JSValue);
@@ -101,13 +117,14 @@ public:
     static ISO8601::InternalDuration round(JSGlobalObject*, ISO8601::InternalDuration, double increment, TemporalUnit, RoundingMode);
     static std::optional<ISO8601::PlainDate> regulateISODate(double, double, double, TemporalOverflow);
     static std::tuple<ISO8601::PlainDate, ISO8601::PlainTime> combineISODateAndTimeRecord(ISO8601::PlainDate, ISO8601::PlainTime);
-    static ISO8601::InternalDuration roundRelativeDuration(JSGlobalObject*, ISO8601::InternalDuration&, Int128, ISO8601::PlainDateTime, std::optional<ISO8601::TimeZone>, TemporalUnit, unsigned, TemporalUnit, RoundingMode);
-    static double totalTimeDuration(Int128 timeDuration, TemporalUnit unit);
+    static ISO8601::InternalDuration roundRelativeDuration(JSGlobalObject*, ISO8601::InternalDuration&, Int128, Int128, ISO8601::PlainDateTime, std::optional<ISO8601::TimeZone>, TemporalUnit, unsigned, TemporalUnit, RoundingMode);
+    static double totalTimeDuration(Int128, TemporalUnit);
     static ISO8601::Duration toDateDurationRecordWithoutTime(JSGlobalObject*, const ISO8601::Duration&);
     static ISO8601::Duration adjustDateDurationRecord(JSGlobalObject*, const ISO8601::Duration&, double, std::optional<double>, std::optional<double>);
     static std::optional<double> balance(ISO8601::Duration&, TemporalUnit largestUnit);
     static ISO8601::Duration toDateDurationWithoutTime(ISO8601::Duration);
-    static Nudged nudgeToCalendarUnit(JSGlobalObject*, int32_t, const ISO8601::InternalDuration&, Int128, ISO8601::PlainDate, ISO8601::PlainTime, std::optional<ISO8601::TimeZone>, unsigned, TemporalUnit, RoundingMode);
+    static NudgeWindow computeNudgeWindow(JSGlobalObject*, int32_t, const ISO8601::InternalDuration&, Int128, ISO8601::PlainDate, ISO8601::PlainTime, std::optional<ISO8601::TimeZone>, unsigned, TemporalUnit, TemporalNudgeWindowShift);
+    static Nudged nudgeToCalendarUnit(JSGlobalObject*, int32_t, const ISO8601::InternalDuration&, Int128, Int128, ISO8601::PlainDate, ISO8601::PlainTime, std::optional<ISO8601::TimeZone>, unsigned, TemporalUnit, RoundingMode);
     static ISO8601::InternalDuration bubbleRelativeDuration(JSGlobalObject*, int32_t, ISO8601::InternalDuration, Int128, ISO8601::PlainDate, ISO8601::PlainTime, std::optional<ISO8601::TimeZone>, TemporalUnit, TemporalUnit);
     static Int128 timeDurationFromEpochNanosecondsDifference(ISO8601::ExactTime, ISO8601::ExactTime);
     static int32_t timeDurationSign(Int128);
@@ -120,7 +137,7 @@ private:
     template<typename CharacterType>
     static std::optional<ISO8601::Duration> parse(StringParsingBuffer<CharacterType>&);
 
-    static String toString(JSGlobalObject*, const ISO8601::Duration&, std::tuple<Precision, unsigned> precision);
+    static String toString(JSGlobalObject*, const ISO8601::Duration&, std::tuple<Precision, unsigned>);
 
     static NudgeResult nudgeToZonedTime(JSGlobalObject*, int32_t, ISO8601::InternalDuration, ISO8601::PlainDate, ISO8601::PlainTime, ISO8601::TimeZone, unsigned, TemporalUnit, RoundingMode);
     ISO8601::Duration m_duration;

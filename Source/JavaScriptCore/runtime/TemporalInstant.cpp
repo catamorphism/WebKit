@@ -245,8 +245,43 @@ ISO8601::Duration TemporalInstant::difference(JSGlobalObject* globalObject, Temp
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    auto [smallestUnit, largestUnit, roundingMode, increment] = extractDifferenceOptions(globalObject, optionsValue, UnitGroup::Time, TemporalUnit::Nanosecond, TemporalUnit::Second);
+    JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
     RETURN_IF_EXCEPTION(scope, { });
+
+    std::optional<String> largestAsString = temporalLargestUnit(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    double incrementDouble = doubleNumberOption(globalObject, options, vm.propertyNames->roundingIncrement, 1);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    RoundingMode roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::Trunc);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    std::optional<String> smallestAsString = temporalSmallestUnit(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+    std::optional<TemporalUnit> smallestUnitOptional = validateSmallestUnit(globalObject, smallestAsString, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day });
+    RETURN_IF_EXCEPTION(scope, { });
+    TemporalUnit smallestUnit = smallestUnitOptional.value_or(TemporalUnit::Nanosecond);
+
+    TemporalUnit defaultLargestUnit = std::min(smallestUnit, TemporalUnit::Second);
+    TemporalUnit largestUnit = defaultLargestUnit;
+    std::optional<TemporalLargestUnit> largest = validateLargestUnit(globalObject, largestAsString, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day }, defaultLargestUnit);
+    RETURN_IF_EXCEPTION(scope, { });
+    if (largest) {
+        ASSERT(std::holds_alternative<TemporalUnit>(largest.value()));
+        largestUnit = std::get<TemporalUnit>(largest.value());
+    }
+
+    if (smallestUnit < largestUnit) {
+        throwRangeError(globalObject, scope, "smallestUnit must be smaller than largestUnit"_s);
+        return { };
+    }
+
+    std::optional<double> maxIncrement = maximumRoundingIncrement(smallestUnit);
+    ASSERT(maxIncrement && *maxIncrement <= 1000); // unbounded increments are impossible with Temporal.Instant
+    validateTemporalRoundingIncrement(globalObject, incrementDouble, maxIncrement, Inclusivity::Exclusive);
+    RETURN_IF_EXCEPTION(scope, { });
+    unsigned increment = static_cast<unsigned>(incrementDouble);
 
     ISO8601::InternalDuration internalDuration = exactTime().difference(globalObject, other->exactTime(), increment, smallestUnit, roundingMode);
     RETURN_IF_EXCEPTION(scope, { });
@@ -329,9 +364,9 @@ ISO8601::ExactTime TemporalInstant::round(JSGlobalObject* globalObject, JSValue 
     RETURN_IF_EXCEPTION(scope, { });
 
     if (!smallest) {
-        auto smallestUnitMaybeAuto = getTemporalUnitValuedOption(globalObject, options, vm.propertyNames->smallestUnit);
-        ASSERT(std::holds_alternative<std::optional<TemporalUnit>>(smallestUnitMaybeAuto));
-        smallest = std::get<std::optional<TemporalUnit>>(smallestUnitMaybeAuto);
+        std::optional<String> smallestUnitAsString = temporalSmallestUnit(globalObject, options);
+        RETURN_IF_EXCEPTION(scope, { });
+        smallest = validateSmallestUnit(globalObject, smallestUnitAsString, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day });
         RETURN_IF_EXCEPTION(scope, { });
     }
 
@@ -341,8 +376,6 @@ ISO8601::ExactTime TemporalInstant::round(JSGlobalObject* globalObject, JSValue 
     }
 
     TemporalUnit smallestUnit = smallest.value();
-    validateTemporalUnitValue(globalObject, smallestUnit, UnitGroup::Time, AllowedUnit::None, "smallestUnit"_s);
-    RETURN_IF_EXCEPTION(scope, { });
 
     validateTemporalRoundingIncrement(globalObject, roundingIncrement, maximumIncrement(smallestUnit), Inclusivity::Inclusive);
     RETURN_IF_EXCEPTION(scope, { });
@@ -363,6 +396,15 @@ String TemporalInstant::toString(JSGlobalObject* globalObject, JSValue optionsVa
     if (!options)
         RELEASE_AND_RETURN(scope, toString(globalObject));
 
+    TemporalFractionalSecondDigits digits = temporalFractionalSecondDigits(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    RoundingMode roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::Trunc);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    std::optional<String> smallestUnitString = temporalSmallestUnit(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+
     TemporalTimeZone* timeZone = nullptr;
     JSValue timeZoneValue = options->get(globalObject, vm.propertyNames->timeZone);
     RETURN_IF_EXCEPTION(scope, { });
@@ -371,10 +413,10 @@ String TemporalInstant::toString(JSGlobalObject* globalObject, JSValue optionsVa
         RETURN_IF_EXCEPTION(scope, { });
     }
 
-    PrecisionData data = secondsStringPrecision(globalObject, options);
+    std::optional<TemporalUnit> smallestUnit = validateSmallestUnit(globalObject, smallestUnitString, { });
     RETURN_IF_EXCEPTION(scope, { });
 
-    RoundingMode roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::Trunc);
+    PrecisionData data = secondsStringPrecision(globalObject, smallestUnit, digits);
     RETURN_IF_EXCEPTION(scope, { });
 
     // No need to make a new object if we were given explicit defaults.

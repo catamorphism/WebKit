@@ -475,6 +475,7 @@ std::optional<TimeZoneRecord> parseTimeZone(StringView);
 std::optional<Duration> parseDuration(StringView);
 std::optional<int64_t> parseUTCOffset(StringView, bool parseSubMinutePrecision = true);
 std::optional<int64_t> parseUTCOffsetInMinutes(StringView);
+std::optional<int64_t> parseDateTimeUTCOffset(StringView);
 enum class ValidateTimeZoneID : bool { No, Yes };
 using CalendarID = RFC9557Value;
 std::optional<std::tuple<PlainTime, std::optional<TimeZoneRecord>>> parseTime(StringView);
@@ -499,8 +500,8 @@ String temporalYearMonthToString(PlainYearMonth, StringView);
 String temporalMonthDayToString(PlainMonthDay, StringView);
 String monthCode(uint32_t);
 
+int32_t dateDurationSign(const Duration&);
 bool isValidDuration(const Duration&);
-PlainDate createISODateRecord(double, double, double);
 void checkISODaysRange(JSGlobalObject*, ISO8601::PlainDate);
 
 std::optional<ExactTime> parseInstant(StringView);

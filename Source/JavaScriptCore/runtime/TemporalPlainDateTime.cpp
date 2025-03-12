@@ -114,6 +114,14 @@ ISO8601::PlainDateTime TemporalPlainDateTime::combineISODateAndTimeRecord(ISO860
     return ISO8601::PlainDateTime(isoDate, isoTime);
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal-combineisodateandtimerecord
+ISO8601::PlainDateTime TemporalPlainDateTime::combineISODateAndTimeRecord(ISO8601::PlainDate isoDate, ISO8601::Duration time)
+{
+    // NOTE: time.[[Days]] is ignored.
+    return ISO8601::PlainDateTime(isoDate, ISO8601::PlainTime(time.hours(), time.minutes(), time.seconds(),
+        time.milliseconds(), time.microseconds(), time.nanoseconds()));
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal-totemporaldatetime
 TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject, JSValue itemValue, JSObject* options)
 {
@@ -388,10 +396,9 @@ TemporalPlainDateTime* TemporalPlainDateTime::round(JSGlobalObject* globalObject
     RETURN_IF_EXCEPTION(scope, { });
 
     if (!smallest) {
-        auto smallestUnitMaybeAuto = getTemporalUnitValuedOption(globalObject, options, vm.propertyNames->smallestUnit);
+        std::optional<String> smallestUnitString = temporalSmallestUnit(globalObject, options);
         RETURN_IF_EXCEPTION(scope, { });
-        ASSERT(std::holds_alternative<std::optional<TemporalUnit>>(smallestUnitMaybeAuto));
-        smallest = std::get<std::optional<TemporalUnit>>(smallestUnitMaybeAuto);
+        smallest = validateSmallestUnit(globalObject, smallestUnitString, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week });
         if (!smallest) {
             throwRangeError(globalObject, scope, "Cannot round without a smallestUnit option"_s);
             return { };
@@ -399,10 +406,6 @@ TemporalPlainDateTime* TemporalPlainDateTime::round(JSGlobalObject* globalObject
     }
 
     auto smallestUnit = smallest.value();
-
-    validateTemporalUnitValue(globalObject, smallestUnit, UnitGroup::Time, AllowedUnit::Day, "smallestUnit"_s);
-    RETURN_IF_EXCEPTION(scope, { });
-
     unsigned maximum = 1;
     Inclusivity isInclusive = Inclusivity::Inclusive;
     if (smallestUnit != TemporalUnit::Day) {
@@ -495,27 +498,54 @@ static ISO8601::InternalDuration differenceISODateTime(JSGlobalObject* globalObj
     return ISO8601::InternalDuration::combineDateAndTimeDuration(dateDifference, timeDuration);
 }
 
-// https://tc39.es/proposal-temporal/#sec-temporal-differenceplaindatetimewithrounding
-static ISO8601::InternalDuration differencePlainDateTimeWithRounding(JSGlobalObject* globalObject,
-    const ISO8601::PlainDateTime& isoDateTime1, const ISO8601::PlainDateTime& isoDateTime2,
-    TemporalUnit largestUnit, double roundingIncrement, TemporalUnit smallestUnit,
-    RoundingMode roundingMode)
+// https://tc39.es/proposal-temporal/#sec-temporal-differenceplaindatetimewithtotal
+double TemporalPlainDateTime::differencePlainDateTimeWithTotal(
+    JSGlobalObject* globalObject, const ISO8601::PlainDateTime& isoDateTime1,
+    const ISO8601::PlainDateTime& isoDateTime2, TemporalUnit unit)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    if (!TemporalCalendar::isoDateTimeCompare(isoDateTime1, isoDateTime2)) {
-        return ISO8601::InternalDuration::combineDateAndTimeDuration(ISO8601::Duration(), 0);
+    if (!TemporalCalendar::isoDateTimeCompare(isoDateTime1, isoDateTime2))
+        return 0;
+
+    if (!isoDateTimeWithinLimits(isoDateTime1) || !isoDateTimeWithinLimits(isoDateTime2)) {
+        throwRangeError(globalObject, scope, "Date/time out of range in differencePlainDateTimeWithTotal"_s);
+        return 0;
     }
-    if (!isoDateTimeWithinLimits(isoDateTime1) || !isoDateTimeWithinLimits(isoDateTime2))
+    auto diff = differenceISODateTime(globalObject, isoDateTime1, isoDateTime2, unit);
+    RETURN_IF_EXCEPTION(scope, 0);
+    if (unit == TemporalUnit::Nanosecond)
+        return diff.time();
+    auto originEpochNs = getUTCEpochNanoseconds(isoDateTime1);
+    auto destEpochNs = getUTCEpochNanoseconds(isoDateTime2);
+    RELEASE_AND_RETURN(scope, TemporalDuration::totalRelativeDuration(globalObject,
+        diff, originEpochNs, destEpochNs, isoDateTime1, std::nullopt, unit));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-differenceplaindatetimewithrounding
+ISO8601::InternalDuration TemporalPlainDateTime::differencePlainDateTimeWithRounding(
+    JSGlobalObject* globalObject, const ISO8601::PlainDateTime& isoDateTime1,
+    const ISO8601::PlainDateTime& isoDateTime2, TemporalUnit largestUnit,
+    double roundingIncrement, TemporalUnit smallestUnit, RoundingMode roundingMode)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    if (!TemporalCalendar::isoDateTimeCompare(isoDateTime1, isoDateTime2))
+        return ISO8601::InternalDuration::combineDateAndTimeDuration(ISO8601::Duration(), 0);
+    if (!isoDateTimeWithinLimits(isoDateTime1) || !isoDateTimeWithinLimits(isoDateTime2)) {
         throwRangeError(globalObject, scope, "Date/time out of range in differencePlainDateTimeWithRounding"_s);
+        return { };
+    }
     auto diff = differenceISODateTime(globalObject, isoDateTime1, isoDateTime2, largestUnit);
     RETURN_IF_EXCEPTION(scope, { });
     if (smallestUnit == TemporalUnit::Nanosecond && roundingIncrement == 1)
         return diff;
+    auto originEpochNs = getUTCEpochNanoseconds(isoDateTime1);
     auto destEpochNs = getUTCEpochNanoseconds(isoDateTime2);
     RELEASE_AND_RETURN(scope, TemporalDuration::roundRelativeDuration(globalObject,
-        diff, destEpochNs, isoDateTime1, std::nullopt,
+        diff, originEpochNs, destEpochNs, isoDateTime1, std::nullopt,
         largestUnit, roundingIncrement, smallestUnit, roundingMode));
 }
 

@@ -482,9 +482,10 @@ ISO8601::Duration TemporalPlainDate::differenceTemporalPlainDate(JSGlobalObject*
     ISO8601::InternalDuration duration = ISO8601::InternalDuration::combineDateAndTimeDuration(dateDifference.value(), 0);
     if (smallestUnit != TemporalUnit::Day || increment != 1) {
         auto isoDateTime = TemporalPlainDateTime::combineISODateAndTimeRecord(plainDate(), ISO8601::PlainTime());
+        Int128 originEpochNs = ISO8601::getUTCEpochNanoseconds(isoDateTime);
         auto isoDateTimeOther = TemporalPlainDateTime::combineISODateAndTimeRecord(other->plainDate(), ISO8601::PlainTime());
         Int128 destEpochNs = ISO8601::getUTCEpochNanoseconds(isoDateTimeOther);
-        TemporalDuration::roundRelativeDuration(globalObject, duration, destEpochNs, isoDateTime, std::nullopt, largestUnit, increment, smallestUnit, roundingMode);
+        TemporalDuration::roundRelativeDuration(globalObject, duration, originEpochNs, destEpochNs, isoDateTime, std::nullopt, largestUnit, increment, smallestUnit, roundingMode);
         RETURN_IF_EXCEPTION(scope, { });
     }
     auto result = TemporalDuration::temporalDurationFromInternal(duration, TemporalUnit::Day);

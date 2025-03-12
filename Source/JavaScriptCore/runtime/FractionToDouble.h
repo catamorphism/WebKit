@@ -36,6 +36,28 @@ static constexpr Int128 absInt128(const Int128& value)
     return value;
 }
 
-double fractionToDouble(const Int128& numerator, double denominator);
+// Double-double precision floating point number, represented as the unevaluated
+// sum of two doubles. In other words, dd[0] is the double approximation term
+// and dd[1] is the error term.
+//
+// There are many such representations, but only one is 'normalized' meaning the
+// dd[0] term is the most accurate possible double-precision approximation of
+// the double-double value.
+using DD = std::array<double, 2>;
 
+double fractionToDouble(const Int128& numerator, const Int128& denominator);
+
+unsigned ddCmp(const DD&, const DD&);
+
+DD ddDiv(const Int128& numerator, const Int128& denominator);
+
+bool ddIsZero(const DD&);
+
+bool ddEq(const DD&, const DD&);
+
+DD ddFadd(double, const DD&);
+
+DD ddFmul(double, const DD&);
+
+DD int128Fdiv(const Int128& n, const Int128& d);
 } // namespace JSC

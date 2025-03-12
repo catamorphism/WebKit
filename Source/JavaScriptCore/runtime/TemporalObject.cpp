@@ -269,50 +269,53 @@ std::optional<TemporalUnit> temporalUnitType(StringView unit)
     return std::nullopt;
 }
 
+// ToLargestTemporalUnit ( normalizedOptions, disallowedUnits, fallback [ , autoValue ] )
+// https://tc39.es/proposal-temporal/#sec-temporal-tolargesttemporalunit
+std::optional<String> temporalLargestUnit(JSGlobalObject* globalObject, JSObject* options)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
 
-// https://tc39.es/proposal-temporal/#sec-temporal-gettemporalunitvaluedoption
-Variant<TemporalAuto, std::optional<TemporalUnit>> getTemporalUnitValuedOption(JSGlobalObject* globalObject, JSObject* options, PropertyName key)
+    if (options) {
+        String largestUnit = intlStringOption(globalObject, options, vm.propertyNames->largestUnit, { }, { }, { });
+        RETURN_IF_EXCEPTION(scope, std::nullopt);
+        if (!largestUnit)
+            return std::nullopt;
+        return largestUnit;
+    }
+
+    return std::nullopt;
+}
+
+// ToLargestTemporalUnit ( normalizedOptions, disallowedUnits, fallback [ , autoValue ] )
+// https://tc39.es/proposal-temporal/#sec-temporal-tolargesttemporalunit
+std::optional<TemporalLargestUnit> validateLargestUnit(JSGlobalObject* globalObject, std::optional<String> unit, std::initializer_list<TemporalUnit> disallowedUnits, std::optional<TemporalUnit> autoValue)
 {
 
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    String unit = intlStringOption(globalObject, options, key, { }, { }, { });
-    RETURN_IF_EXCEPTION(scope, std::nullopt);
-
     if (!unit)
         return std::nullopt;
 
-    if (unit == "auto"_s)
+    if (unit == "auto"_s) {
+        if (autoValue)
+            return autoValue.value();
         return TemporalAuto::Auto;
+    }
 
-    auto unitType = temporalUnitType(unit);
+    auto unitType = temporalUnitType(unit.value());
     if (!unitType) [[unlikely]] {
         throwRangeError(globalObject, scope, "invalid Temporal unit"_s);
         return std::nullopt;
     }
 
+    if (disallowedUnits.size() && std::find(disallowedUnits.begin(), disallowedUnits.end(), unitType.value()) != disallowedUnits.end()) {
+        throwRangeError(globalObject, scope, "largestUnit is a disallowed unit"_s);
+        return { };
+    }
+
     return unitType;
-}
-
-// https://tc39.es/proposal-temporal/#sec-temporal-validatetemporalunitvaluedoption
-void validateTemporalUnitValue(JSGlobalObject* globalObject, Variant<TemporalAuto, std::optional<TemporalUnit>> unit, UnitGroup unitGroup, AllowedUnit extraValue, StringView valueName)
-{
-    VM& vm = globalObject->vm();
-    auto scope = DECLARE_THROW_SCOPE(vm);
-
-    if (isAbsentUnit(unit))
-        return;
-    if (extraValue == AllowedUnit::Auto && std::holds_alternative<TemporalAuto>(unit))
-        return;
-    TemporalUnit actualUnit = std::get<std::optional<TemporalUnit>>(unit).value();
-    if (extraValue == AllowedUnit::Day && actualUnit == TemporalUnit::Day)
-        return;
-    if (actualUnit <= TemporalUnit::Day && ((unitGroup == UnitGroup::Date) || (unitGroup == UnitGroup::DateTime)))
-        return;
-    if (actualUnit > TemporalUnit::Day && ((unitGroup == UnitGroup::Time) || (unitGroup == UnitGroup::DateTime)))
-        return;
-    throwRangeError(globalObject, scope, makeString(valueName, " is a disallowed unit"_s));
 }
 
 // dividend must be a double because the maximum rounding increment for nanoseconds
@@ -360,52 +363,28 @@ std::tuple<TemporalUnit, TemporalUnit, RoundingMode, double> extractDifferenceOp
     JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
     RETURN_IF_EXCEPTION(scope, { });
 
-    auto largestUnitMaybeAuto = getTemporalUnitValuedOption(globalObject, options, vm.propertyNames->largestUnit);
+    std::optional<String> largestUnitString = temporalLargestUnit(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
     auto roundingIncrement = temporalRoundingIncrement(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
     auto roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::Trunc);
     RETURN_IF_EXCEPTION(scope, { });
-    Variant<TemporalAuto, std::optional<TemporalUnit>> smallestUnitMaybeAuto = getTemporalUnitValuedOption(globalObject, options, vm.propertyNames->smallestUnit);
+    std::optional<String> smallestUnitString = temporalSmallestUnit(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
-    ASSERT(std::holds_alternative<std::optional<TemporalUnit>>(smallestUnitMaybeAuto));
-    auto smallestUnitOptional = std::get<std::optional<TemporalUnit>>(smallestUnitMaybeAuto);
-
-    validateTemporalUnitValue(globalObject, largestUnitMaybeAuto, unitGroup, AllowedUnit::Auto, "largestUnit"_s);
+    std::optional<TemporalUnit> smallestUnitOptional = validateSmallestUnit(globalObject, smallestUnitString, disallowedUnits[static_cast<uint8_t>(unitGroup)]);
+    RETURN_IF_EXCEPTION(scope, { });
+    std::optional<TemporalLargestUnit> largestUnitMaybeAuto = validateLargestUnit(globalObject, largestUnitString, disallowedUnits[static_cast<uint8_t>(unitGroup)], std::nullopt);
     RETURN_IF_EXCEPTION(scope, { });
 
-    if (isAbsentUnit(largestUnitMaybeAuto))
+    if (!largestUnitMaybeAuto)
         largestUnitMaybeAuto = TemporalAuto::Auto;
-
-    auto disallowedUnitsList = disallowedUnits[static_cast<uint8_t>(unitGroup)];
-
-    if (std::holds_alternative<std::optional<TemporalUnit>>(largestUnitMaybeAuto)) {
-        auto largestUnitOptional = std::get<std::optional<TemporalUnit>>(largestUnitMaybeAuto);
-        if (largestUnitOptional) {
-            if (disallowedUnitsList.size() && std::ranges::find(disallowedUnitsList, largestUnitOptional.value()) != disallowedUnitsList.end()) [[unlikely]] {
-                throwRangeError(globalObject, scope, "largestUnit is a disallowed unit"_s);
-                return { };
-            }
-        }
-    }
-
-    validateTemporalUnitValue(globalObject, smallestUnitMaybeAuto, unitGroup, AllowedUnit::None, "smallestUnit"_s);
-    RETURN_IF_EXCEPTION(scope, { });
 
     auto smallestUnit = smallestUnitOptional.value_or(fallbackSmallestUnit);
 
-    if (disallowedUnitsList.size() && std::ranges::find(disallowedUnitsList, smallestUnit) != disallowedUnitsList.end()) [[unlikely]] {
-        throwRangeError(globalObject, scope, "smallestUnit is a disallowed unit"_s);
-        return { };
-    }
-
     auto defaultLargestUnit = std::min(smallestLargestDefaultUnit, smallestUnit);
     auto largestUnit = defaultLargestUnit;
-    if (std::holds_alternative<std::optional<TemporalUnit>>(largestUnitMaybeAuto)) {
-        auto largestUnitOptional = std::get<std::optional<TemporalUnit>>(largestUnitMaybeAuto);
-        ASSERT(largestUnitOptional);
-        largestUnit = largestUnitOptional.value();
-    }
+    if (std::holds_alternative<TemporalUnit>(largestUnitMaybeAuto.value()))
+        largestUnit = std::get<TemporalUnit>(largestUnitMaybeAuto.value());
 
     if (smallestUnit < largestUnit) [[unlikely]] {
         throwRangeError(globalObject, scope, "smallestUnit must be smaller than largestUnit"_s);
@@ -665,6 +644,23 @@ double applyUnsignedRoundingMode(double x, double r1, double r2, UnsignedRoundin
     ASSERT(unsignedRoundingMode == UnsignedRoundingMode::HalfEven);
     auto cardinality = std::fmod(r1 / (r2 - r1), 2);
     return !cardinality ? r1 : r2;
+}
+
+double applyUnsignedRoundingMode2(double r1, double r2, int32_t cmp, bool evenCardinality, UnsignedRoundingMode unsignedRoundingMode)
+{
+    if (unsignedRoundingMode == UnsignedRoundingMode::Zero)
+        return r1;
+    if (unsignedRoundingMode == UnsignedRoundingMode::Infinity)
+        return r2;
+    if (cmp < 0)
+        return r1;
+    if (cmp > 0)
+        return r2;
+    if (unsignedRoundingMode == UnsignedRoundingMode::HalfZero)
+        return r1;
+    if (unsignedRoundingMode == UnsignedRoundingMode::HalfInfinity)
+        return r2;
+    return evenCardinality ? r1 : r2;
 }
 
 void formatSecondsStringFraction(StringBuilder& builder, unsigned fraction, std::tuple<Precision, unsigned> precision)
