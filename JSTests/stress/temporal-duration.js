@@ -117,6 +117,14 @@ shouldBe(Temporal.Duration.compare(posAbsolute, zero), 1);
 shouldBe(Temporal.Duration.compare(zero, posAbsolute), -1);
 shouldBe(Temporal.Duration.compare('PT86400S', 'P1D'), 0);
 shouldBe(Temporal.Duration.compare({ days: 200 }, { days: 200, nanoseconds: 1 }), -1);
+{
+    const dd1 = new Temporal.Duration(5, 5, 5, 5, 5, 5, 5, 5, 5, 5);
+    const dd2 = new Temporal.Duration(5, 5, 5, 5, 5, 4, 5, 5, 5, 5);
+    const relativeTo = Temporal.PlainDate.from("2017-01-01");
+    shouldBe(Temporal.Duration.compare(dd1, dd1, { relativeTo }), 0);
+    shouldBe(Temporal.Duration.compare(dd2, dd1, { relativeTo }), -1);
+    shouldBe(Temporal.Duration.compare(dd1, dd2, { relativeTo }), 1);
+}
 
 shouldBe(Temporal.Duration.prototype.with.length, 1);
 shouldThrow(() => Temporal.Duration.prototype.with.call({}, { years: 1 }), TypeError);
@@ -228,6 +236,16 @@ shouldBe(Temporal.Duration.from('-PT45S').round({ smallestUnit: 'second', roundi
 shouldBe(Temporal.Duration.from('-PT45S').round({ smallestUnit: 'second', roundingIncrement: 30, roundingMode: 'trunc' }).toString(), '-PT30S');
 // Rounding would exceed maxTimeDuration
 shouldThrow(() => Temporal.Duration.from({ seconds: Number.MAX_SAFE_INTEGER }).round({ smallestUnit: 'seconds', roundingMode: 'ceil', roundingIncrement: 30 }), RangeError);
+{
+    const instance = new Temporal.Duration(1, 0, 0, 0, 24);
+    var relativeTo = "2019-11-01T00:00";
+    shouldBe(instance.round({ largestUnit: "years", relativeTo }).toString(), "P1Y1D");
+    relativeTo = Temporal.PlainDateTime.from(relativeTo);
+    shouldBe(instance.round({ largestUnit: "years", relativeTo }).toString(), "P1Y1D");
+    relativeTo = new Temporal.ZonedDateTime(0n, "UTC");
+    shouldBe(instance.round({ largestUnit: "minutes", relativeTo }).toString(), "PT527040M");
+
+}
 
 const seconds = 8692288669465520;
 const nanoseconds = 321_414_345;
@@ -262,6 +280,11 @@ const posSubseconds = new Temporal.Duration(0, 0, 0, 0, 0, 0, 0, 999, 999999, 99
 const negSubseconds = new Temporal.Duration(0, 0, 0, 0, 0, 0, 0, -999, -999999, -999999999);
 shouldBe(posSubseconds.total("seconds"), 2.998998999);
 shouldBe(negSubseconds.total("seconds"), -2.998998999);
+{
+    const instance = new Temporal.Duration(1, 0, 0, 0, 24);
+    const relativeTo = "2019-11-01T00:00";
+    shouldBe(instance.total({ unit: "days", relativeTo }), 367);
+}
 
 // At present, toLocaleString has the same behavior as toJSON or argumentless toString.
 for (const method of ['toString', 'toJSON', 'toLocaleString']) {    
