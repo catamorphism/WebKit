@@ -31,6 +31,7 @@
 #include "JSCInlines.h"
 #include "ObjectConstructor.h"
 #include "TemporalDuration.h"
+#include "TemporalObjectInlines.h"
 #include "TemporalPlainDate.h"
 #include "TemporalPlainDateTime.h"
 #include "TemporalPlainMonthDay.h"
@@ -122,19 +123,6 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainMonthDayPrototypeFuncToJSON, (JSGlobalObje
     return JSValue::encode(jsString(vm, monthDay->toString()));
 }
 
-// https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.prototype.tolocalestring
-JSC_DEFINE_HOST_FUNCTION(temporalPlainMonthDayPrototypeFuncToLocaleString, (JSGlobalObject* globalObject, CallFrame* callFrame))
-{
-    VM& vm = globalObject->vm();
-    auto scope = DECLARE_THROW_SCOPE(vm);
-
-    auto* monthDay = jsDynamicCast<TemporalPlainMonthDay*>(callFrame->thisValue());
-    if (!monthDay)
-        return throwVMTypeError(globalObject, scope, "Temporal.PlainMonthDay.prototype.toLocaleString called on value that's not a PlainMonthDay"_s);
-
-    return JSValue::encode(jsString(vm, monthDay->toString()));
-}
-
 // https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.prototype.with
 JSC_DEFINE_HOST_FUNCTION(temporalPlainMonthDayPrototypeFuncWith, (JSGlobalObject* globalObject, CallFrame* callFrame))
 {
@@ -208,6 +196,20 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainMonthDayPrototypeFuncToPlainDate, (JSGloba
     }
 
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject, globalObject->plainDateStructure(), WTFMove(plainDateOptional.value()))));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.prototype.tolocalestring
+JSC_DEFINE_HOST_FUNCTION(temporalPlainMonthDayPrototypeFuncToLocaleString, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* monthDay = jsDynamicCast<TemporalPlainMonthDay*>(callFrame->thisValue());
+    if (!monthDay)
+        return throwVMTypeError(globalObject, scope, "Temporal.PlainMonthDay.prototype.toLocaleString called on value that's not a PlainMonthDay"_s);
+
+    RELEASE_AND_RETURN(scope, JSValue::encode(callIntlDateTimeFormat(globalObject, monthDay,
+        callFrame->argument(0), callFrame->argument(1))));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.prototype.valueof
