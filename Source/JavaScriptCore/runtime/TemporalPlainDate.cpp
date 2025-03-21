@@ -31,6 +31,7 @@
 #include "JSCInlines.h"
 #include "LazyPropertyInlines.h"
 #include "TemporalDuration.h"
+#include "TemporalObjectInlines.h"
 #include "TemporalPlainDateTime.h"
 #include "VMTrapsInlines.h"
 

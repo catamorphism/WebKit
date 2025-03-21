@@ -99,7 +99,7 @@ const zdt = new Temporal.ZonedDateTime(0n, "UTC");
 {
     shouldBe(zdt.toString(), '1970-01-01T00:00:00+00:00[UTC]');
     shouldBe(zdt.toJSON(), zdt.toString());
-    shouldBe(zdt.toLocaleString(), zdt.toString());
+    shouldBe(zdt.toLocaleString({ locale: undefined }), '1/1/1970, 12:00:00 AM UTC');
 }
 
 shouldBe(Temporal.ZonedDateTime.prototype.with.length, 1);

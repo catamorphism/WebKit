@@ -50,6 +50,7 @@ enum class TemporalDateTimeFormat : uint8_t {
     PlainMonthDay,
     PlainTime,
     PlainYearMonth,
+    ZonedDateTime,
 };
 
 static inline bool isPlain(std::optional<TemporalDateTimeFormat> format)
@@ -86,14 +87,15 @@ public:
     enum class RequiredComponent : uint8_t { Date, Time, Any };
     enum class Defaults : uint8_t { Date, Time, All };
     void initializeDateTimeFormat(JSGlobalObject*, JSValue locales, JSValue options, RequiredComponent, Defaults);
-    JSValue format(JSGlobalObject*, ExactTime value, std::optional<TemporalDateTimeFormat>) const;
+    JSValue format(JSGlobalObject*, ExactTime value, std::optional<TemporalDateTimeFormat>,
+        std::optional<ISO8601::TimeZone>) const;
     JSValue formatToParts(JSGlobalObject*, ExactTime value, std::optional<TemporalDateTimeFormat>,
         JSString* sourceType = nullptr) const;
     JSValue formatRange(JSGlobalObject*, ExactTime, ExactTime, std::optional<TemporalDateTimeFormat>);
     JSValue formatRangeToParts(JSGlobalObject*, ExactTime, ExactTime, std::optional<TemporalDateTimeFormat>);
     JSObject* resolvedOptions(JSGlobalObject*) const;
-    std::tuple<ExactTime, std::optional<TemporalDateTimeFormat>>
-    handleDateTimeValue(JSGlobalObject*, JSValue);
+    std::tuple<ExactTime, std::optional<TemporalDateTimeFormat>, std::optional<ISO8601::TimeZone>>
+    handleDateTimeValue(JSGlobalObject*, JSValue, bool);
 
     JSBoundFunction* boundFormat() const LIFETIME_BOUND { return m_boundFormat.get(); }
     void setBoundFormat(VM&, JSBoundFunction*);
@@ -169,6 +171,7 @@ private:
     ISO8601::TimeZone m_timeZone;
     String m_timeZoneForICU;
     HourCycle m_hourCycle { HourCycle::None };
+    WTF::TriState m_hour12 { WTF::TriState::Indeterminate }; 
     Weekday m_weekday { Weekday::None };
     Era m_era { Era::None };
     Year m_year { Year::None };
@@ -187,6 +190,7 @@ private:
     bool m_userSpecifiedHour = false;
     bool m_userSpecifiedMinute = false;
     bool m_userSpecifiedSecond = false;
+    bool m_userSpecifiedTimeZone = false;
 
     TimeZoneName m_timeZoneName { TimeZoneName::None };
     DateTimeStyle m_dateStyle { DateTimeStyle::None };

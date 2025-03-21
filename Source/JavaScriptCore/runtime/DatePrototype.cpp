@@ -977,7 +977,7 @@ JSC_DEFINE_HOST_FUNCTION(dateProtoFuncToLocaleString, (JSGlobalObject* globalObj
 
     Int128 nano = 1'000'000 * static_cast<Int128>(milli);
     RELEASE_AND_RETURN(scope, JSValue::encode(dateTimeFormat->format(globalObject,
-        ExactTime(nano), std::nullopt)));
+        ExactTime(nano), std::nullopt, std::nullopt)));
 }
 
 JSC_DEFINE_HOST_FUNCTION(dateProtoFuncToLocaleDateString, (JSGlobalObject* globalObject, CallFrame* callFrame))
@@ -998,7 +998,8 @@ JSC_DEFINE_HOST_FUNCTION(dateProtoFuncToLocaleDateString, (JSGlobalObject* globa
     RETURN_IF_EXCEPTION(scope, { });
 
     Int128 nano = 1'000'000 * static_cast<Int128>(milli);
-    RELEASE_AND_RETURN(scope, JSValue::encode(dateTimeFormat->format(globalObject, ExactTime(nano), std::nullopt)));
+    RELEASE_AND_RETURN(scope, JSValue::encode(dateTimeFormat->format(globalObject,
+        ExactTime(nano), std::nullopt, std::nullopt)));
 }
 
 JSC_DEFINE_HOST_FUNCTION(dateProtoFuncToLocaleTimeString, (JSGlobalObject* globalObject, CallFrame* callFrame))
@@ -1018,8 +1019,9 @@ JSC_DEFINE_HOST_FUNCTION(dateProtoFuncToLocaleTimeString, (JSGlobalObject* globa
     dateTimeFormat->initializeDateTimeFormat(globalObject, callFrame->argument(0), callFrame->argument(1), IntlDateTimeFormat::RequiredComponent::Time, IntlDateTimeFormat::Defaults::Time);
     RETURN_IF_EXCEPTION(scope, { });
 
-    Int128 nano = 1'000'000 * static_cast<Int128>(milli);
-    RELEASE_AND_RETURN(scope, JSValue::encode(dateTimeFormat->format(globalObject, ExactTime(nano), std::nullopt)));
+    Int128 nano = 1'000'000 * static_cast<Int128>(milli); 
+    RELEASE_AND_RETURN(scope, JSValue::encode(dateTimeFormat->format(globalObject, ExactTime(nano),
+        std::nullopt, std::nullopt)));
 }
 
 } // namespace JSC
