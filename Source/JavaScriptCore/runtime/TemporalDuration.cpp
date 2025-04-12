@@ -212,6 +212,21 @@ static double totalNanoseconds(ISO8601::Duration& duration)
     return 1000 * microseconds + duration.nanoseconds();
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal-add24hourdaystonormalizedtimeduration
+static Int128 add24HourDaysToTimeDuration(JSGlobalObject* globalObject, Int128 d, double days)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    Int128 daysInNanoseconds = ((Int128) days) * ISO8601::ExactTime::nsPerDay;
+    Int128 result = d + daysInNanoseconds;
+    if (absInt128(result) > ISO8601::InternalDuration::maxTimeDuration) {
+        throwRangeError(globalObject, scope, "Total time in duration is out of range"_s);
+        return { };
+    }
+    return result;
+}
+
 JSValue TemporalDuration::compare(JSGlobalObject* globalObject, JSValue valueOne, JSValue valueTwo)
 {
     VM& vm = globalObject->vm();
@@ -302,6 +317,43 @@ static TemporalUnit largestSubduration(const ISO8601::Duration& duration)
     while (index < numberOfTemporalUnits - 1 && !duration[index])
         index++;
     return static_cast<TemporalUnit>(index);
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-timedurationfromcomponents
+Int128 TemporalDuration::timeDurationFromComponents(double hours, double minutes, double seconds, double milliseconds, double microseconds, double nanoseconds)
+{
+    Int128 min = ((Int128) minutes) + ((Int128) hours) * 60;
+    Int128 sec = ((Int128) seconds) + min * 60;
+    Int128 millis = ((Int128) milliseconds) + sec * 1000;
+    Int128 micros = ((Int128) microseconds) + millis * 1000;
+    Int128 nanos = ((Int128) nanoseconds) + micros * 1000;
+    ASSERT(absInt128(nanos) <= ISO8601::InternalDuration::maxTimeDuration);
+    return nanos;
+}
+
+ISO8601::InternalDuration TemporalDuration::toInternalDurationRecordWith24HourDays(JSGlobalObject* globalObject, ISO8601::Duration d)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    Int128 timeDuration = timeDurationFromComponents(d.hours(), d.minutes(), d.seconds(), d.milliseconds(), d.microseconds(), d.nanoseconds());
+    timeDuration = add24HourDaysToTimeDuration(globalObject, timeDuration, d.days());
+    RETURN_IF_EXCEPTION(scope, { });
+    ISO8601::Duration dateDuration = ISO8601::Duration { d.years(), d.months(), d.weeks(), 0, 0, 0, 0, 0, 0, 0 };
+    return ISO8601::InternalDuration::combineDateAndTimeDuration(dateDuration, timeDuration);
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-todatedurationrecordwithouttime
+// ToDateDurationRecordWithoutTime ( duration )
+ISO8601::Duration TemporalDuration::toDateDurationRecordWithoutTime(JSGlobalObject* globalObject, const ISO8601::Duration& duration)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto internalDuration = toInternalDurationRecordWith24HourDays(globalObject, duration);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto days = internalDuration.time() / ISO8601::ExactTime::nsPerDay;
+    return ISO8601::Duration { internalDuration.dateDuration().years(), internalDuration.dateDuration().months(), internalDuration.dateDuration().weeks(), (double) days, 0, 0, 0, 0, 0, 0 };
 }
 
 // BalanceDuration ( days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds, largestUnit [ , relativeTo ] )
