@@ -51,6 +51,7 @@ public:
     static JSObject* toTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
     static JSObject* getTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
     static CalendarID toTemporalCalendarIdentifier(JSGlobalObject*, JSValue);
+    static CalendarID getTemporalCalendarIdentifierWithISODefault(JSGlobalObject*, JSValue);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, JSObject*, TemporalDateFormat, std::variant<JSObject*, TemporalOverflow>, TemporalOverflow&);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, TemporalDateFormat, double year, double month, double day, TemporalOverflow);
     static ISO8601::PlainDate yearMonthFromFields(JSGlobalObject*, double year, double month, TemporalOverflow);
