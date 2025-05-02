@@ -137,6 +137,23 @@ enum IsInclusive : bool {
 };
 
 double nonNegativeModulo(double x, double y);
+enum class TemporalShowCalendar : uint8_t {
+    Auto,
+    Never,
+    Critical,
+    Always,
+};
+
+enum class TemporalShowOffset : bool {
+    Auto,
+    Never,
+};
+
+enum class TemporalShowTimeZone : uint8_t {
+    Auto,
+    Never,
+    Critical,
+};
 enum class TemporalFractionalSecondDigits : uint8_t {
     Zero = 0,
     One,
@@ -158,8 +175,13 @@ std::optional<TemporalUnit> temporalUnitType(StringView);
 std::optional<TemporalUnit> temporalLargestUnit(JSGlobalObject*, JSObject* options, std::initializer_list<TemporalUnit> disallowedUnits, TemporalUnit autoValue);
 std::optional<TemporalUnit> temporalSmallestUnit(JSGlobalObject*, JSObject* options, std::initializer_list<TemporalUnit> disallowedUnits);
 std::tuple<TemporalUnit, TemporalUnit, RoundingMode, double> extractDifferenceOptions(JSGlobalObject*, JSValue, UnitGroup, TemporalUnit defaultSmallestUnit, TemporalUnit defaultLargestUnit);
-std::optional<unsigned> temporalFractionalSecondDigits(JSGlobalObject*, JSObject* options);
+TemporalShowCalendar getTemporalShowCalendarNameOption(JSGlobalObject*, JSObject*);
+TemporalShowOffset getTemporalShowOffsetOption(JSGlobalObject*, JSObject*);
+TemporalShowTimeZone getTemporalShowTimeZoneNameOption(JSGlobalObject*, JSObject*);
+TemporalFractionalSecondDigits temporalFractionalSecondDigits(JSGlobalObject*, JSObject* options);
 PrecisionData secondsStringPrecision(JSGlobalObject*, JSObject* options);
+PrecisionData secondsStringPrecision(std::optional<TemporalUnit>, TemporalFractionalSecondDigits);
+PrecisionData secondsStringPrecision(TemporalFractionalSecondDigits);
 RoundingMode temporalRoundingMode(JSGlobalObject*, JSObject*, RoundingMode);
 RoundingMode negateTemporalRoundingMode(RoundingMode);
 void formatSecondsStringFraction(StringBuilder&, unsigned fraction, std::tuple<Precision, unsigned>);

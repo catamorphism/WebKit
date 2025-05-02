@@ -230,6 +230,7 @@
     macro(numberingSystem) \
     macro(numeric) \
     macro(of) \
+    macro(offset) \
     macro(omitPadding) \
     macro(opcode) \
     macro(origin) \

@@ -1500,6 +1500,15 @@ uint8_t daysInMonth(uint8_t month)
     return daysInMonths[isLeapYear][month - 1];
 }
 
+String formatTimeZone(TimeZone tz)
+{
+    if (tz.isUTC())
+        return "UTC"_s;
+    if (tz.isOffset())
+        return formatUTCOffsetNanoseconds(tz.offsetNanoseconds());
+    return ""_s; // TODO: handle named time zones
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal-formatfractionalseconds
 static String formatFractionalSeconds(int64_t subSecondNanoseconds, TemporalFractionalSecondDigits precision)
 {

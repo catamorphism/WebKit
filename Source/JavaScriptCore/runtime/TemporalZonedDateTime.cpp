@@ -100,4 +100,66 @@ TemporalZonedDateTime* TemporalZonedDateTime::tryCreateIfValid(JSGlobalObject* g
     return TemporalZonedDateTime::create(vm, structure, WTFMove(epochNanoseconds), WTFMove(timeZone));
 }
 
+
+// https://tc39.es/proposal-temporal/#sec-temporal-temporalzoneddatetimetostring
+String TemporalZonedDateTime::temporalZonedDateTimeToString(ISO8601::ExactTime exactTime,
+    ISO8601::TimeZone timeZone, PrecisionData precision, TemporalShowCalendar showCalendar,
+    TemporalShowTimeZone showTimeZone, TemporalShowOffset showOffset, unsigned increment,
+    TemporalUnit unit, RoundingMode roundingMode)
+{
+    Int128 epochNs = TemporalInstant::roundTemporalInstant(exactTime.epochNanoseconds(), increment, unit, roundingMode);
+    auto offsetNanoseconds = TemporalTimeZone::getOffsetNanosecondsFor(timeZone, epochNs);
+    auto isoDateTime = TemporalTimeZone::getISODateTimeFor(timeZone, ISO8601::ExactTime(epochNs));
+    auto dateTimeString = temporalDateTimeToString(isoDateTime.date(), isoDateTime.time(), precision.precision);
+    String offsetString;
+    if (showOffset != TemporalShowOffset::Never)
+        offsetString = TemporalTimeZone::formatDateTimeUTCOffsetRounded(offsetNanoseconds);
+    String timeZoneString;
+    if (showTimeZone != TemporalShowTimeZone::Never) {
+        String flag;
+        if (showTimeZone == TemporalShowTimeZone::Critical)
+            flag = "!"_s;
+        timeZoneString = makeString('[', flag, formatTimeZone(timeZone), ']');
+    }
+    auto calendarString = TemporalCalendar::formatCalendarAnnotation(showCalendar);
+    return makeString(dateTimeString, offsetString, timeZoneString, calendarString);
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.tostring
+String TemporalZonedDateTime::toString(JSGlobalObject* globalObject, JSValue optionsValue) const
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    if (!options)
+        return toString();
+
+    auto showCalendar = getTemporalShowCalendarNameOption(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+    TemporalFractionalSecondDigits digits =
+        temporalFractionalSecondDigits(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto showOffset = getTemporalShowOffsetOption(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::Trunc);
+    RETURN_IF_EXCEPTION(scope, { });
+    std::optional<TemporalUnit> smallestUnit = temporalSmallestUnit(globalObject, options,
+        { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day });
+    RETURN_IF_EXCEPTION(scope, { });
+    if (smallestUnit == TemporalUnit::Hour) {
+        throwRangeError(globalObject, scope, "smallestUnit cannot be hour"_s);
+        return { };
+    }
+    auto showTimeZone = getTemporalShowTimeZoneNameOption(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+    PrecisionData precision = secondsStringPrecision(smallestUnit, digits);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    return temporalZonedDateTimeToString(m_exactTime.get(), m_timeZone, precision, showCalendar, showTimeZone,
+        showOffset, precision.increment, precision.unit, roundingMode);
+}
+
 } // namespace JSC

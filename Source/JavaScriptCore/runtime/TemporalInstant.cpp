@@ -296,6 +296,15 @@ static double maximumIncrement(TemporalUnit smallestUnit)
     RELEASE_ASSERT_NOT_REACHED();
 }
 
+
+// https://tc39.es/proposal-temporal/#sec-temporal-roundtemporalinstant
+Int128 TemporalInstant::roundTemporalInstant(Int128 ns, unsigned increment, TemporalUnit unit, RoundingMode roundingMode)
+{
+    auto unitLength = lengthInNanoseconds(unit);
+    auto incrementNs = increment * unitLength;
+    return roundNumberToIncrementAsIfPositive(ns, incrementNs, roundingMode);
+}
+
 ISO8601::ExactTime TemporalInstant::round(JSGlobalObject* globalObject, JSValue optionsValue) const
 {
     VM& vm = globalObject->vm();
