@@ -43,6 +43,7 @@ static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToString);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToLocaleString);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToJSON);
 static JSC_DECLARE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterCalendarId);
+static JSC_DECLARE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterTimeZoneId);
 static JSC_DECLARE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterYear);
 static JSC_DECLARE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterMonth);
 static JSC_DECLARE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterMonthCode);
@@ -72,6 +73,7 @@ const ClassInfo TemporalZonedDateTimePrototype::s_info = { "Temporal.ZonedDateTi
   toLocaleString        temporalZonedDateTimePrototypeFuncToLocaleString        DontEnum|Function 0
   toJSON                temporalZonedDateTimePrototypeFuncToJSON                DontEnum|Function 0
   calendarId            temporalZonedDateTimePrototypeGetterCalendarId          DontEnum|ReadOnly|CustomAccessor
+  timeZoneId            temporalZonedDateTimePrototypeGetterTimeZoneId          DontEnum|ReadOnly|CustomAccessor
   year                  temporalZonedDateTimePrototypeGetterYear                DontEnum|ReadOnly|CustomAccessor
   month                 temporalZonedDateTimePrototypeGetterMonth               DontEnum|ReadOnly|CustomAccessor
   monthCode             temporalZonedDateTimePrototypeGetterMonthCode           DontEnum|ReadOnly|CustomAccessor
@@ -164,6 +166,19 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterCalendarId, (JSGlob
 
     // FIXME: when calendars are supported, get the string ID of the calendar
     return JSValue::encode(jsString(vm, StringView("iso8601"_s)));
+}
+
+// https://tc39.es/proposal-temporal/#sec-get-temporal.zoneddatetime.prototype.timezoneid
+JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterTimeZoneId, (JSGlobalObject* globalObject, EncodedJSValue thisValue, PropertyName))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* zdt = jsDynamicCast<TemporalZonedDateTime*>(JSValue::decode(thisValue));
+    if (!zdt)
+        return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.timeZoneId called on value that's not a ZonedDateTime"_s);
+
+    return JSValue::encode(jsString(vm, ISO8601::formatTimeZone(zdt->timeZone())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-get-temporal.zoneddatetime.prototype.year

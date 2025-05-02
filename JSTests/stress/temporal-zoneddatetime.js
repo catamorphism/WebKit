@@ -90,6 +90,7 @@ const zdt = new Temporal.ZonedDateTime(0n, "UTC");
     shouldBe(zdt.epochMilliseconds, 0);
     shouldBe(zdt.epochNanoseconds, 0n);
     shouldBe(zdt.calendarId, "iso8601");
+    shouldBe(zdt.timeZoneId, "UTC");
 
     shouldThrow(() => new Temporal.ZonedDateTime(0n, null), TypeError);
     shouldThrow(() => new Temporal.ZonedDateTime(864n * 10n ** 19n + 1n, "UTC"), RangeError);
