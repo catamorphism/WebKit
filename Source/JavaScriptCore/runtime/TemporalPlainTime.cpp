@@ -85,17 +85,11 @@ void TemporalPlainTime::visitChildrenImpl(JSCell* cell, Visitor& visitor)
 DEFINE_VISIT_CHILDREN(TemporalPlainTime);
 
 // https://tc39.es/proposal-temporal/#sec-temporal-isvalidtime
-ISO8601::PlainTime TemporalPlainTime::toPlainTime(JSGlobalObject* globalObject, const ISO8601::Duration& duration)
+ISO8601::PlainTime TemporalPlainTime::toPlainTime(JSGlobalObject* globalObject, Int128 hour, Int128 minute, Int128 second, Int128 millisecond, Int128 microsecond, Int128 nanosecond)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    double hour = duration.hours();
-    double minute = duration.minutes();
-    double second = duration.seconds();
-    double millisecond = duration.milliseconds();
-    double microsecond = duration.microseconds();
-    double nanosecond = duration.nanoseconds();
     if (!(hour >= 0 && hour <= 23)) {
         throwRangeError(globalObject, scope, "hour is out of range"_s);
         return { };
@@ -128,6 +122,18 @@ ISO8601::PlainTime TemporalPlainTime::toPlainTime(JSGlobalObject* globalObject, 
         static_cast<unsigned>(microsecond),
         static_cast<unsigned>(nanosecond)
     };
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-isvalidtime
+ISO8601::PlainTime TemporalPlainTime::toPlainTime(JSGlobalObject* globalObject, const ISO8601::Duration& duration)
+{
+    double hour = duration.hours();
+    double minute = duration.minutes();
+    double second = duration.seconds();
+    double millisecond = duration.milliseconds();
+    double microsecond = duration.microseconds();
+    double nanosecond = duration.nanoseconds();
+    return toPlainTime(globalObject, static_cast<Int128>(hour), static_cast<Int128>(minute), static_cast<Int128>(second), static_cast<Int128>(millisecond), static_cast<Int128>(microsecond), static_cast<Int128>(nanosecond));
 }
 
 // CreateTemporalPlainTime ( years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds [ , newTarget ] )
@@ -398,29 +404,27 @@ std::array<std::optional<double>, numberOfTemporalPlainTimeUnits> TemporalPlainT
     return partialTime;
 }
 
-static ISO8601::PlainTime constrainTime(ISO8601::Duration&& duration)
+static ISO8601::PlainTime constrainTime(Int128 hour, Int128 minute, Int128 second, Int128 millisecond, Int128 microsecond, Int128 nanosecond)
 {
-    auto constrainToRange = [](double value, unsigned minimum, unsigned maximum) -> unsigned {
-        if (std::isnan(value))
-            return 0;
-        return static_cast<unsigned>(std::min<double>(std::max<double>(value, minimum), maximum));
+    auto constrainToRange = [](Int128 value, unsigned minimum, unsigned maximum) -> unsigned {
+        return static_cast<unsigned>(std::min<Int128>(std::max<Int128>(value, minimum), maximum));
     };
     return ISO8601::PlainTime(
-        constrainToRange(duration.hours(), 0, 23),
-        constrainToRange(duration.minutes(), 0, 59),
-        constrainToRange(duration.seconds(), 0, 59),
-        constrainToRange(duration.milliseconds(), 0, 999),
-        constrainToRange(duration.microseconds(), 0, 999),
-        constrainToRange(duration.nanoseconds(), 0, 999));
+        constrainToRange(hour, 0, 23),
+        constrainToRange(minute, 0, 59),
+        constrainToRange(second, 0, 59),
+        constrainToRange(millisecond, 0, 999),
+        constrainToRange(microsecond, 0, 999),
+        constrainToRange(nanosecond, 0, 999));
 }
 
-ISO8601::PlainTime TemporalPlainTime::regulateTime(JSGlobalObject* globalObject, ISO8601::Duration&& duration, TemporalOverflow overflow)
+ISO8601::PlainTime TemporalPlainTime::regulateTime(JSGlobalObject* globalObject, Int128 hour, Int128 minute, Int128 second, Int128 millisecond, Int128 microsecond, Int128 nanosecond, TemporalOverflow overflow)
 {
     switch (overflow) {
     case TemporalOverflow::Constrain:
-        return constrainTime(WTF::move(duration));
+        return constrainTime(hour, minute, second, millisecond, microsecond, nanosecond);
     case TemporalOverflow::Reject:
-        return TemporalPlainTime::toPlainTime(globalObject, duration);
+        return TemporalPlainTime::toPlainTime(globalObject, hour, minute, second, millisecond, microsecond, nanosecond);
     }
     return { };
 }
@@ -452,7 +456,7 @@ TemporalPlainTime* TemporalPlainTime::from(JSGlobalObject* globalObject, JSValue
             RETURN_IF_EXCEPTION(scope, { });
         }
 
-        auto plainTime = regulateTime(globalObject, WTF::move(duration), overflow);
+        auto plainTime = regulateTime(globalObject, static_cast<Int128>(duration.hours()), static_cast<Int128>(duration.minutes()), static_cast<Int128>(duration.seconds()), static_cast<Int128>(duration.milliseconds()), static_cast<Int128>(duration.microseconds()), static_cast<Int128>(duration.nanoseconds()), overflow);
         RETURN_IF_EXCEPTION(scope, { });
         return TemporalPlainTime::create(vm, globalObject->plainTimeStructure(), WTF::move(plainTime));
     }
@@ -526,19 +530,27 @@ int32_t TemporalPlainTime::compare(const ISO8601::PlainTime& t1, const ISO8601::
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-addtime
-ISO8601::Duration TemporalPlainTime::addTime(const ISO8601::PlainTime& plainTime, const ISO8601::Duration& duration)
+ISO8601::Duration TemporalPlainTime::addTime(const ISO8601::PlainTime& plainTime, Int128 timeDuration)
 {
+    Int128 ns = static_cast<Int128>(std::trunc(plainTime.nanosecond())) + timeDuration;
     return balanceTime(
-        // The seconds, milliseconds, microseconds, or nanoseconds fields can be up to
-        // MAX_SAFE_INTEGER. So to do the addition, we have to convert to Int128.
-        // The hour and minute fields are more constrained, but for consistency, these
-        // arguments are Int128 as well.
-        static_cast<Int128>(plainTime.hour()) + static_cast<Int128>(duration.hours()),
-        static_cast<Int128>(plainTime.minute()) + static_cast<Int128>(duration.minutes()),
-        static_cast<Int128>(plainTime.second()) + static_cast<Int128>(duration.seconds()),
-        static_cast<Int128>(plainTime.millisecond()) + static_cast<Int128>(duration.milliseconds()),
-        static_cast<Int128>(plainTime.microsecond()) + static_cast<Int128>(duration.microseconds()),
-        static_cast<Int128>(plainTime.nanosecond()) + static_cast<Int128>(duration.nanoseconds()));
+        plainTime.hour(),
+        plainTime.minute(),
+        plainTime.second(),
+        plainTime.millisecond(),
+        plainTime.microsecond(),
+        ns);
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-adddurationtotime
+ISO8601::PlainTime TemporalPlainTime::addDurationToTime(bool isAdd, TemporalPlainTime* temporalTime, ISO8601::Duration duration)
+{
+    if (!isAdd)
+        duration = -duration;
+    auto internalDuration = TemporalDuration::toInternalDuration(duration);
+    auto d = addTime(temporalTime->plainTime(), internalDuration.time());
+    return ISO8601::PlainTime(d.hours(), d.minutes(), d.seconds(), d.milliseconds(),
+        d.microseconds(), d.nanoseconds());
 }
 
 ISO8601::PlainTime TemporalPlainTime::with(JSGlobalObject* globalObject, JSObject* temporalTimeLike, JSValue optionsValue) const
@@ -558,15 +570,7 @@ ISO8601::PlainTime TemporalPlainTime::with(JSGlobalObject* globalObject, JSObjec
     TemporalOverflow overflow = toTemporalOverflow(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
 
-    ISO8601::Duration duration { };
-    duration.setHours(hourOptional.value_or(hour()));
-    duration.setMinutes(minuteOptional.value_or(minute()));
-    duration.setSeconds(secondOptional.value_or(second()));
-    duration.setMilliseconds(millisecondOptional.value_or(millisecond()));
-    duration.setMicroseconds(microsecondOptional.value_or(microsecond()));
-    duration.setNanoseconds(nanosecondOptional.value_or(nanosecond()));
-
-    RELEASE_AND_RETURN(scope, regulateTime(globalObject, WTF::move(duration), overflow));
+    RELEASE_AND_RETURN(scope, regulateTime(globalObject, static_cast<Int128>(hourOptional.value_or(hour())), static_cast<Int128>(minuteOptional.value_or(minute())), static_cast<Int128>(secondOptional.value_or(second())), static_cast<Int128>(millisecondOptional.value_or(millisecond())), static_cast<Int128>(microsecondOptional.value_or(microsecond())), static_cast<Int128>(nanosecondOptional.value_or(nanosecond())), overflow));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-differencetime

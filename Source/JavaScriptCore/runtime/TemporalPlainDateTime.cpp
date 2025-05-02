@@ -108,6 +108,12 @@ TemporalPlainDateTime* TemporalPlainDateTime::tryCreateIfValid(JSGlobalObject* g
     RELEASE_AND_RETURN(scope, TemporalPlainDateTime::tryCreateIfValid(globalObject, structure, WTF::move(plainDate), WTF::move(plainTime)));
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal-combineisodateandtimerecord
+ISO8601::PlainDateTime TemporalPlainDateTime::combineISODateAndTimeRecord(ISO8601::PlainDate isoDate, ISO8601::PlainTime isoTime)
+{
+    return ISO8601::PlainDateTime(isoDate, isoTime);
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal-totemporaldatetime
 TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject, JSValue itemValue, JSObject* options)
 {
@@ -141,7 +147,7 @@ TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject,
         auto timeDuration = TemporalPlainTime::toTemporalTimeRecord(globalObject, asObject(itemValue), skipRelevantPropertyCheck);
         RETURN_IF_EXCEPTION(scope, { });
 
-        auto plainTime = TemporalPlainTime::regulateTime(globalObject, WTF::move(timeDuration), overflow);
+        auto plainTime = TemporalPlainTime::regulateTime(globalObject, static_cast<Int128>(timeDuration.hours()), static_cast<Int128>(timeDuration.minutes()), static_cast<Int128>(timeDuration.seconds()), static_cast<Int128>(timeDuration.milliseconds()), static_cast<Int128>(timeDuration.microseconds()), static_cast<Int128>(timeDuration.nanoseconds()), overflow);
         RETURN_IF_EXCEPTION(scope, { });
 
         RELEASE_AND_RETURN(scope, TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), WTF::move(plainDate), WTF::move(plainTime)));
@@ -265,6 +271,30 @@ uint8_t TemporalPlainDateTime::weekOfYear() const
     return ISO8601::weekOfYear(m_plainDate);
 }
 
+TemporalPlainDateTime* TemporalPlainDateTime::addDurationToDateTime(JSGlobalObject* globalObject,
+    bool isAdd, ISO8601::Duration duration, JSObject* options) {
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    if (!isAdd)
+        duration = -duration;
+    TemporalOverflow overflow = toTemporalOverflow(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto internalDuration = TemporalDuration::toInternalDurationRecordWith24HourDays(globalObject, duration);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto timeResult = TemporalPlainTime::addTime(m_plainTime, internalDuration.time());
+    auto dateDuration = TemporalDuration::adjustDateDurationRecord(globalObject, internalDuration.dateDuration(),
+        timeResult.days(), std::nullopt, std::nullopt);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto addedDate = TemporalCalendar::isoDateAdd(globalObject, m_plainDate, dateDuration, overflow);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto result = combineISODateAndTimeRecord(addedDate,
+        ISO8601::PlainTime(timeResult.hours(), timeResult.minutes(), timeResult.seconds(),
+            timeResult.milliseconds(), timeResult.microseconds(), timeResult.nanoseconds()));
+    RELEASE_AND_RETURN(scope, TemporalPlainDateTime::tryCreateIfValid(globalObject,
+        globalObject->plainDateTimeStructure(), result.date(), result.time()));
+}
+
 TemporalPlainDateTime* TemporalPlainDateTime::with(JSGlobalObject* globalObject, JSObject* temporalDateTimeLike, JSValue optionsValue)
 {
     VM& vm = globalObject->vm();
@@ -295,7 +325,7 @@ TemporalPlainDateTime* TemporalPlainDateTime::with(JSGlobalObject* globalObject,
     duration.setMilliseconds(optionalMillisecond.value_or(millisecond()));
     duration.setMicroseconds(optionalMicrosecond.value_or(microsecond()));
     duration.setNanoseconds(optionalNanosecond.value_or(nanosecond()));
-    auto plainTime = TemporalPlainTime::regulateTime(globalObject, WTF::move(duration), overflow);
+    auto plainTime = TemporalPlainTime::regulateTime(globalObject, static_cast<Int128>(optionalHour.value_or(hour())), static_cast<Int128>(optionalMinute.value_or(minute())), static_cast<Int128>(optionalSecond.value_or(second())), static_cast<Int128>(optionalMillisecond.value_or(millisecond())), static_cast<Int128>(optionalMicrosecond.value_or(microsecond())), static_cast<Int128>(optionalNanosecond.value_or(nanosecond())), overflow);
     RETURN_IF_EXCEPTION(scope, { });
 
     RELEASE_AND_RETURN(scope, TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), WTF::move(plainDate), WTF::move(plainTime)));

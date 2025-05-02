@@ -101,3 +101,37 @@ const zdt = new Temporal.ZonedDateTime(0n, "UTC");
     shouldBe(zdt.toJSON(), zdt.toString());
     shouldBe(zdt.toLocaleString(), zdt.toString());
 }
+
+shouldBe(Temporal.ZonedDateTime.prototype.with.length, 1);
+{
+    shouldBe(zdt.with({ year: 2021, month: 3, day: 5 }).toString(), '2021-03-05T00:00:00+00:00[UTC]');
+    shouldBe(zdt.with({ year: "2021", month: 3, day: 5 }).toString(), '2021-03-05T00:00:00+00:00[UTC]');
+    shouldBe(zdt.with({ offset: "+01:30" }, { offset: "use" }).toString(), '1969-12-31T22:30:00+00:00[UTC]');
+    shouldBe(zdt.with({ month: 3, day: 5 }).toString(), '1970-03-05T00:00:00+00:00[UTC]');
+    shouldBe(zdt.with({ month: 3 }).toString(), '1970-03-01T00:00:00+00:00[UTC]');
+
+    shouldBe(zdt.with({ month: 4, day: 31 }).toString(), '1970-04-30T00:00:00+00:00[UTC]');
+    shouldThrow(() => { zdt.with({ month: 4, day: 31 }, { overflow: 'reject' }); }, RangeError);
+}
+
+shouldBe(Temporal.ZonedDateTime.prototype.withPlainTime.length, 0);
+{
+    shouldBe(zdt.withPlainTime({ hour: 10 }).toString(), '1970-01-01T10:00:00+00:00[UTC]');
+    shouldBe(zdt.withPlainTime(new Temporal.PlainTime(11, 22)).toString(), '1970-01-01T11:22:00+00:00[UTC]');
+    shouldBe(zdt.withPlainTime("12:34").toString(), '1970-01-01T12:34:00+00:00[UTC]');
+}
+
+shouldBe(Temporal.ZonedDateTime.prototype.withTimeZone.length, 1);
+{
+    shouldBe(zdt.toString(), zdt.withTimeZone("UTC").toString());
+    shouldBe(zdt.withTimeZone("+01:30").toString(), '1970-01-01T01:30:00+01:30[+01:30]');
+}
+
+shouldBe(Temporal.ZonedDateTime.prototype.withCalendar.length, 1);
+{
+    shouldBe(zdt.toString(), zdt.withCalendar("iso8601").toString());
+    shouldBe(zdt.toString(), zdt.withCalendar("2020-01-01[u-ca=iso8601]").toString());
+    shouldBe(zdt.toString(), zdt.withCalendar("01-01[u-ca=iso8601]").toString());
+    shouldBe(zdt.toString(), zdt.withCalendar("2020-01[u-ca=iso8601]").toString());
+}
+

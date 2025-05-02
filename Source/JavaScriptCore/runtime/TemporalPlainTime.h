@@ -47,12 +47,14 @@ public:
 
     DECLARE_INFO;
 
+    static ISO8601::PlainTime toPlainTime(JSGlobalObject*, Int128, Int128, Int128, Int128, Int128, Int128);
     static ISO8601::PlainTime toPlainTime(JSGlobalObject*, const ISO8601::Duration&);
     static ISO8601::Duration roundTime(ISO8601::PlainTime, double increment, TemporalUnit, RoundingMode, std::optional<double> dayLengthNs);
     static ISO8601::Duration toTemporalTimeRecord(JSGlobalObject*, JSObject*, bool skipRelevantPropertyCheck = false);
     static std::array<std::optional<double>, numberOfTemporalPlainTimeUnits> toPartialTime(JSGlobalObject*, JSObject*, bool skipRelevantPropertyCheck = false);
-    static ISO8601::PlainTime regulateTime(JSGlobalObject*, ISO8601::Duration&&, TemporalOverflow);
-    static ISO8601::Duration addTime(const ISO8601::PlainTime&, const ISO8601::Duration&);
+    static ISO8601::PlainTime regulateTime(JSGlobalObject*, Int128, Int128, Int128, Int128, Int128, Int128, TemporalOverflow);
+    static ISO8601::Duration addTime(const ISO8601::PlainTime&, Int128);
+    static ISO8601::PlainTime addDurationToTime(bool, TemporalPlainTime*, ISO8601::Duration);
     static ISO8601::Duration balanceTime(Int128 hour, Int128 minute, Int128 second, Int128 millisecond, Int128 microsecond, Int128 nanosecond);
 
     static TemporalPlainTime* from(JSGlobalObject*, JSValue, JSObject*);

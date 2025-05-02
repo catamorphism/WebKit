@@ -99,6 +99,142 @@ TemporalZonedDateTime* TemporalZonedDateTime::tryCreateIfValid(JSGlobalObject* g
 }
 
 
+// https://tc39.es/proposal-temporal/#sec-temporal-interpretisodatetimeoffset
+static ISO8601::ExactTime interpretISODateTimeOffset(JSGlobalObject* globalObject,
+    ISO8601::PlainDate isoDate, ISO8601::PlainTime time,
+    TemporalOffsetBehavior offsetBehavior, int64_t offsetNanoseconds, ISO8601::TimeZone timeZone,
+    TemporalDisambiguation disambiguation, TemporalOffset offsetOption,
+    TemporalMatchBehavior matchBehavior)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto isoDateTime = TemporalPlainDateTime::combineISODateAndTimeRecord(isoDate, time);
+
+    if (offsetBehavior == TemporalOffsetBehavior::Wall
+        || (offsetBehavior == TemporalOffsetBehavior::Option && offsetOption == TemporalOffset::Ignore)) {
+        return ISO8601::ExactTime(TemporalTimeZone::getEpochNanosecondsFor(
+            globalObject, timeZone, isoDateTime, disambiguation));
+    }
+
+    if (offsetBehavior == TemporalOffsetBehavior::Exact
+        || (offsetBehavior == TemporalOffsetBehavior::Option && offsetOption == TemporalOffset::Use)) {
+        auto balanced = TemporalPlainDateTime::balanceISODateTime(globalObject, static_cast<Int128>(isoDate.year()), static_cast<Int128>(isoDate.month()), static_cast<Int128>(isoDate.day()), static_cast<Int128>(time.hour()), static_cast<Int128>(time.minute()), static_cast<Int128>(time.second()), static_cast<Int128>(time.millisecond()), static_cast<Int128>(time.microsecond()), static_cast<Int128>(time.nanosecond()) - offsetNanoseconds);
+        RETURN_IF_EXCEPTION(scope, { });
+        checkISODaysRange(globalObject, balanced.date());
+        RETURN_IF_EXCEPTION(scope, { });
+        auto epochNanoseconds = ISO8601::ExactTime(ISO8601::getUTCEpochNanoseconds(balanced));
+        if (!epochNanoseconds.isValid()) {
+            throwRangeError(globalObject, scope, "invalid epochNanoseconds result in interpretISODateTimeOffset()"_s);
+            return { };
+        }
+        return epochNanoseconds;
+    }
+
+    ASSERT(offsetBehavior == TemporalOffsetBehavior::Option);
+    ASSERT(offsetOption == TemporalOffset::Prefer || offsetOption == TemporalOffset::Reject);
+
+    checkISODaysRange(globalObject, isoDate);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto utcEpochNanoseconds = ISO8601::getUTCEpochNanoseconds(isoDateTime);
+    auto possibleEpochNs = TemporalTimeZone::getPossibleEpochNanoseconds(globalObject, timeZone, isoDateTime);
+    RETURN_IF_EXCEPTION(scope, { });
+    for (auto candidate : possibleEpochNs) {
+        auto candidateOffset = utcEpochNanoseconds - candidate;
+        if (candidateOffset == offsetNanoseconds)
+            return ISO8601::ExactTime(candidate);
+        if (matchBehavior == TemporalMatchBehavior::Minutes) {
+            Int128 increment = 60;
+            increment *= 1000000000;
+            auto roundedCandidateNanoseconds = roundNumberToIncrementInt128(candidateOffset, increment, RoundingMode::HalfExpand);
+            if (roundedCandidateNanoseconds == offsetNanoseconds)
+                return ISO8601::ExactTime(candidate);
+        }
+    }
+
+    if (offsetOption == TemporalOffset::Reject) {
+        throwRangeError(globalObject, scope, "User-provided offset doesn't match any instants for this time zone and date/time"_s);
+        return { };
+    }
+
+    RELEASE_AND_RETURN(scope, TemporalTimeZone::disambiguatePossibleEpochNanoseconds(globalObject,
+        possibleEpochNs, timeZone, ISO8601::PlainDateTime(isoDate, time), disambiguation));
+}
+
+TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject, JSObject* temporalZonedDateTimeLike, JSValue options)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    if (!isPartialTemporalObject(globalObject, temporalZonedDateTimeLike)) {
+        RETURN_IF_EXCEPTION(scope, { });
+        throwTypeError(globalObject, scope, "argument to with() must be an object, must not be an instance of a time-related or date-related Temporal type, and must not have a calendar or time zone property"_s);
+        return { };
+    }
+    RETURN_IF_EXCEPTION(scope, { });
+
+    auto epochNs = exactTime();
+    auto thisTimeZone = timeZone();
+    auto thisCalendar = calendar();
+    auto offsetNanoseconds = TemporalTimeZone::getOffsetNanosecondsFor(thisTimeZone, epochNs.epochNanoseconds());
+    auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, thisTimeZone, epochNs);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto isoDate = isoDateTime.date();
+    auto isoTime = isoDateTime.time();
+    int32_t year = isoDate.year();
+    unsigned month = isoDate.month();
+    std::optional<WTF::String> monthCode = std::nullopt;
+    unsigned day = isoDate.day();
+    int32_t hour = isoTime.hour();
+    int32_t minute = isoTime.minute();
+    int32_t second = isoTime.second();
+    int32_t millisecond = isoTime.millisecond();
+    int32_t microsecond = isoTime.microsecond();
+    int32_t nanosecond = isoTime.nanosecond();
+
+    auto fields =  Vector { FieldName::Day, FieldName::Hour, FieldName::Microsecond, FieldName::Millisecond,
+        FieldName::Minute, FieldName::Month, FieldName::MonthCode, FieldName::Nanosecond, FieldName::Offset,
+        FieldName::Second, FieldName::Year };
+    auto [optionalYear, optionalMonth, optionalMonthCode, optionalDay, optionalHour, optionalMinute, optionalSecond, optionalMillisecond, optionalMicrosecond, optionalNanosecond, optionalOffset, timeZoneOptional] = TemporalCalendar::prepareCalendarFields(globalObject, thisCalendar->identifier(), temporalZonedDateTimeLike, fields, std::nullopt);
+    RETURN_IF_EXCEPTION(scope, { });
+    year = optionalYear.value_or(year);
+    month = optionalMonth.value_or(month);
+    monthCode = optionalMonthCode;
+    day = optionalDay.value_or(day);
+    hour = optionalHour.value_or(hour);
+    minute = optionalMinute.value_or(minute);
+    second = optionalSecond.value_or(second);
+    millisecond = optionalMillisecond.value_or(millisecond);
+    microsecond = optionalMicrosecond.value_or(microsecond);
+    nanosecond = optionalNanosecond.value_or(nanosecond);
+    if (optionalOffset) {
+        auto offsetNanosecondsOptional = ISO8601::parseUTCOffset(optionalOffset.value(), false);
+        if (!offsetNanosecondsOptional) {
+            throwRangeError(globalObject, scope, "invalid offset string in Temporal.ZonedDateTime.with"_s);
+            return { };
+        }
+        offsetNanoseconds = offsetNanosecondsOptional.value();
+    }
+    auto resolvedOptions = intlGetOptionsObject(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto disambiguation = getTemporalDisambiguationOption(globalObject, resolvedOptions);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto offset = getTemporalOffsetOption(globalObject, resolvedOptions, TemporalOffset::Prefer);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto overflow = toTemporalOverflow(globalObject, resolvedOptions);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto dateTimeResult = TemporalCalendar::interpretTemporalDateTimeFields(globalObject,
+        thisCalendar->identifier(), year, month, monthCode, day, hour, minute, second, millisecond,
+        microsecond, nanosecond, overflow);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto epochNanoseconds = interpretISODateTimeOffset(globalObject, dateTimeResult.date(),
+        dateTimeResult.time(), TemporalOffsetBehavior::Option, static_cast<int64_t>(offsetNanoseconds),
+        thisTimeZone, disambiguation, offset, TemporalMatchBehavior::Exactly);
+    RETURN_IF_EXCEPTION(scope, { });
+    RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject,
+        globalObject->zonedDateTimeStructure(), WTF::move(epochNanoseconds), WTF::move(thisTimeZone)));
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal-temporalzoneddatetimetostring
 String TemporalZonedDateTime::temporalZonedDateTimeToString(JSGlobalObject* globalObject, ISO8601::ExactTime exactTime,
     ISO8601::TimeZone timeZone, PrecisionData precision, TemporalShowCalendar showCalendar,

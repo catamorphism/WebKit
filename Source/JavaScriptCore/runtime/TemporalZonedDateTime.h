@@ -51,6 +51,8 @@ public:
 
     TemporalCalendar* calendar() { return m_calendar.get(this); }
 
+    TemporalZonedDateTime* with(JSGlobalObject*, JSObject* temporalDateLike, JSValue options);
+
     ExactTime exactTime() const { return m_exactTime.get(); }
     TimeZone timeZone() const { return m_timeZone; }
 

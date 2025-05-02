@@ -28,6 +28,7 @@
 
 #include "IntlObjectInlines.h"
 #include "JSCInlines.h"
+#include "TemporalPlainDate.h"
 #include "TemporalPlainYearMonth.h"
 #include "TemporalPlainYearMonthPrototype.h"
 
@@ -123,7 +124,7 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainYearMonth, (JSGlobalObject* globa
         RETURN_IF_EXCEPTION(scope, { });
     }
 
-    if (!ISO8601::isValidISODate(isoYear, isoMonth, referenceDay)) [[unlikely]] {
+    if (!TemporalPlainDate::isValidISODate(isoYear, isoMonth, referenceDay)) [[unlikely]] {
         return throwVMRangeError(globalObject, scope, "Temporal.PlainYearMonth: not a valid ISO date"_s);
     };
 

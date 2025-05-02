@@ -259,15 +259,9 @@ test/built-ins/Temporal/Instant/prototype/toString/timezone-string-sub-minute-of
 test/built-ins/Temporal/Instant/prototype/toString/timezone-wrong-type.js:
   default: 'Test262Error: null does not convert to a valid ISO string Expected a TypeError but got a RangeError'
   strict mode: 'Test262Error: null does not convert to a valid ISO string Expected a TypeError but got a RangeError'
-test/built-ins/Temporal/PlainDate/compare/argument-propertybag-calendar-iso-string.js:
-  default: 'RangeError: invalid calendar ID'
-  strict mode: 'RangeError: invalid calendar ID'
 test/built-ins/Temporal/PlainDate/compare/argument-string-calendar-invalid-iso-string.js:
   default: 'Test262Error: Unknown calendar is not a valid calendar ID (first argument) Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID (first argument) Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/PlainDate/from/argument-propertybag-calendar-iso-string.js:
-  default: 'RangeError: invalid calendar ID'
-  strict mode: 'RangeError: invalid calendar ID'
 test/built-ins/Temporal/PlainDate/from/argument-string-calendar-invalid-iso-string.js:
   default: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
@@ -286,9 +280,6 @@ test/built-ins/Temporal/PlainDate/from/options-wrong-type.js:
 test/built-ins/Temporal/PlainDate/from/order-of-operations.js:
   default: 'Test262Error: Actual [get options.overflow, get options.overflow.toString, call options.overflow.toString, get fields.calendar, get fields.day, get fields.day.valueOf, call fields.day.valueOf, get fields.month, get fields.month.valueOf, call fields.month.valueOf, get fields.monthCode, get fields.monthCode.toString, call fields.monthCode.toString, get fields.year, get fields.year.valueOf, call fields.year.valueOf] and expected [get fields.calendar, get fields.day, get fields.day.valueOf, call fields.day.valueOf, get fields.month, get fields.month.valueOf, call fields.month.valueOf, get fields.monthCode, get fields.monthCode.toString, call fields.monthCode.toString, get fields.year, get fields.year.valueOf, call fields.year.valueOf, get options.overflow, get options.overflow.toString, call options.overflow.toString] should have the same contents. order of operations'
   strict mode: 'Test262Error: Actual [get options.overflow, get options.overflow.toString, call options.overflow.toString, get fields.calendar, get fields.day, get fields.day.valueOf, call fields.day.valueOf, get fields.month, get fields.month.valueOf, call fields.month.valueOf, get fields.monthCode, get fields.monthCode.toString, call fields.monthCode.toString, get fields.year, get fields.year.valueOf, call fields.year.valueOf] and expected [get fields.calendar, get fields.day, get fields.day.valueOf, call fields.day.valueOf, get fields.month, get fields.month.valueOf, call fields.month.valueOf, get fields.monthCode, get fields.monthCode.toString, call fields.monthCode.toString, get fields.year, get fields.year.valueOf, call fields.year.valueOf, get options.overflow, get options.overflow.toString, call options.overflow.toString] should have the same contents. order of operations'
-test/built-ins/Temporal/PlainDate/prototype/equals/argument-propertybag-calendar-iso-string.js:
-  default: 'RangeError: invalid calendar ID'
-  strict mode: 'RangeError: invalid calendar ID'
 test/built-ins/Temporal/PlainDate/prototype/equals/argument-string-calendar-invalid-iso-string.js:
   default: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
@@ -304,18 +295,12 @@ test/built-ins/Temporal/PlainDate/prototype/eraYear/branding.js:
 test/built-ins/Temporal/PlainDate/prototype/eraYear/prop-desc.js:
   default: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
   strict mode: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
-test/built-ins/Temporal/PlainDate/prototype/since/argument-propertybag-calendar-iso-string.js:
-  default: 'RangeError: invalid calendar ID'
-  strict mode: 'RangeError: invalid calendar ID'
 test/built-ins/Temporal/PlainDate/prototype/since/argument-string-calendar-invalid-iso-string.js:
   default: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
 test/built-ins/Temporal/PlainDate/prototype/toString/order-of-operations.js:
   default: 'Test262Error: Actual [] and expected [get options.calendarName, get options.calendarName.toString, call options.calendarName.toString] should have the same contents. order of operations'
   strict mode: 'Test262Error: Actual [] and expected [get options.calendarName, get options.calendarName.toString, call options.calendarName.toString] should have the same contents. order of operations'
-test/built-ins/Temporal/PlainDate/prototype/until/argument-propertybag-calendar-iso-string.js:
-  default: 'RangeError: invalid calendar ID'
-  strict mode: 'RangeError: invalid calendar ID'
 test/built-ins/Temporal/PlainDate/prototype/until/argument-string-calendar-invalid-iso-string.js:
   default: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
@@ -331,15 +316,9 @@ test/built-ins/Temporal/PlainDate/prototype/yearOfWeek/prop-desc.js:
 test/built-ins/Temporal/PlainDateTime/argument-convert.js:
   default: 'Test262Error: year undefined Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: year undefined Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/PlainDateTime/compare/argument-propertybag-calendar-iso-string.js:
-  default: 'RangeError: invalid calendar ID'
-  strict mode: 'RangeError: invalid calendar ID'
 test/built-ins/Temporal/PlainDateTime/compare/argument-string-calendar-invalid-iso-string.js:
   default: 'Test262Error: Unknown calendar is not a valid calendar ID (first argument) Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID (first argument) Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/PlainDateTime/from/argument-propertybag-calendar-iso-string.js:
-  default: 'RangeError: invalid calendar ID'
-  strict mode: 'RangeError: invalid calendar ID'
 test/built-ins/Temporal/PlainDateTime/from/argument-string-calendar-invalid-iso-string.js:
   default: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
@@ -355,9 +334,6 @@ test/built-ins/Temporal/PlainDateTime/from/options-wrong-type.js:
 test/built-ins/Temporal/PlainDateTime/from/order-of-operations.js:
   default: 'Test262Error: Actual [get fields.calendar, get fields.day, get fields.day.valueOf, call fields.day.valueOf, get fields.month, get fields.month.valueOf, call fields.month.valueOf, get fields.monthCode, get fields.monthCode.toString, call fields.monthCode.toString, get fields.year, get fields.year.valueOf, call fields.year.valueOf, get options.overflow, get options.overflow.toString, call options.overflow.toString, get fields.hour, get fields.hour.valueOf, call fields.hour.valueOf, get fields.microsecond, get fields.microsecond.valueOf, call fields.microsecond.valueOf, get fields.millisecond, get fields.millisecond.valueOf, call fields.millisecond.valueOf, get fields.minute, get fields.minute.valueOf, call fields.minute.valueOf, get fields.nanosecond, get fields.nanosecond.valueOf, call fields.nanosecond.valueOf, get fields.second, get fields.second.valueOf, call fields.second.valueOf] and expected [get fields.calendar, get fields.day, get fields.day.valueOf, call fields.day.valueOf, get fields.hour, get fields.hour.valueOf, call fields.hour.valueOf, get fields.microsecond, get fields.microsecond.valueOf, call fields.microsecond.valueOf, get fields.millisecond, get fields.millisecond.valueOf, call fields.millisecond.valueOf, get fields.minute, get fields.minute.valueOf, call fields.minute.valueOf, get fields.month, get fields.month.valueOf, call fields.month.valueOf, get fields.monthCode, get fields.monthCode.toString, call fields.monthCode.toString, get fields.nanosecond, get fields.nanosecond.valueOf, call fields.nanosecond.valueOf, get fields.second, get fields.second.valueOf, call fields.second.valueOf, get fields.year, get fields.year.valueOf, call fields.year.valueOf, get options.overflow, get options.overflow.toString, call options.overflow.toString] should have the same contents. order of operations'
   strict mode: 'Test262Error: Actual [get fields.calendar, get fields.day, get fields.day.valueOf, call fields.day.valueOf, get fields.month, get fields.month.valueOf, call fields.month.valueOf, get fields.monthCode, get fields.monthCode.toString, call fields.monthCode.toString, get fields.year, get fields.year.valueOf, call fields.year.valueOf, get options.overflow, get options.overflow.toString, call options.overflow.toString, get fields.hour, get fields.hour.valueOf, call fields.hour.valueOf, get fields.microsecond, get fields.microsecond.valueOf, call fields.microsecond.valueOf, get fields.millisecond, get fields.millisecond.valueOf, call fields.millisecond.valueOf, get fields.minute, get fields.minute.valueOf, call fields.minute.valueOf, get fields.nanosecond, get fields.nanosecond.valueOf, call fields.nanosecond.valueOf, get fields.second, get fields.second.valueOf, call fields.second.valueOf] and expected [get fields.calendar, get fields.day, get fields.day.valueOf, call fields.day.valueOf, get fields.hour, get fields.hour.valueOf, call fields.hour.valueOf, get fields.microsecond, get fields.microsecond.valueOf, call fields.microsecond.valueOf, get fields.millisecond, get fields.millisecond.valueOf, call fields.millisecond.valueOf, get fields.minute, get fields.minute.valueOf, call fields.minute.valueOf, get fields.month, get fields.month.valueOf, call fields.month.valueOf, get fields.monthCode, get fields.monthCode.toString, call fields.monthCode.toString, get fields.nanosecond, get fields.nanosecond.valueOf, call fields.nanosecond.valueOf, get fields.second, get fields.second.valueOf, call fields.second.valueOf, get fields.year, get fields.year.valueOf, call fields.year.valueOf, get options.overflow, get options.overflow.toString, call options.overflow.toString] should have the same contents. order of operations'
-test/built-ins/Temporal/PlainDateTime/prototype/equals/argument-propertybag-calendar-iso-string.js:
-  default: 'RangeError: invalid calendar ID'
-  strict mode: 'RangeError: invalid calendar ID'
 test/built-ins/Temporal/PlainDateTime/prototype/equals/argument-string-calendar-invalid-iso-string.js:
   default: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
@@ -413,8 +389,8 @@ test/built-ins/Temporal/PlainTime/prototype/toString/order-of-operations.js:
   default: 'Test262Error: Actual [get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString] and expected [get options.fractionalSecondDigits, get options.fractionalSecondDigits.toString, call options.fractionalSecondDigits.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString, get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] should have the same contents. order of operations'
   strict mode: 'Test262Error: Actual [get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString] and expected [get options.fractionalSecondDigits, get options.fractionalSecondDigits.toString, call options.fractionalSecondDigits.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString, get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] should have the same contents. order of operations'
 test/built-ins/Temporal/PlainYearMonth/from/argument-string-calendar-case-insensitive.js:
-  default: 'RangeError: Temporal.PlainYearMonth.from: invalid date string 1976-11[u-ca=ISO8601]'
-  strict mode: 'RangeError: Temporal.PlainYearMonth.from: invalid date string 1976-11[u-ca=ISO8601]'
+  default: 'RangeError: YYYY-MM format is only valid with iso8601 calendar'
+  strict mode: 'RangeError: YYYY-MM format is only valid with iso8601 calendar'
 test/built-ins/Temporal/PlainYearMonth/from/month-code-wrong-type.js:
   default: 'Test262Error: month code 5 should be rejected Expected a TypeError but got a RangeError'
   strict mode: 'Test262Error: month code 5 should be rejected Expected a TypeError but got a RangeError'

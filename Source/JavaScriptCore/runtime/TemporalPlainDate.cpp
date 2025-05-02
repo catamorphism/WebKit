@@ -531,6 +531,44 @@ ISO8601::Duration TemporalPlainDate::since(JSGlobalObject* globalObject, Tempora
         DifferenceOperation::Since, other, smallestUnit, largestUnit, roundingMode, increment));
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal-create-iso-date-record
+ISO8601::PlainDate TemporalPlainDate::createISODateRecord(int32_t year, unsigned month, unsigned day)
+{
+    ASSERT(isValidISODate(year, month, day));
+    if (!ISO8601::isYearWithinLimits(year))
+        year = ISO8601::outOfRangeYear;
+    return ISO8601::PlainDate(year, month, day);
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-isvalidisodate
+bool TemporalPlainDate::isValidISODate(int32_t year, unsigned month, unsigned day)
+{
+    if (month < 1 || month > 12)
+        return false;
+    auto daysInMonth1 = ISO8601::daysInMonth(year, month);
+    if (day < 1 || day > daysInMonth1)
+        return false;
+    return true;
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-regulateisodate
+std::optional<ISO8601::PlainDate> TemporalPlainDate::regulateISODate(int32_t year, unsigned month, unsigned day, TemporalOverflow overflow)
+{
+    if (overflow == TemporalOverflow::Constrain) {
+        if (month < 1)
+            month = 1;
+        if (month > 12)
+            month = 12;
+        auto daysInMonth = ISO8601::daysInMonth(year, month);
+        if (day < 1)
+            day = 1;
+        if (day > daysInMonth)
+            day = daysInMonth;
+    } else if (!isValidISODate(year, month, day))
+        return std::nullopt;
+    return createISODateRecord(year, month, day);
+}
+
 String TemporalPlainDate::monthCode() const
 {
     return ISO8601::monthCode(m_plainDate.month());

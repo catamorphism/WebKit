@@ -32,6 +32,7 @@
 #include "IntlObject.h"
 #include "ParseInt.h"
 #include "TemporalObject.h"
+#include "TemporalPlainDate.h"
 #include <limits>
 #include <wtf/CheckedArithmetic.h>
 #include <wtf/DateMath.h>
@@ -1152,13 +1153,13 @@ static std::optional<PlainDate> parseDate(StringParsingBuffer<CharacterType>& bu
     } else
         return std::nullopt;
 
-    if (format == TemporalDateFormat::YearMonth && buffer.atEnd()) {
+    if (format == TemporalDateFormat::YearMonth && (buffer.atEnd() || canBeRFC9557Annotation(buffer))) {
         if (!isYearWithinLimits(year)) [[unlikely]]
             year = outOfRangeYear;
         return PlainDate(year, month, 1);
     }
 
-    if (*buffer == '-') {
+    if (!buffer.atEnd() && *buffer == '-') {
         if (splitByHyphen || format != TemporalDateFormat::Date)
             buffer.advance();
         else
@@ -1167,18 +1168,20 @@ static std::optional<PlainDate> parseDate(StringParsingBuffer<CharacterType>& bu
         return std::nullopt;
 
     unsigned day = 0;
-    auto firstDayCharacter = *buffer;
-    if (firstDayCharacter >= '0' && firstDayCharacter <= '3') {
-        buffer.advance();
-        auto secondDayCharacter = *buffer;
-        if (!isASCIIDigit(secondDayCharacter))
+    if (buffer.lengthRemaining() >= 2) {
+        auto firstDayCharacter = *buffer;
+        if (firstDayCharacter >= '0' && firstDayCharacter <= '3') {
+            buffer.advance();
+            auto secondDayCharacter = *buffer;
+            if (!isASCIIDigit(secondDayCharacter))
+                return std::nullopt;
+            day = (secondDayCharacter - '0') + 10 * (firstDayCharacter - '0');
+            if (!day || day > daysInMonth(year, month))
+                return std::nullopt;
+            buffer.advance();
+        } else if (format != TemporalDateFormat::YearMonth)
             return std::nullopt;
-        day = (secondDayCharacter - '0') + 10 * (firstDayCharacter - '0');
-        if (!day || day > daysInMonth(year, month))
-            return std::nullopt;
-        buffer.advance();
-    } else if (format != TemporalDateFormat::YearMonth)
-        return std::nullopt;
+    }
 
     // PlainDate represents out-of-range years using outOfRangeYear
     if (!isYearWithinLimits(year)) [[unlikely]]
@@ -1306,9 +1309,23 @@ std::optional<std::tuple<PlainTime, std::optional<TimeZoneRecord>>> parseTime(St
 }
 
 template<typename CharacterType>
+static unsigned lengthRemainingBeforeAnnotation(StringParsingBuffer<CharacterType>& buffer)
+{
+    unsigned length = 0;
+    while (length < buffer.lengthRemaining()) {
+        if (buffer[length] == '[')
+            break;
+        length++;
+    }
+    return length;
+}
+
+template<typename CharacterType>
 static bool isAmbiguousCalendarTime(StringParsingBuffer<CharacterType>& buffer)
 {
-    auto length = buffer.lengthRemaining();
+    // Time zone or calendar annotations don't disambiguate,
+    // so we consider the length of the buffer without annotations if any are present
+    auto length = lengthRemainingBeforeAnnotation(buffer);
     ASSERT(length > 1);
 
     // There is no ambiguity if we have a TimeDesignator.
@@ -1351,9 +1368,11 @@ static bool isAmbiguousCalendarTime(StringParsingBuffer<CharacterType>& buffer)
 
     buffer.advanceBy(monthPartLength);
     if (buffer.hasCharactersRemaining()) {
-        unsigned day = (buffer[0] - '0') * 10 + (buffer[1] - '0');
-        if (!day || day > daysInMonth(month))
-            return false;
+        if (isASCIIDigit(buffer[0]) && isASCIIDigit(buffer[1])) {
+            auto day = (buffer[0] - '0') * 10 + (buffer[1] - '0');
+            if (!day || day > daysInMonth(month))
+                return false;
+        }
     }
 
     return true;
@@ -1368,8 +1387,8 @@ std::optional<std::tuple<PlainTime, std::optional<TimeZoneRecord>, std::optional
         return result;
     });
 
-    // Without a calendar, we need to verify that the parse isn't ambiguous with DateSpecYearMonth or DateSpecMonthDay.
-    if (tuple && !std::get<2>(tuple.value())) {
+    // We need to verify that the parse isn't ambiguous with DateSpecYearMonth or DateSpecMonthDay.
+    if (tuple) {
         if (readCharactersForParsing(string, [](auto buffer) -> bool { return isAmbiguousCalendarTime(buffer); }))
             return std::nullopt;
     }
@@ -1999,15 +2018,15 @@ bool isDateTimeWithinLimits(int32_t year, uint8_t month, uint8_t day, unsigned h
     return true;
 }
 
-// https://tc39.es/proposal-temporal/#sec-temporal-isvalidisodate
-bool isValidISODate(double year, double month, double day)
+// https://tc39.es/proposal-temporal/#sec-checkisodaysrange
+void checkISODaysRange(JSGlobalObject* globalObject, ISO8601::PlainDate isoDate)
 {
-    if (month < 1 || month > 12)
-        return false;
-    auto daysInMonth1 = daysInMonth(year, month);
-    if (day < 1 || day > daysInMonth1)
-        return false;
-    return true;
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    Int128 val = ISO8601::makeDay(isoDate.year(), isoDate.month() - 1, isoDate.day());
+    if (absInt128(val) > 100000000)
+        throwRangeError(globalObject, scope, "date/time value is outside the supported range"_s);
 }
 
 // https://tc39.es/ecma262/#sec-getnamedtimezoneoffsetnanoseconds
@@ -2033,7 +2052,7 @@ Int128 getUTCEpochNanoseconds(PlainDateTime isoDateTime)
 // https://tc39.es/proposal-temporal/#sec-temporal-create-iso-date-record
 PlainDate createISODateRecord(double year, double month, double day)
 {
-    ASSERT(isValidISODate(year, month, day));
+    ASSERT(TemporalPlainDate::isValidISODate(year, month, day));
     return PlainDate(year, month, day);
 }
 

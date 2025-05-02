@@ -107,6 +107,7 @@ public:
 
     constexpr ExactTime() = default;
     constexpr ExactTime(const ExactTime&) = default;
+    ExactTime& operator=(const ExactTime&) = default;
     constexpr explicit ExactTime(Int128 epochNanoseconds) : m_epochNanoseconds(epochNanoseconds) { }
 
     static constexpr ExactTime fromEpochMilliseconds(int64_t epochMilliseconds)
@@ -493,8 +494,8 @@ String temporalMonthDayToString(PlainMonthDay, StringView);
 String monthCode(uint32_t);
 
 bool isValidDuration(const Duration&);
-bool isValidISODate(double, double, double);
 PlainDate createISODateRecord(double, double, double);
+void checkISODaysRange(JSGlobalObject*, ISO8601::PlainDate);
 
 std::optional<ExactTime> parseInstant(StringView);
 std::optional<ParsedMonthCode> parseMonthCode(StringView);
@@ -502,7 +503,7 @@ std::optional<ParsedMonthCode> parseMonthCode(StringView);
 bool isDateTimeWithinLimits(int32_t year, uint8_t month, uint8_t day, unsigned hour, unsigned minute, unsigned second, unsigned millisecond, unsigned microsecond, unsigned nanosecond);
 
 Int128 roundTimeDuration(JSGlobalObject*, Int128, unsigned, TemporalUnit, RoundingMode);
-Int128 getNamedTimeZoneOffsetNanoseconds(TimeZoneID timeZoneIdentifier, Int128);
+Int128 getNamedTimeZoneOffsetNanoseconds(TimeZoneID, Int128);
 Int128 getUTCEpochNanoseconds(PlainDateTime);
 
 static constexpr Int128 hoursPerDay = 24;

@@ -346,6 +346,8 @@ skip:
     - test/built-ins/Temporal/PlainYearMonth/prototype/until/argument-propertybag-calendar-wrong-type.js
     - test/built-ins/Temporal/PlainYearMonth/prototype/until/argument-string-unknown-annotation.js
     - test/built-ins/Temporal/PlainYearMonth/refisoday-undefined.js
+    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/calendar-case-insensitive.js
+    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-calendar-annotation.js
 
     # Depends on annotations in datetime strings
     - test/built-ins/Temporal/PlainDate/compare/argument-string-time-zone-annotation.js
@@ -388,6 +390,7 @@ skip:
     - test/built-ins/Temporal/PlainYearMonth/prototype/since/argument-string-date-with-utc-offset.js
     - test/built-ins/Temporal/PlainYearMonth/prototype/until/argument-string-calendar-annotation.js
     - test/built-ins/Temporal/PlainYearMonth/prototype/until/argument-string-date-with-utc-offset.js
+    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-unknown-annotation.js
 
     # Depends on Temporal.ZonedDateTime
     - test/built-ins/Temporal/Duration/compare/relativeto-zoneddatetime-negative-epochnanoseconds.js
@@ -1062,105 +1065,18 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/weekOfYear/basic.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/weekOfYear/branding.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/weekOfYear/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/basic.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/builtin.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/builtin.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/calendar-case-insensitive.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/calendar-invalid-iso-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/calendar-iso-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/calendar-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/calendar-string-leap-second.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/calendar-temporal-object.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/calendar-time-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/calendar-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/length.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/name.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/not-a-constructor.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/subclassing-ignored.js
+    # Next six tests depend on Temporal.PlainDateTime.toZonedDateTime
     - test/built-ins/Temporal/ZonedDateTime/prototype/with/basic-year-month-day.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/copy-properties-not-undefined.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/disambiguation-invalid-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/disambiguation-wrong-type.js
+    - test/built-ins/Temporal/ZonedDateTime/prototype/with/basic.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/with/incorrectly-spelled-properties-ignored.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/infinity-throws-rangeerror.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/invalid-disambiguation.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/invalid-offset.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/length.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/minimum-instant-with-one-hour-offset.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/month-and-month-code-must-agree.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/name.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/not-a-constructor.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/offset-invalid-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/offset-property-invalid-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/offset-undefined.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/offset-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/options-object.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/options-read-before-algorithmic-validation.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/options-undefined.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/options-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/order-of-operations.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/overflow-invalid-string.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/with/overflow-options.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/with/overflow-reject-throws.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/overflow-undefined.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/overflow-wrong-type.js
+    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/calendar-time-string.js
+    # Next five tests depend on Temporal.ZonedDateTime.from
     - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-propertybag-optional-properties.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-calendar-annotation-invalid-key.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-calendar-annotation.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-critical-unknown-annotation.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-date-with-utc-offset.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-minus-sign.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-multiple-calendar.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-multiple-time-zone.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-no-implicit-midnight.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-time-designator-required-for-disambiguation.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-time-separators.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-time-zone-annotation.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-unknown-annotation.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-with-time-designator.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-with-utc-designator.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-zoneddatetime-balance-negative-time-units.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-zoneddatetime-negative-epochnanoseconds.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/basic.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/builtin.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/get-start-of-day-throws.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/incorrectly-spelled-properties-ignored.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/leap-second.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/length.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/name.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/not-a-constructor.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/order-of-operations.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/plaintime-propertybag-no-time-units.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/subclassing-ignored.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/throws-if-epoch-nanoseconds-outside-valid-limits.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/time-undefined.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/year-zero.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/subclassing-ignored.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/builtin.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/length.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/name.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/not-a-constructor.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/preserves-instant.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/subclassing-ignored.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/timezone-case-insensitive.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/timezone-string-datetime.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/timezone-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/timezone-string-leap-second.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/timezone-string-multiple-offsets.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/timezone-string-sub-minute-offset.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/timezone-string-year-zero.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/timezone-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/zoned-datetime-like-at-minimum-date-time.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/zoned-datetime-like-at-minimum-date-time-with-offset.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/year/basic.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/yearOfWeek/basic.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/yearOfWeek/branding.js

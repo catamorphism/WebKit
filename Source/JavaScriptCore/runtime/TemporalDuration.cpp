@@ -364,24 +364,6 @@ ISO8601::InternalDuration TemporalDuration::toInternalDurationRecordWith24HourDa
         timeDuration);
 }
 
-// https://tc39.es/proposal-temporal/#sec-temporal-regulateisodate
-std::optional<ISO8601::PlainDate> TemporalDuration::regulateISODate(double year, double month, double day, TemporalOverflow overflow)
-{
-    if (overflow == TemporalOverflow::Constrain) {
-        if (month < 1)
-            month = 1;
-        if (month > 12)
-            month = 12;
-        auto daysInMonth = ISO8601::daysInMonth(year, month);
-        if (day < 1)
-            day = 1;
-        if (day > daysInMonth)
-            day = daysInMonth;
-    } else if (!ISO8601::isValidISODate(year, month, day))
-        return std::nullopt;
-    return ISO8601::createISODateRecord(year, month, day);
-}
-
 // https://tc39.es/proposal-temporal/#sec-temporal-todatedurationrecordwithouttime
 // ToDateDurationRecordWithoutTime ( duration )
 ISO8601::Duration TemporalDuration::toDateDurationRecordWithoutTime(JSGlobalObject* globalObject, const ISO8601::Duration& duration)
@@ -611,7 +593,7 @@ static double totalTimeDuration(Int128 timeDuration, TemporalUnit unit)
     return fractionToDouble(timeDuration, divisor);
 }
 
-static ISO8601::Duration adjustDateDurationRecord(JSGlobalObject* globalObject, const ISO8601::Duration& dateDuration, double days, std::optional<double> weeks, std::optional<double> months)
+ISO8601::Duration TemporalDuration::adjustDateDurationRecord(JSGlobalObject* globalObject, const ISO8601::Duration& dateDuration, double days, std::optional<double> weeks, std::optional<double> months)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -776,7 +758,7 @@ static NudgeResult nudgeToDayOrTime(JSGlobalObject* globalObject, ISO8601::Inter
         days = roundedWholeDays;
         remainder = roundedTime + TemporalDuration::timeDurationFromComponents(-roundedWholeDays * WTF::hoursPerDay, 0, 0, 0, 0, 0);
     }
-    auto dateDuration = adjustDateDurationRecord(globalObject, duration.dateDuration(), days, std::nullopt, std::nullopt);
+    auto dateDuration = TemporalDuration::adjustDateDurationRecord(globalObject, duration.dateDuration(), days, std::nullopt, std::nullopt);
     RETURN_IF_EXCEPTION(scope, { });
     auto resultDuration = ISO8601::InternalDuration::combineDateAndTimeDuration(dateDuration, remainder);
     RETURN_IF_EXCEPTION(scope, { });
