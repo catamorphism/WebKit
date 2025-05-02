@@ -372,4 +372,20 @@ TemporalPlainDateTime* TemporalPlainDateTime::round(JSGlobalObject* globalObject
     RELEASE_AND_RETURN(scope, TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), WTFMove(plainDate), WTFMove(plainTime)));
 }
 
+
+// https://tc39.es/proposal-temporal/#sec-temporal-balanceisodatetime
+ISO8601::PlainDateTime TemporalPlainDateTime::balanceISODateTime(double year, double month, double day,
+    double hour, double minute, double second, double millisecond, double microsecond, double nanosecond)
+{
+    auto balancedTime = TemporalPlainTime::balanceTime(
+        static_cast<Int128>(hour), static_cast<Int128>(minute), static_cast<Int128>(second),
+        static_cast<Int128>(millisecond), static_cast<Int128>(microsecond),
+        static_cast<Int128>(nanosecond));
+    auto balancedDate = TemporalCalendar::balanceISODate(year, month, day + balancedTime.days());
+    return ISO8601::PlainDateTime(WTFMove(balancedDate),
+        ISO8601::PlainTime(balancedTime.hours(), balancedTime.minutes(),
+            balancedTime.seconds(), balancedTime.milliseconds(),
+            balancedTime.microseconds(), balancedTime.nanoseconds()));
+}
+
 } // namespace JSC

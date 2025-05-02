@@ -29,6 +29,7 @@
 
 #include "DateConstructor.h"
 #include "JSObjectInlines.h"
+#include "LazyPropertyInlines.h"
 #include "StructureInlines.h"
 #include "TemporalDuration.h"
 #include "TemporalPlainDate.h"
@@ -55,6 +56,42 @@ TemporalCalendar::TemporalCalendar(VM& vm, Structure* structure, CalendarID iden
     : Base(vm, structure)
     , m_identifier(identifier)
 {
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-parsetemporalcalendarstring
+static std::optional<CalendarID> parseTemporalCalendarString(JSGlobalObject* globalObject, StringView string)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto parseResult = ISO8601::parseCalendarDateTime(string, TemporalDateFormat::Date);
+    std::optional<ISO8601::CalendarID> calendarParseResult;
+    if (parseResult)
+        calendarParseResult = std::get<3>(parseResult.value());
+    else {
+        parseResult = ISO8601::parseCalendarDateTime(string, TemporalDateFormat::YearMonth);
+        if (parseResult)
+            calendarParseResult = std::get<3>(parseResult.value());
+        else {
+            parseResult = ISO8601::parseCalendarDateTime(string, TemporalDateFormat::MonthDay);
+            if (parseResult)
+                calendarParseResult = std::get<3>(parseResult.value());
+            else {
+                calendarParseResult = ISO8601::parseCalendar(string);
+                if (!calendarParseResult) {
+                    throwRangeError(globalObject, scope, "invalid calendar ID"_s);
+                    return std::nullopt;
+                }
+            }
+        }
+    }
+    if (!calendarParseResult)
+        return iso8601CalendarID();
+    if (WTF::String(calendarParseResult.value()).convertToASCIILowercase() == "iso8601"_s)
+        return iso8601CalendarID();
+
+    throwRangeError(globalObject, scope, "calendar ID not supported yet"_s);
+    return std::nullopt;
 }
 
 JSObject* TemporalCalendar::toTemporalCalendarWithISODefault(JSGlobalObject* globalObject, JSValue temporalCalendarLike)
@@ -93,14 +130,65 @@ std::optional<CalendarID> TemporalCalendar::isBuiltinCalendar(StringView string)
     return std::nullopt;
 }
 
-// https://tc39.es/proposal-temporal/#sec-temporal-parsetemporalcalendarstring
-static std::optional<CalendarID> parseTemporalCalendarString(JSGlobalObject* globalObject, StringView)
+// https://tc39.es/ecma262/#sec-hourfromtime
+static double hourFromTime(double t)
 {
-    // FIXME: Implement parsing temporal calendar string, which requires full ISO 8601 parser.
-    VM& vm = globalObject->vm();
-    auto scope = DECLARE_THROW_SCOPE(vm);
-    throwRangeError(globalObject, scope, "invalid calendar ID"_s);
-    return std::nullopt;
+    double result = std::trunc(std::fmod(std::floor(t / msPerHour), WTF::hoursPerDay));
+    if (result < 0)
+        result += WTF::hoursPerDay;
+    return result;
+}
+
+// https://tc39.es/ecma262/#sec-minfromtime
+static double minFromTime(double t)
+{
+    double result = std::trunc(std::fmod(std::floor(t / msPerMinute), minutesPerHour));
+    if (result < 0)
+        result += minutesPerHour;
+    return result;
+}
+
+// https://tc39.es/ecma262/#sec-secfromtime
+static double secFromTime(double t)
+{
+    double result = std::trunc(std::fmod(std::floor(t / msPerSecond), secondsPerMinute));
+    if (result < 0)
+        result += secondsPerMinute;
+    return result;
+}
+
+// https://tc39.es/ecma262/#sec-msfromtime
+static double msFromTime(double t)
+{
+    double result = std::fmod(t, msPerSecond);
+    if (result < 0)
+        result += msPerSecond;
+    return std::trunc(result);
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-getisopartsfromepoch
+ISO8601::PlainDateTime TemporalCalendar::getISOPartsFromEpoch(ISO8601::ExactTime epochNanoseconds)
+{
+    ASSERT(epochNanoseconds.isValid());
+    Int128 remainderNs = epochNanoseconds.epochNanoseconds() % 1000000;
+    if (remainderNs < 0)
+        remainderNs += 1000000;
+    double epochMilliseconds = static_cast<double>((epochNanoseconds.epochNanoseconds() - remainderNs) / 1000000);
+    int year = TemporalCalendar::epochTimeToEpochYear(epochMilliseconds);
+    int32_t month = TemporalCalendar::epochTimeToMonthInYear(epochMilliseconds) + 1;
+    int32_t day = TemporalCalendar::epochTimeToDate(epochMilliseconds);
+    double hour = hourFromTime(epochMilliseconds);
+    double minute = minFromTime(epochMilliseconds);
+    double second = secFromTime(epochMilliseconds);
+    double millisecond = msFromTime(epochMilliseconds);
+    int32_t microsecond = static_cast<int32_t>(remainderNs) / 1000;
+    ASSERT(microsecond < 1000);
+    int32_t nanosecond = static_cast<int32_t>(remainderNs) % 1000;
+    auto isoDate = ISO8601::PlainDate(year, month, day);
+    auto time = ISO8601::PlainTime(static_cast<unsigned>(hour), static_cast<unsigned>(minute),
+        static_cast<unsigned>(second), static_cast<unsigned>(millisecond),
+        static_cast<unsigned>(microsecond), static_cast<unsigned>(nanosecond));
+    return ISO8601::PlainDateTime(WTFMove(isoDate), WTFMove(time));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-totemporalcalendar
@@ -315,29 +403,14 @@ ISO8601::PlainDate TemporalCalendar::monthDayFromFields(JSGlobalObject* globalOb
         plainDate.year(), plainDate.month(), plainDate.day(), overflow));
 }
 
-static int epochTimeToEpochYear(double t)
-{
-    return msToYear(t);
-}
-
-static int32_t epochTimeToMonthInYear(double t)
-{
-    return std::get<1>(WTF::yearMonthDayFromDays(msToDays(t)));
-}
-
-static int32_t epochTimeToDate(double t)
-{
-    return std::get<2>(WTF::yearMonthDayFromDays(msToDays(t)));
-}
-
 // https://tc39.es/proposal-temporal/#sec-temporal-balanceisodate
 ISO8601::PlainDate TemporalCalendar::balanceISODate(double year, double month, double day)
 {
     auto epochDays = makeDay(year, month - 1, day);
     double ms = makeDate(epochDays, 0);
-    int32_t y = epochTimeToEpochYear(ms);
-    int32_t m = epochTimeToMonthInYear(ms) + 1;
-    int32_t d = std::trunc(epochTimeToDate(ms));
+    int32_t y = TemporalCalendar::epochTimeToEpochYear(ms);
+    int32_t m = TemporalCalendar::epochTimeToMonthInYear(ms) + 1;
+    int32_t d = std::trunc(TemporalCalendar::epochTimeToDate(ms));
     return ISO8601::PlainDate { y, (unsigned) m, (unsigned) d };
 }
 

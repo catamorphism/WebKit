@@ -280,10 +280,19 @@ private:
     int32_t m_day : 6; // Starts with 1.
 };
 
+class PlainDateTime {
+public:
+    constexpr PlainDate date() const { return m_date; }
+    constexpr PlainTime time() const { return m_time; }
 
-using TimeZone = std::variant<TimeZoneID, int64_t>;
+    constexpr PlainDateTime(PlainDate date, PlainTime time) : m_date(date), m_time(time) { }
+    constexpr PlainDateTime() = default;
+private:
+    PlainDate m_date;
+    PlainTime m_time;
+};
 
-class PlainYearMonth final {
+class PlainYearMonth {
     WTF_MAKE_TZONE_ALLOCATED(PlainYearMonth);
 public:
     constexpr PlainYearMonth()
@@ -341,14 +350,82 @@ private:
 };
 static_assert(sizeof(PlainYearMonth) == sizeof(PlainDate));
 
-using TimeZone = std::variant<TimeZoneID, int64_t>;
+class TimeZone {
+    WTF_MAKE_TZONE_ALLOCATED(TimeZone);
+    public:
+    bool operator==(const TimeZone& other) const
+    {
+        if (isUTC() && other.isUTC())
+            return true;
+        return m_timezone == other.m_timezone;
+    }
+    bool isUTC() const
+    {
+        return (std::holds_alternative<TimeZoneID>(m_timezone) && std::get<TimeZoneID>(m_timezone) == utcTimeZoneID())
+            || (std::holds_alternative<int64_t>(m_timezone) && !std::get<int64_t>(m_timezone));
+    }
+    bool isOffset() const
+    {
+        return std::holds_alternative<int64_t>(m_timezone);
+    }
+    int64_t offsetNanoseconds() const
+    {
+        RELEASE_ASSERT(isOffset());
+        return std::get<int64_t>(m_timezone);
+    }
+    int64_t offsetMinutes() const
+    {
+        RELEASE_ASSERT(isOffset());
+        return std::get<int64_t>(m_timezone) / static_cast<int64_t>(ExactTime::nsPerMinute);
+    }
+    const String& offsetString() const
+    {
+        RELEASE_ASSERT(isOffset());
+        RELEASE_ASSERT(m_offsetString);
+        return m_offsetString.value();
+    }
+    TimeZoneID asID() const
+    {
+        RELEASE_ASSERT(!isOffset());
+        return std::get<TimeZoneID>(m_timezone);
+    }
+    static TimeZone utc() { return named(utcTimeZoneID()); }
+    static TimeZone offset(int64_t offset) { return TimeZone(offset); }
+    static TimeZone named(TimeZoneID id) { return TimeZone(id); }
+    TimeZone()
+        : m_timezone(utcTimeZoneID()) { }
+    private:
+    TimeZone(TimeZoneID id)
+        : m_timezone(id) { }
+    TimeZone(int64_t offset)
+        : m_timezone(offset) { }
+    std::variant<TimeZoneID, int64_t> m_timezone;
+    std::optional<String> m_offsetString;
+};
 
-// https://tc39.es/proposal-temporal/#sec-temporal-parsetemporaltimezonestring
-// Record { [[Z]], [[OffsetString]], [[Name]] }
+struct TimeZoneOffset {
+    // Offset in nanoseconds.
+    // Stored as a pair of the original string (so that offset strings
+    // with subsecond precision can be distinguished) and the offset
+    // as an int64_t.
+    Vector<LChar> m_offsetString;
+    int64_t m_offset;
+};
+
+struct TimeZoneAnnotation {
+    Vector<LChar> m_annotation;
+    // If `m_annotation` can be parsed as a numeric offset, then m_offset is non-null.
+    std::optional<int64_t> m_offset;
+};
+
+// https://tc39.es/proposal-temporal/#sec-temporal-iso-string-time-zone-parse-records
+// Record { [[Z]], [[OffsetString]], [[TimeZoneAnnotation]] }
 struct TimeZoneRecord {
     bool m_z { false };
-    std::optional<int64_t> m_offset;
-    Variant<Vector<LChar>, int64_t> m_nameOrOffset;
+    // Offset as part of ISO string, if present
+    std::optional<TimeZoneOffset> m_offset;
+    // Bracketed annotation, if present
+    std::optional<TimeZoneAnnotation> m_annotation;
 };
 
 static constexpr unsigned minCalendarLength = 3;
@@ -364,6 +441,7 @@ struct RFC9557Annotation {
 
 // https://tc39.es/proposal-temporal/#sup-isvalidtimezonename
 std::optional<TimeZoneID> parseTimeZoneName(StringView);
+std::optional<TimeZoneRecord> parseTimeZone(StringView);
 std::optional<Duration> parseDuration(StringView);
 std::optional<int64_t> parseUTCOffset(StringView, bool parseSubMinutePrecision = true);
 std::optional<int64_t> parseUTCOffsetInMinutes(StringView);
@@ -373,13 +451,15 @@ std::optional<std::tuple<PlainTime, std::optional<TimeZoneRecord>>> parseTime(St
 std::optional<std::tuple<PlainTime, std::optional<TimeZoneRecord>, std::optional<CalendarID>>> parseCalendarTime(StringView);
 std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::optional<TimeZoneRecord>>> parseDateTime(StringView, TemporalDateFormat);
 std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::optional<TimeZoneRecord>, std::optional<CalendarID>>> parseCalendarDateTime(StringView, TemporalDateFormat);
+std::optional<CalendarID> parseCalendar(StringView);
 uint8_t dayOfWeek(PlainDate);
 uint16_t dayOfYear(PlainDate);
 uint8_t weeksInYear(int32_t year);
 uint8_t weekOfYear(PlainDate);
 uint8_t daysInMonth(int32_t year, uint8_t month);
 uint8_t daysInMonth(uint8_t month);
-String formatTimeZoneOffsetString(int64_t);
+String formatTimeString(int64_t, int64_t, int64_t, int64_t, std::optional<TemporalFractionalSecondDigits>, std::optional<bool>);
+String formatUTCOffsetNanoseconds(int64_t);
 String temporalTimeToString(PlainTime, std::tuple<Precision, unsigned>);
 String temporalDateToString(PlainDate);
 String temporalDateTimeToString(PlainDate, PlainTime, std::tuple<Precision, unsigned>);
@@ -400,6 +480,8 @@ bool isYearMonthWithinLimits(double year, double month);
 bool isYearWithinLimits(double year);
 
 Int128 roundTimeDuration(JSGlobalObject*, Int128, unsigned, TemporalUnit, RoundingMode);
+Int128 getUTCEpochNanoseconds(PlainDateTime);
+Int128 getNamedTimeZoneOffsetNanoseconds(TimeZoneID timeZoneIdentifier, Int128);
 
 } // namespace ISO8601
 

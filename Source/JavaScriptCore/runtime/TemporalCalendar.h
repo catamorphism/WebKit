@@ -63,6 +63,7 @@ public:
     static ISO8601::PlainDate balanceISODate(double, double, double);
     static ISO8601::Duration calendarDateUntil(const ISO8601::PlainDate&, const ISO8601::PlainDate&, TemporalUnit);
     static int32_t isoDateCompare(const ISO8601::PlainDate&, const ISO8601::PlainDate&);
+    static ISO8601::PlainDateTime getISOPartsFromEpoch(ISO8601::ExactTime);
 
     CalendarID identifier() const { return m_identifier; }
     bool isISO8601() const { return m_identifier == iso8601CalendarID(); }
@@ -72,6 +73,22 @@ public:
     static JSObject* from(JSGlobalObject*, JSValue);
 
     bool equals(JSGlobalObject*, TemporalCalendar*);
+
+
+    static inline int epochTimeToEpochYear(double t)
+    {
+        return msToYear(t);
+    }
+
+    static inline int32_t epochTimeToMonthInYear(double t)
+    {
+        return std::get<1>(WTF::yearMonthDayFromDays(msToDays(t)));
+    }
+
+    static inline int32_t epochTimeToDate(double t)
+    {
+        return std::get<2>(WTF::yearMonthDayFromDays(msToDays(t)));
+    }
 
 private:
     TemporalCalendar(VM&, Structure*, CalendarID);

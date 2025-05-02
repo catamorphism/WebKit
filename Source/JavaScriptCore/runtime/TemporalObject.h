@@ -137,6 +137,20 @@ enum IsInclusive : bool {
 };
 
 double nonNegativeModulo(double x, double y);
+enum class TemporalFractionalSecondDigits : uint8_t {
+    Zero = 0,
+    One,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Auto,
+};
+
 WTF::String ellipsizeAt(unsigned maxLength, const WTF::String&);
 PropertyName temporalUnitPluralPropertyName(VM&, TemporalUnit);
 PropertyName temporalUnitSingularPropertyName(VM&, TemporalUnit);
