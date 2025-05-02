@@ -112,6 +112,27 @@ std::optional<ISO8601::TimeZone> TemporalTimeZone::getAvailableNamedTimeZoneIden
     return { };
 }
 
+
+// https://tc39.es/proposal-temporal/#sec-temporal-formatoffsettimezoneidentifier
+String TemporalTimeZone::formatOffsetTimeZoneIdentifier(int64_t offsetMinutes, std::optional<bool> isSeparated)
+{
+    auto sign = offsetMinutes >= 0 ? '+' : '-';
+    auto absoluteMinutes = std::abs(offsetMinutes);
+    auto hour = std::floor(absoluteMinutes / 60);
+    auto minute = std::fmod(absoluteMinutes, 60);
+    return ISO8601::formatTimeString(sign, hour, minute, 0, 0, std::nullopt, isSeparated);
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-formatdatetimeutcoffsetrounded
+String TemporalTimeZone::formatDateTimeUTCOffsetRounded(Int128 offsetNanoseconds)
+{
+    Int128 divisor = 60000000000ll;
+    offsetNanoseconds = roundNumberToIncrementInt128(offsetNanoseconds, divisor, RoundingMode::HalfExpand);
+    ASSERT(!(offsetNanoseconds % divisor));
+    Int128 offsetMinutes = offsetNanoseconds / divisor;
+    return formatOffsetTimeZoneIdentifier((int64_t) offsetMinutes, std::nullopt);
+}
+
 static std::optional<TimeZoneID> parseTimeZoneIANAName(StringView)
 {
     // FIXME: support named time zones

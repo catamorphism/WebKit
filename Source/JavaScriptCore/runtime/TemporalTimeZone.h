@@ -61,6 +61,8 @@ public:
         const Vector<Latin1Character>&);
     static std::optional<TimeZone> parseTemporalTimeZoneString(StringView);
     static std::optional<ISO8601::TimeZone> parseTimeZoneIdentifier(StringView);
+    static String formatDateTimeUTCOffsetRounded(Int128);
+    static String formatOffsetTimeZoneIdentifier(int64_t, std::optional<bool>);
 
 private:
     TemporalTimeZone(VM&, Structure*, TimeZone);

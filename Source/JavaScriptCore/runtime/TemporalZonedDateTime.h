@@ -54,6 +54,18 @@ public:
     ExactTime exactTime() const { return m_exactTime.get(); }
     TimeZone timeZone() const { return m_timeZone; }
 
+    static String temporalZonedDateTimeToString(JSGlobalObject*, ExactTime, TimeZone,
+        PrecisionData, TemporalShowCalendar, TemporalShowTimeZone, TemporalShowOffset,
+        unsigned, TemporalUnit, RoundingMode);
+    String toString(JSGlobalObject*, JSValue options) const;
+    String toString(JSGlobalObject* globalObject) const
+    {
+        return temporalZonedDateTimeToString(globalObject, m_exactTime.get(), m_timeZone,
+            PrecisionData { { Precision::Auto, 0 }, TemporalUnit::Nanosecond, 1 },
+            TemporalShowCalendar::Auto,
+            TemporalShowTimeZone::Auto, TemporalShowOffset::Auto, 1, TemporalUnit::Nanosecond, RoundingMode::Trunc);
+    }
+
     DECLARE_VISIT_CHILDREN;
 
 private:

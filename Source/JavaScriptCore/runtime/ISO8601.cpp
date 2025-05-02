@@ -1499,6 +1499,15 @@ uint8_t daysInMonth(uint8_t month)
     return daysInMonths[isLeapYear][month - 1];
 }
 
+String formatTimeZone(TimeZone tz)
+{
+    if (tz.isUTC())
+        return "UTC"_s;
+    if (tz.isOffset())
+        return formatUTCOffsetNanoseconds(tz.offsetNanoseconds());
+    return ""_s; // TODO: handle named time zones
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal-formatfractionalseconds
 static String formatFractionalSeconds(int64_t subSecondNanoseconds, TemporalFractionalSecondDigits precision)
 {
@@ -1532,7 +1541,7 @@ static String formatFractionalSeconds(int64_t subSecondNanoseconds, TemporalFrac
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-formattimestring
-static String formatTimeString(char sign, int64_t hour, int64_t minute, int64_t second, int64_t subSecondNanoseconds,
+String formatTimeString(char sign, int64_t hour, int64_t minute, int64_t second, int64_t subSecondNanoseconds,
     std::optional<TemporalFractionalSecondDigits> precision, std::optional<bool> isSeparated)
 {
     auto separator = isSeparated && !(isSeparated.value()) ? ""_s : ":"_s;

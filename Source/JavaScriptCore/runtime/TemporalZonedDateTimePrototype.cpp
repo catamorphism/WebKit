@@ -39,6 +39,9 @@
 
 namespace JSC {
 
+static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToString);
+static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToLocaleString);
+static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToJSON);
 static JSC_DECLARE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterCalendarId);
 static JSC_DECLARE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterYear);
 static JSC_DECLARE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterMonth);
@@ -65,6 +68,9 @@ const ClassInfo TemporalZonedDateTimePrototype::s_info = { "Temporal.ZonedDateTi
 
 /* Source for TemporalZonedDateTimePrototype.lut.h
 @begin zonedDateTimePrototypeTable
+  toString              temporalZonedDateTimePrototypeFuncToString              DontEnum|Function 0
+  toLocaleString        temporalZonedDateTimePrototypeFuncToLocaleString        DontEnum|Function 0
+  toJSON                temporalZonedDateTimePrototypeFuncToJSON                DontEnum|Function 0
   calendarId            temporalZonedDateTimePrototypeGetterCalendarId          DontEnum|ReadOnly|CustomAccessor
   year                  temporalZonedDateTimePrototypeGetterYear                DontEnum|ReadOnly|CustomAccessor
   month                 temporalZonedDateTimePrototypeGetterMonth               DontEnum|ReadOnly|CustomAccessor
@@ -105,6 +111,45 @@ void TemporalZonedDateTimePrototype::finishCreation(VM& vm, JSGlobalObject*)
     Base::finishCreation(vm);
     ASSERT(inherits(info()));
     JSC_TO_STRING_TAG_WITHOUT_TRANSITION();
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.tostring
+JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToString, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* zonedDateTime = jsDynamicCast<TemporalZonedDateTime*>(callFrame->thisValue());
+    if (!zonedDateTime) [[unlikely]]
+        return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.toString called on value that's not a ZonedDateTime"_s);
+
+    RELEASE_AND_RETURN(scope, JSValue::encode(jsString(vm, zonedDateTime->toString(globalObject, callFrame->argument(0)))));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.tojson
+JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToJSON, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* zonedDateTime = jsDynamicCast<TemporalZonedDateTime*>(callFrame->thisValue());
+    if (!zonedDateTime) [[unlikely]]
+        return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.toJSON called on value that's not a ZonedDateTime"_s);
+
+    RELEASE_AND_RETURN(scope, JSValue::encode(jsString(vm, zonedDateTime->toString(globalObject))));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.tolocalestring
+JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToLocaleString, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* zonedDateTime = jsDynamicCast<TemporalZonedDateTime*>(callFrame->thisValue());
+    if (!zonedDateTime) [[unlikely]]
+        return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.toLocaleString called on value that's not a ZonedDateTime"_s);
+
+    RELEASE_AND_RETURN(scope, JSValue::encode(jsString(vm, zonedDateTime->toString(globalObject))));
 }
 
 // https://tc39.es/proposal-temporal/#sec-get-temporal.zoneddatetime.prototype.calendarid

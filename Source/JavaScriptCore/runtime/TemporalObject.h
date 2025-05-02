@@ -166,6 +166,24 @@ static inline bool isAbsentUnit(Variant<TemporalAuto, std::optional<TemporalUnit
     return std::holds_alternative<std::optional<TemporalUnit>>(unit) && !std::get<std::optional<TemporalUnit>>(unit);
 }
 
+enum class TemporalShowCalendar : uint8_t {
+    Auto,
+    Never,
+    Critical,
+    Always,
+};
+
+enum class TemporalShowOffset : bool {
+    Auto,
+    Never,
+};
+
+enum class TemporalShowTimeZone : uint8_t {
+    Auto,
+    Never,
+    Critical,
+};
+
 enum class TemporalFractionalSecondDigits : uint8_t {
     Zero = 0,
     One,
@@ -189,8 +207,18 @@ getTemporalUnitValuedOption(JSGlobalObject*, JSObject*, PropertyName);
 void validateTemporalUnitValue(JSGlobalObject*, Variant<TemporalAuto, std::optional<TemporalUnit>>, UnitGroup, AllowedUnit, StringView);
 void validateTemporalRoundingIncrement(JSGlobalObject*, double, std::optional<double>, Inclusivity);
 std::tuple<TemporalUnit, TemporalUnit, RoundingMode, double> extractDifferenceOptions(JSGlobalObject*, JSValue, UnitGroup, TemporalUnit, TemporalUnit);
-std::optional<unsigned> temporalFractionalSecondDigits(JSGlobalObject*, JSObject* options);
+std::optional<TemporalUnit> temporalLargestUnit(JSGlobalObject*, JSObject* options, std::initializer_list<TemporalUnit> disallowedUnits, TemporalUnit autoValue);
+std::optional<String> temporalSmallestUnit(JSGlobalObject*, JSObject*);
+std::optional<TemporalUnit> validateSmallestUnit(JSGlobalObject*, std::optional<String>, std::initializer_list<TemporalUnit>);
+std::optional<String> temporalTimeZone(JSGlobalObject*, JSObject*);
+std::tuple<TemporalUnit, TemporalUnit, RoundingMode, double> extractDifferenceOptions(JSGlobalObject*, JSValue, UnitGroup, TemporalUnit defaultSmallestUnit, TemporalUnit defaultLargestUnit);
+TemporalShowCalendar getTemporalShowCalendarNameOption(JSGlobalObject*, JSObject*);
+TemporalShowOffset getTemporalShowOffsetOption(JSGlobalObject*, JSObject*);
+TemporalShowTimeZone getTemporalShowTimeZoneNameOption(JSGlobalObject*, JSObject*);
+TemporalFractionalSecondDigits temporalFractionalSecondDigits(JSGlobalObject*, JSObject* options);
 PrecisionData secondsStringPrecision(JSGlobalObject*, JSObject* options);
+PrecisionData secondsStringPrecision(JSGlobalObject*, std::optional<TemporalUnit>, TemporalFractionalSecondDigits);
+PrecisionData secondsStringPrecision(TemporalFractionalSecondDigits);
 RoundingMode temporalRoundingMode(JSGlobalObject*, JSObject*, RoundingMode);
 RoundingMode negateTemporalRoundingMode(RoundingMode);
 void formatSecondsStringFraction(StringBuilder&, unsigned fraction, std::tuple<Precision, unsigned>);

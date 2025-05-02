@@ -190,6 +190,24 @@ ISO8601::PlainDateTime TemporalCalendar::getISOPartsFromEpoch(ISO8601::ExactTime
     return ISO8601::PlainDateTime(WTF::move(isoDate), WTF::move(time));
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal-formatcalendarannotation
+String TemporalCalendar::formatCalendarAnnotation(TemporalShowCalendar showCalendar)
+{
+    // TODO: non-iso8601 calendars
+    switch (showCalendar) {
+    case TemporalShowCalendar::Never:
+        return ""_s;
+    case TemporalShowCalendar::Auto:
+        return ""_s;
+    case TemporalShowCalendar::Critical:
+        return "[!u-ca=iso8601]"_s;
+    case TemporalShowCalendar::Always:
+        return "[u-ca=iso8601]"_s;
+    default:
+        RELEASE_ASSERT_NOT_REACHED();
+    }
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal-totemporalcalendar
 JSObject* TemporalCalendar::from(JSGlobalObject* globalObject, JSValue calendarLike)
 {
