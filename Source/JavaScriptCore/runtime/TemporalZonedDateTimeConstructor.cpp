@@ -38,6 +38,7 @@ namespace JSC {
 STATIC_ASSERT_IS_TRIVIALLY_DESTRUCTIBLE(TemporalZonedDateTimeConstructor);
 
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimeConstructorFuncFrom);
+static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimeConstructorFuncCompare);
 
 }
 
@@ -50,6 +51,7 @@ const ClassInfo TemporalZonedDateTimeConstructor::s_info = { "Function"_s, &Base
 /* Source for TemporalZonedDateTimeConstructor.lut.h
 @begin temporalZonedDateTimeConstructorTable
   from             temporalZonedDateTimeConstructorFuncFrom             DontEnum|Function 1
+  compare          temporalZonedDateTimeConstructorFuncCompare          DontEnum|Function 2
 @end
 */
 
@@ -129,6 +131,21 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimeConstructorFuncFrom, (JSGlobalObje
 {
     return JSValue::encode(TemporalZonedDateTime::from(globalObject,
         callFrame->argument(0), callFrame->argument(1)));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.compare
+JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimeConstructorFuncCompare, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* one = TemporalZonedDateTime::from(globalObject, callFrame->argument(0), std::nullopt);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    auto* two = TemporalZonedDateTime::from(globalObject, callFrame->argument(1), std::nullopt);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    return JSValue::encode(jsNumber(TemporalZonedDateTime::compare(one, two)));
 }
 
 } // namespace JSC

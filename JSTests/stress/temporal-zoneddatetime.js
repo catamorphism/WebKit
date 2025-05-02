@@ -154,3 +154,24 @@ shouldBe(Temporal.ZonedDateTime.from.length, 1);
     shouldBe(zdt2.day, 2);
     shouldBe(zdt2.hour, 0);
 }
+
+shouldBe(Temporal.ZonedDateTime.compare.length, 2);
+{
+    const zdt2 = new Temporal.ZonedDateTime(1n, "UTC");
+    shouldBe(Temporal.ZonedDateTime.compare(zdt, zdt), 0);
+    shouldBe(Temporal.ZonedDateTime.compare(zdt, zdt2), -1);
+    shouldBe(Temporal.ZonedDateTime.compare(zdt2, zdt), 1);
+}
+
+shouldBe(Temporal.ZonedDateTime.prototype.equals.length, 1);
+{
+    const zdt2 = new Temporal.ZonedDateTime(1n, "UTC");
+    const zdt3 = new Temporal.ZonedDateTime(0n, "+01:00");
+
+    shouldBe(zdt.equals(zdt), true);
+    shouldBe(zdt.equals(zdt2), false);
+    shouldBe(zdt.equals(zdt3), false);
+}
+
+shouldBe(Temporal.ZonedDateTime.prototype.valueOf.length, 0);
+shouldThrow(() => zdt.valueOf(), TypeError);

@@ -447,4 +447,10 @@ TemporalZonedDateTime* TemporalZonedDateTime::from(JSGlobalObject* globalObject,
         WTF::move(epochNanoseconds), WTF::move(timeZone));
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.compare
+int32_t TemporalZonedDateTime::compare(const TemporalZonedDateTime* t1, const TemporalZonedDateTime* t2)
+{
+    return ISO8601::ExactTime::compare(t1->m_exactTime.get(), t2->m_exactTime.get());
+}
+
 } // namespace JSC

@@ -158,6 +158,11 @@ public:
 
     friend constexpr auto operator<=>(const ExactTime&, const ExactTime&) = default;
 
+    static constexpr int32_t compare(ExactTime one, ExactTime two)
+    {
+        return (one < two ? -1 : one == two ? 0 : 1);
+    }
+
     std::optional<ExactTime> add(Duration) const;
     InternalDuration difference(JSGlobalObject*, ExactTime, unsigned, TemporalUnit, RoundingMode) const;
     ExactTime round(JSGlobalObject*, unsigned, TemporalUnit, RoundingMode) const;

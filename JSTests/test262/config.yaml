@@ -346,6 +346,8 @@ skip:
     - test/built-ins/Temporal/PlainYearMonth/prototype/until/argument-propertybag-calendar-wrong-type.js
     - test/built-ins/Temporal/PlainYearMonth/prototype/until/argument-string-unknown-annotation.js
     - test/built-ins/Temporal/PlainYearMonth/refisoday-undefined.js
+    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-calendar-case-insensitive.js
+    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-calendar-case-insensitive.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/calendar-case-insensitive.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-calendar-annotation.js
 
@@ -390,10 +392,14 @@ skip:
     - test/built-ins/Temporal/PlainYearMonth/prototype/since/argument-string-date-with-utc-offset.js
     - test/built-ins/Temporal/PlainYearMonth/prototype/until/argument-string-calendar-annotation.js
     - test/built-ins/Temporal/PlainYearMonth/prototype/until/argument-string-date-with-utc-offset.js
+    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-calendar-annotation.js
+    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-unknown-annotation.js
     - test/built-ins/Temporal/ZonedDateTime/from/argument-propertybag-calendar-case-insensitive.js
     - test/built-ins/Temporal/ZonedDateTime/from/argument-string-calendar-annotation.js
     - test/built-ins/Temporal/ZonedDateTime/from/argument-string-time-zone-annotation.js
     - test/built-ins/Temporal/ZonedDateTime/from/argument-string-unknown-annotation.js
+    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-string-calendar-annotation.js
+    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-string-unknown-annotation.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-unknown-annotation.js
 
     # Depends on Temporal.ZonedDateTime
@@ -464,66 +470,9 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/calendar-iso-string.js
     - test/built-ins/Temporal/ZonedDateTime/calendar-number.js
     - test/built-ins/Temporal/ZonedDateTime/calendar-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-calendar-case-insensitive.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-calendar-invalid-iso-string.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-calendar-iso-string.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-calendar-leap-second.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-calendar-string.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-calendar-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-calendar-year-zero.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-invalid-offset-string.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-offset-not-agreeing-with-timezone.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-optional-properties.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-timezone-string-datetime.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-timezone-string.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-timezone-string-leap-second.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-timezone-string-multiple-offsets.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-timezone-string-sub-minute-offset.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-timezone-string-year-zero.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-timezone-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-calendar-annotation-invalid-key.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-calendar-annotation.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-calendar-invalid-iso-string.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-critical-unknown-annotation.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-date-with-utc-offset.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-limits.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-minus-sign.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-multiple-calendar.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-multiple-time-zone.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-sub-minute-offset.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-time-separators.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-time-zone-annotation.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-string-unknown-annotation.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/basic.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/builtin.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/calendar-temporal-object.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/casts-arguments.js
+    # Depends on ZonedDateTime.toPlainDateTime
     - test/built-ins/Temporal/ZonedDateTime/compare/compares-exact-time-not-clock-time.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/disregard-time-zone-ids-if-exact-times-are-equal.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/infinity-throws-rangeerror.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/leap-second.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/length.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/name.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/not-a-constructor.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/order-of-operations.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/requires-properties.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/year-zero.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/zoneddatetime-string.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/zoneddatetime-string-multiple-offsets.js
     - test/built-ins/Temporal/ZonedDateTime/construction-and-properties.js
-    # Next ten tests depend on ZonedDateTime.prototype.equals
-    - test/built-ins/Temporal/ZonedDateTime/from/argument-propertybag-function-object.js
-    - test/built-ins/Temporal/ZonedDateTime/from/argument-propertybag-ignores-incorrect-properties.js
-    - test/built-ins/Temporal/ZonedDateTime/from/argument-propertybag-monthcode-month.js
-    - test/built-ins/Temporal/ZonedDateTime/from/argument-propertybag-optional-properties.js
-    - test/built-ins/Temporal/ZonedDateTime/from/argument-string-basic-and-extended-format.js
-    - test/built-ins/Temporal/ZonedDateTime/from/argument-string-decimal-places.js
-    - test/built-ins/Temporal/ZonedDateTime/from/argument-string-negative-extended-year.js
-    - test/built-ins/Temporal/ZonedDateTime/from/argument-string-optional-parts.js
-    - test/built-ins/Temporal/ZonedDateTime/from/argument-string-variant-decimal-separator.js
-    - test/built-ins/Temporal/ZonedDateTime/from/overflow-options.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/add/add-duration.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/add/add-large-subseconds.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/add/argument-duration-max.js
@@ -579,60 +528,8 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/daysInYear/basic.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/daysInYear/branding.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/daysInYear/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-object.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-calendar-case-insensitive.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-calendar-invalid-iso-string.js 
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-calendar-iso-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-calendar-leap-second.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-calendar-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-calendar-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-calendar-year-zero.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-invalid-offset-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-offset-not-agreeing-with-timezone.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-optional-properties.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-timezone-case-insensitive.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-timezone-normalize-offset-strings.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-timezone-string-datetime.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-timezone-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-timezone-string-leap-second.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-timezone-string-multiple-offsets.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-timezone-string-sub-minute-offset.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-timezone-string-year-zero.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-timezone-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-string-calendar-annotation-invalid-key.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-string-calendar-annotation.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-string-critical-unknown-annotation.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-string-date-with-utc-offset.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-string-calendar-invalid-iso-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-string-limits.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-string-minus-sign.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-string-multiple-calendar.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-string-multiple-time-zone.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-string-sub-minute-offset.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-string-time-separators.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-string-time-zone-annotation.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-string-unknown-annotation.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-valid.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/builtin.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/calendar-temporal-object.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/casts-argument.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/constructed-from-equivalent-parameters-are-equal.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/different-instant-not-equal.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/different-time-zone-not-equal.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/infinity-throws-rangeerror.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/leap-second.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/length.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/name.js
+    # Buggy test, see https://github.com/tc39/test262/pull/5001
     - test/built-ins/Temporal/ZonedDateTime/prototype/equals/no-fractional-minutes-hours.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/not-a-constructor.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/order-of-operations.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/requires-properties.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/year-zero.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/zoneddatetime-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/equals/zoneddatetime-string-multiple-offsets.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/era/branding.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/era/prop-desc.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/eraYear/branding.js
@@ -989,9 +886,6 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/year-zero.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/zoneddatetime-string.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/zoneddatetime-string-multiple-offsets.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/valueOf/basic.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/valueOf/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/valueOf/prop-desc.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/weekOfYear/basic.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/weekOfYear/branding.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/weekOfYear/prop-desc.js
@@ -1002,10 +896,6 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/with/overflow-options.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/with/overflow-reject-throws.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/calendar-time-string.js
-    # Next three tests depend on Temporal.ZonedDateTime.equals
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-propertybag-optional-properties.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/basic.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/incorrectly-spelled-properties-ignored.js
     # Depends on Temporal.ZonedDateTime.toPlainDateTime
     - test/built-ins/Temporal/ZonedDateTime/prototype/withTimeZone/preserves-instant.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/yearOfWeek/basic.js
