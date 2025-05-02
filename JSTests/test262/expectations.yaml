@@ -647,8 +647,8 @@ test/intl402/Temporal/Duration/compare/twenty-five-hour-day.js:
   default: "RangeError: Couldn't parse time zone name"
   strict mode: "RangeError: Couldn't parse time zone name"
 test/intl402/Temporal/Duration/prototype/round/adjust-rounded-duration-days.js:
-  default: "TypeError: Temporal.ZonedDateTime.from is not a function. (In 'Temporal.ZonedDateTime.from('2024-03-10T00:00:00[America/New_York]')', 'Temporal.ZonedDateTime.from' is undefined)"
-  strict mode: "TypeError: Temporal.ZonedDateTime.from is not a function. (In 'Temporal.ZonedDateTime.from('2024-03-10T00:00:00[America/New_York]')', 'Temporal.ZonedDateTime.from' is undefined)"
+  default: 'RangeError: in Temporal.ZonedDateTime, parsing strings with named time zones not implemented yet'
+  strict mode: 'RangeError: in Temporal.ZonedDateTime, parsing strings with named time zones not implemented yet'
 test/intl402/Temporal/Duration/prototype/round/dst-balancing-result.js:
   default: "TypeError: Temporal.PlainDateTime.from(\"2000-04-02\").toZonedDateTime is not a function. (In 'Temporal.PlainDateTime.from(\"2000-04-02\").toZonedDateTime(timeZone)', 'Temporal.PlainDateTime.from(\"2000-04-02\").toZonedDateTime' is undefined)"
   strict mode: "TypeError: Temporal.PlainDateTime.from(\"2000-04-02\").toZonedDateTime is not a function. (In 'Temporal.PlainDateTime.from(\"2000-04-02\").toZonedDateTime(timeZone)', 'Temporal.PlainDateTime.from(\"2000-04-02\").toZonedDateTime' is undefined)"

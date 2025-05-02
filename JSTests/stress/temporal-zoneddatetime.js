@@ -135,3 +135,22 @@ shouldBe(Temporal.ZonedDateTime.prototype.withCalendar.length, 1);
     shouldBe(zdt.toString(), zdt.withCalendar("2020-01[u-ca=iso8601]").toString());
 }
 
+shouldBe(Temporal.ZonedDateTime.from.length, 1);
+{
+    shouldThrow(() => Temporal.ZonedDateTime.from("1970-01-01T00:00"), RangeError);
+    shouldThrow(() => Temporal.ZonedDateTime.from("1970-01-01T00:00Z"), RangeError);
+    shouldThrow(() => Temporal.ZonedDateTime.from("1970-01-01T00:00+01:00"), RangeError);
+
+    const str = "1970-01-01T00:00Z[+01:00]";
+    const zdt1 = Temporal.ZonedDateTime.from(str);
+    shouldBe(zdt1.toString(), "1970-01-01T01:00:00+01:00[+01:00]");
+    shouldBe(zdt1.epochNanoseconds, 0n);
+    shouldBe(zdt1.timeZoneId, "+01:00");
+
+    const zdt2 = Temporal.ZonedDateTime.from({ year: 2000, month: 5, day: 2, timeZone: "UTC" });
+    shouldBe(zdt2.timeZoneId, "UTC");
+    shouldBe(zdt2.year, 2000);
+    shouldBe(zdt2.month, 5);
+    shouldBe(zdt2.day, 2);
+    shouldBe(zdt2.hour, 0);
+}

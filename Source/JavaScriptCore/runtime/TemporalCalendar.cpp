@@ -150,6 +150,7 @@ CalendarID TemporalCalendar::toTemporalCalendarIdentifier(JSGlobalObject* global
     return calendarId.value();
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal-gettemporalcalendarslotvaluewithisodefault
 JSObject* TemporalCalendar::getTemporalCalendarWithISODefault(JSGlobalObject* globalObject, JSValue itemValue)
 {
     VM& vm = globalObject->vm();
@@ -167,6 +168,37 @@ JSObject* TemporalCalendar::getTemporalCalendarWithISODefault(JSGlobalObject* gl
     JSValue calendar = itemValue.get(globalObject, vm.propertyNames->calendar);
     RETURN_IF_EXCEPTION(scope, { });
     RELEASE_AND_RETURN(scope, toTemporalCalendarWithISODefault(globalObject, calendar));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-gettemporalcalendarslotvaluewithisodefault
+CalendarID TemporalCalendar::getTemporalCalendarIdentifierWithISODefault(JSGlobalObject* globalObject, JSValue itemValue)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    if (itemValue.inherits<TemporalPlainDate>())
+        return jsCast<TemporalPlainDate*>(itemValue)->calendar()->identifier();
+
+    if (itemValue.inherits<TemporalPlainDateTime>())
+        return jsCast<TemporalPlainDateTime*>(itemValue)->calendar()->identifier();
+
+    if (itemValue.inherits<TemporalPlainTime>())
+        return jsCast<TemporalPlainTime*>(itemValue)->calendar()->identifier();
+
+    if (itemValue.inherits<TemporalPlainMonthDay>())
+        return jsCast<TemporalPlainMonthDay*>(itemValue)->calendar()->identifier();
+
+    if (itemValue.inherits<TemporalPlainYearMonth>())
+        return jsCast<TemporalPlainYearMonth*>(itemValue)->calendar()->identifier();
+
+    if (itemValue.inherits<TemporalZonedDateTime>())
+        return jsCast<TemporalZonedDateTime*>(itemValue)->calendar()->identifier();
+
+    JSValue calendar = itemValue.get(globalObject, vm.propertyNames->calendar);
+    RETURN_IF_EXCEPTION(scope, { });
+    if (calendar.isUndefined())
+        return iso8601CalendarID();
+    RELEASE_AND_RETURN(scope, toTemporalCalendarIdentifier(globalObject, calendar));
 }
 
 std::optional<CalendarID> TemporalCalendar::isBuiltinCalendar(StringView string)

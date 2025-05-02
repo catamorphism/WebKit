@@ -37,6 +37,8 @@ namespace JSC {
 
 STATIC_ASSERT_IS_TRIVIALLY_DESTRUCTIBLE(TemporalZonedDateTimeConstructor);
 
+static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimeConstructorFuncFrom);
+
 }
 
 #include "TemporalZonedDateTimeConstructor.lut.h"
@@ -47,6 +49,7 @@ const ClassInfo TemporalZonedDateTimeConstructor::s_info = { "Function"_s, &Base
 
 /* Source for TemporalZonedDateTimeConstructor.lut.h
 @begin temporalZonedDateTimeConstructorTable
+  from             temporalZonedDateTimeConstructorFuncFrom             DontEnum|Function 1
 @end
 */
 
@@ -119,6 +122,13 @@ JSC_DEFINE_HOST_FUNCTION(callTemporalZonedDateTime, (JSGlobalObject* globalObjec
     auto scope = DECLARE_THROW_SCOPE(vm);
 
     return JSValue::encode(throwConstructorCannotBeCalledAsFunctionTypeError(globalObject, scope, "ZonedDateTime"_s));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.from
+JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimeConstructorFuncFrom, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    return JSValue::encode(TemporalZonedDateTime::from(globalObject,
+        callFrame->argument(0), callFrame->argument(1)));
 }
 
 } // namespace JSC

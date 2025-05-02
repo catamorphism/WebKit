@@ -618,6 +618,26 @@ static bool canBeTimeZone(const StringParsingBuffer<CharacterType>& buffer, Char
 }
 
 template<typename CharacterType>
+static bool canBeTimeZoneAnnotation(const StringParsingBuffer<CharacterType>& buffer, CharacterType character)
+{
+    switch (static_cast<UChar>(character)) {
+    // TimeZoneBracketedAnnotation
+    // https://tc39.es/proposal-temporal/#prod-TimeZoneBracketedAnnotation
+    case '[': {
+        // We should reject calendar extension case.
+        // https://tc39.es/proposal-temporal/#prod-Calendar
+        // Calendar :
+        //     [u-ca= CalendarName]
+        if (canBeRFC9557Annotation(buffer))
+            return false;
+        return true;
+    }
+    default:
+        return false;
+    }
+}
+
+template<typename CharacterType>
 static std::optional<TimeZoneAnnotation> parseTimeZoneAnnotation(StringParsingBuffer<CharacterType>& buffer)
 {
     // https://tc39.es/proposal-temporal/#prod-TimeZoneAnnotation
@@ -1227,6 +1247,67 @@ static std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::option
         return std::nullopt;
 
     return std::tuple { WTF::move(plainDate.value()), std::nullopt, std::nullopt };
+}
+
+template<typename CharacterType>
+static std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::optional<TimeZoneRecord>, std::optional<CalendarID>>> parseTemporalDateTimeString(StringParsingBuffer<CharacterType>& buffer)
+{
+    // https://tc39.es/proposal-temporal/#prod-TemporalDateTimeString
+    // TemporalDateTimeString[Zoned] :
+    //     AnnotatedDateTime[?Zoned, ~TimeRequired]
+    //
+    //  AnnotatedDateTime[Zoned, TimeRequired] :
+    //      [~Zoned] DateTime[~Z, ?TimeRequired] TimeZoneAnnotationopt Annotationsopt
+    //      [+Zoned] DateTime[+Z, ?TimeRequired] TimeZoneAnnotation Annotationsopt
+    auto plainDate = parseDate(buffer, TemporalDateFormat::Date);
+    if (!plainDate)
+        return std::nullopt;
+    if (buffer.atEnd())
+        return std::tuple { WTF::move(plainDate.value()), std::nullopt, std::nullopt, std::nullopt };
+
+    std::optional<PlainTime> plainTimeOptional = std::nullopt;
+    std::optional<TimeZoneRecord> timeZoneOptional = std::nullopt;
+
+    if (*buffer == ' ' || *buffer == 'T' || *buffer == 't') {
+        buffer.advance();
+        auto plainTimeAndTimeZone = parseTime(buffer);
+        if (!plainTimeAndTimeZone)
+            return std::nullopt;
+        auto [plainTime, timeZone] = WTF::move(plainTimeAndTimeZone.value());
+        if (buffer.atEnd())
+            return std::tuple { WTF::move(plainDate.value()), WTF::move(plainTime), WTF::move(timeZone), std::nullopt };
+        plainTimeOptional = plainTime;
+        timeZoneOptional = timeZone;
+    }
+
+    if (!timeZoneOptional) {
+        if (canBeTimeZoneAnnotation(buffer, *buffer))
+            timeZoneOptional = parseTimeZone(buffer);
+    }
+
+    if (buffer.atEnd())
+        return std::tuple { WTF::move(plainDate.value()), WTF::move(plainTimeOptional), WTF::move(timeZoneOptional), std::nullopt };
+
+    std::optional<CalendarID> calendarOptional;
+    if (canBeRFC9557Annotation(buffer)) {
+        auto calendar = parseCalendar(buffer);
+        if (!calendar || calendar->size() < 1)
+            return std::nullopt;
+        calendarOptional = WTF::move(calendar.value()[0]);
+    }
+
+    return std::tuple { WTF::move(plainDate.value()), WTF::move(plainTimeOptional), WTF::move(timeZoneOptional), WTF::move(calendarOptional) };
+
+}
+
+std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::optional<TimeZoneRecord>, std::optional<CalendarID>>> parseTemporalDateTimeString(StringView string)
+{
+    return readCharactersForParsing(string, [](auto buffer) -> std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::optional<TimeZoneRecord>, std::optional<CalendarID>>> {
+        auto result = parseTemporalDateTimeString(buffer);
+        if (!buffer.atEnd())
+            return std::nullopt;
+        return result;
+    });
 }
 
 template<typename CharacterType>

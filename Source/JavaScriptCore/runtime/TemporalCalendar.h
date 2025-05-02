@@ -52,7 +52,6 @@ public:
     static JSObject* toTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
     static JSObject* getTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
     static void calendarResolveFields(JSGlobalObject*, std::optional<int32_t>, unsigned, std::optional<ParsedMonthCode>, TemporalDateFormat);
-    static CalendarID toTemporalCalendarIdentifier(JSGlobalObject*, JSValue);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, JSObject*, TemporalDateFormat, Variant<JSObject*, TemporalOverflow>, TemporalOverflow&);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, TemporalDateFormat, int32_t, unsigned, unsigned, std::optional<ParsedMonthCode>, TemporalOverflow);
     static ISO8601::PlainDate yearMonthFromFields(JSGlobalObject*, int32_t, int32_t, std::optional<ParsedMonthCode>, TemporalOverflow);
@@ -64,6 +63,8 @@ public:
         CalendarID, std::optional<int32_t>, std::optional<unsigned>, std::optional<String>, std::optional<unsigned>, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, TemporalOverflow);
     template<DifferenceOperation>
     static ISO8601::Duration differenceTemporalPlainYearMonth(JSGlobalObject*, const ISO8601::PlainYearMonth&, const ISO8601::PlainYearMonth&, unsigned, TemporalUnit, TemporalUnit, RoundingMode);
+    static CalendarID toTemporalCalendarIdentifier(JSGlobalObject*, JSValue);
+    static CalendarID getTemporalCalendarIdentifierWithISODefault(JSGlobalObject*, JSValue);
     static ISO8601::PlainDate addDurationToDate(JSGlobalObject*, const ISO8601::PlainDate&, const ISO8601::Duration&, TemporalOverflow);
     static ISO8601::PlainDate isoDateAdd(JSGlobalObject*, const ISO8601::PlainDate&, const ISO8601::Duration&, TemporalOverflow);
     static ISO8601::PlainYearMonth balanceISOYearMonth(double, double);

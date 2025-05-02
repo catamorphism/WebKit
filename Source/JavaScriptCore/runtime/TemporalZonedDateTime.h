@@ -49,6 +49,8 @@ public:
 
     DECLARE_INFO;
 
+    static TemporalZonedDateTime* from(JSGlobalObject*, JSValue, std::optional<JSValue>);
+
     TemporalCalendar* calendar() { return m_calendar.get(this); }
 
     TemporalZonedDateTime* with(JSGlobalObject*, JSObject* temporalDateLike, JSValue options);

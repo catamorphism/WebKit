@@ -475,6 +475,7 @@ using CalendarID = RFC9557Value;
 std::optional<std::tuple<PlainTime, std::optional<TimeZoneRecord>>> parseTime(StringView);
 std::optional<std::tuple<PlainTime, std::optional<TimeZoneRecord>, std::optional<CalendarID>>> parseCalendarTime(StringView);
 std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::optional<TimeZoneRecord>>> parseDateTime(StringView, TemporalDateFormat);
+std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::optional<TimeZoneRecord>, std::optional<CalendarID>>> parseTemporalDateTimeString(StringView);
 std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::optional<TimeZoneRecord>, std::optional<CalendarID>>> parseCalendarDateTime(StringView, TemporalDateFormat);
 std::optional<CalendarID> parseCalendar(StringView);
 uint8_t dayOfWeek(PlainDate);
