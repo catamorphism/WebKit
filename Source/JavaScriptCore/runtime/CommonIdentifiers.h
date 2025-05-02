@@ -116,6 +116,7 @@
     macro(descriptions) \
     macro(detached) \
     macro(detail) \
+    macro(disambiguation) \
     macro(displayName) \
     macro(done) \
     macro(dotAll) \

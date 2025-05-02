@@ -51,6 +51,8 @@ public:
 
     TemporalCalendar* calendar() { return m_calendar.get(this); }
 
+    TemporalZonedDateTime* with(JSGlobalObject*, JSObject* temporalDateLike, JSValue options);
+
     String monthCode() const;
     uint8_t dayOfWeek() const;
     uint16_t dayOfYear() const;

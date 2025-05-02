@@ -102,8 +102,9 @@ public:
     static void roundRelativeDuration(JSGlobalObject*, ISO8601::InternalDuration&, Int128, ISO8601::PlainDate, TemporalUnit, double, TemporalUnit, RoundingMode);
     static std::tuple<ISO8601::PlainDate, ISO8601::PlainTime>
         combineISODateAndTimeRecord(ISO8601::PlainDate, ISO8601::PlainTime);
-    static std::optional<ISO8601::PlainDate> regulateISODate(double, double, double, TemporalOverflow);
     static ISO8601::Duration toDateDurationRecordWithoutTime(JSGlobalObject*, const ISO8601::Duration&);
+    static ISO8601::Duration adjustDateDurationRecord(JSGlobalObject*,
+        const ISO8601::Duration&, double, std::optional<double>, std::optional<double>);
     static std::optional<double> balance(ISO8601::Duration&, TemporalUnit largestUnit);
     static ISO8601::Duration toDateDurationWithoutTime(ISO8601::Duration);
     static Nudged nudgeToCalendarUnit(JSGlobalObject*,

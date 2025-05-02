@@ -517,15 +517,27 @@ int32_t TemporalPlainTime::compare(const ISO8601::PlainTime& t1, const ISO8601::
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-addtime
-ISO8601::Duration TemporalPlainTime::addTime(const ISO8601::PlainTime& plainTime, const ISO8601::Duration& duration)
+ISO8601::Duration TemporalPlainTime::addTime(const ISO8601::PlainTime& plainTime, Int128 timeDuration)
 {
+    Int128 ns = ((Int128) (std::trunc(plainTime.nanosecond()))) + timeDuration;
     return balanceTime(
-        plainTime.hour() + duration.hours(),
-        plainTime.minute() + duration.minutes(),
-        plainTime.second() + duration.seconds(),
-        plainTime.millisecond() + duration.milliseconds(),
-        plainTime.microsecond() + duration.microseconds(),
-        plainTime.nanosecond() + duration.nanoseconds());
+        plainTime.hour(),
+        plainTime.minute(),
+        plainTime.second(),
+        plainTime.millisecond(),
+        plainTime.microsecond(),
+        ns);
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-adddurationtotime
+ISO8601::PlainTime TemporalPlainTime::addDurationToTime(bool isAdd, TemporalPlainTime* temporalTime, ISO8601::Duration duration)
+{
+    if (!isAdd)
+        duration = -duration;
+    auto internalDuration = TemporalDuration::toInternalDuration(duration);
+    auto d = addTime(temporalTime->plainTime(), internalDuration.time());
+    return ISO8601::PlainTime(d.hours(), d.minutes(), d.seconds(), d.milliseconds(),
+        d.microseconds(), d.nanoseconds());
 }
 
 ISO8601::PlainTime TemporalPlainTime::with(JSGlobalObject* globalObject, JSObject* temporalTimeLike, JSValue optionsValue) const

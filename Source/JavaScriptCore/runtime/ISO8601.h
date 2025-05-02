@@ -471,8 +471,8 @@ bool validMonthCode(StringView);
 uint8_t monthFromCode(StringView);
 
 bool isValidDuration(const Duration&);
-bool isValidISODate(double, double, double);
 PlainDate createISODateRecord(double, double, double);
+void checkISODaysRange(JSGlobalObject*, ISO8601::PlainDate);
 
 std::optional<ExactTime> parseInstant(StringView);
 

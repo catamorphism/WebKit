@@ -154,6 +154,21 @@ enum class TemporalShowTimeZone : uint8_t {
     Never,
     Critical,
 };
+
+enum class TemporalDisambiguation : uint8_t {
+    Compatible,
+    Earlier,
+    Later,
+    Reject,
+};
+
+enum class TemporalOffset : uint8_t {
+    Prefer,
+    Use,
+    Ignore,
+    Reject,
+};
+
 enum class TemporalFractionalSecondDigits : uint8_t {
     Zero = 0,
     One,
@@ -168,6 +183,22 @@ enum class TemporalFractionalSecondDigits : uint8_t {
     Auto,
 };
 
+enum class FieldName : uint8_t {
+    Year,
+    Month,
+    MonthCode,
+    Day,
+    Hour,
+    Minute,
+    Second,
+    Millisecond,
+    Microsecond,
+    Nanosecond,
+    Calendar,
+    Offset,
+    TimeZone,
+};
+
 WTF::String ellipsizeAt(unsigned maxLength, const WTF::String&);
 PropertyName temporalUnitPluralPropertyName(VM&, TemporalUnit);
 PropertyName temporalUnitSingularPropertyName(VM&, TemporalUnit);
@@ -177,7 +208,9 @@ std::optional<TemporalUnit> temporalSmallestUnit(JSGlobalObject*, JSObject* opti
 std::tuple<TemporalUnit, TemporalUnit, RoundingMode, double> extractDifferenceOptions(JSGlobalObject*, JSValue, UnitGroup, TemporalUnit defaultSmallestUnit, TemporalUnit defaultLargestUnit);
 TemporalShowCalendar getTemporalShowCalendarNameOption(JSGlobalObject*, JSObject*);
 TemporalShowOffset getTemporalShowOffsetOption(JSGlobalObject*, JSObject*);
+TemporalOffset getTemporalOffsetOption(JSGlobalObject*, JSObject*, TemporalOffset);
 TemporalShowTimeZone getTemporalShowTimeZoneNameOption(JSGlobalObject*, JSObject*);
+TemporalDisambiguation getTemporalDisambiguationOption(JSGlobalObject*, JSObject*);
 TemporalFractionalSecondDigits temporalFractionalSecondDigits(JSGlobalObject*, JSObject* options);
 PrecisionData secondsStringPrecision(JSGlobalObject*, JSObject* options);
 PrecisionData secondsStringPrecision(std::optional<TemporalUnit>, TemporalFractionalSecondDigits);
@@ -194,6 +227,7 @@ Int128 roundNumberToIncrementInt128(Int128, Int128, RoundingMode);
 Int128 roundNumberToIncrementAsIfPositive(Int128, Int128, RoundingMode);
 double applyUnsignedRoundingMode(double, double, double, UnsignedRoundingMode);
 void rejectObjectWithCalendarOrTimeZone(JSGlobalObject*, JSObject*);
+bool isPartialTemporalObject(JSGlobalObject*, JSObject* value);
 
 
 constexpr Int128 lengthInNanoseconds(TemporalUnit unit)
@@ -253,17 +287,21 @@ TemporalOverflow toTemporalOverflow(JSGlobalObject*, JSObject*);
 TemporalOverflow toTemporalOverflow(JSGlobalObject*, JSValue);
 String toTemporalCalendarName(JSGlobalObject*, JSObject*);
 
-enum class TemporalDisambiguation : uint8_t {
-    Compatible,
-    Earlier,
-    Later,
-    Reject,
-};
-
 enum class TemporalDateFormat : uint8_t {
     Date,
     YearMonth,
     MonthDay
+};
+
+enum class TemporalOffsetBehavior : uint8_t {
+    Option,
+    Exact,
+    Wall,
+};
+
+enum class TemporalMatchBehavior : bool {
+    Exactly,
+    Minutes,
 };
 
 } // namespace JSC

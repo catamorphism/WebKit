@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "DateConstructor.h"
 #include "ISO8601.h"
 #include "LazyProperty.h"
 #include "TemporalCalendar.h"
@@ -67,6 +68,9 @@ public:
 
     TemporalPlainDateTime* with(JSGlobalObject*, JSObject* temporalDateLike, JSValue options);
     TemporalPlainDateTime* round(JSGlobalObject*, JSValue options);
+
+    TemporalPlainDateTime* addDurationToDateTime(JSGlobalObject*, bool, ISO8601::Duration, JSObject*);
+    static ISO8601::PlainDateTime combineISODateAndTimeRecord(ISO8601::PlainDate, ISO8601::PlainTime);
     static ISO8601::PlainDateTime balanceISODateTime(double, double, double, double, double, double, double,
         double, double);
 
@@ -91,5 +95,20 @@ private:
     ISO8601::PlainTime m_plainTime;
     LazyProperty<TemporalPlainDateTime, TemporalCalendar> m_calendar;
 };
+
+// https://tc39.es/proposal-temporal/#sec-temporal-isodatetimewithinlimits
+constexpr bool isoDateTimeWithinLimits(ISO8601::PlainDateTime isoDateTime)
+{
+    auto isoDate = isoDateTime.date();
+
+    if (std::abs(makeDay(isoDate.year(), isoDate.month() - 1, isoDate.day())) > 100000001)
+        return false;
+    auto ns = ISO8601::getUTCEpochNanoseconds(isoDateTime);
+    if (ns <= ISO8601::ExactTime::minValue - ISO8601::ExactTime::nsPerDay)
+        return false;
+    if (ns >= ISO8601::ExactTime::maxValue + ISO8601::ExactTime::nsPerDay)
+        return false;
+    return true;
+}
 
 } // namespace JSC
