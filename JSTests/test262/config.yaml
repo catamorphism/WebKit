@@ -470,47 +470,10 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/calendar-number.js
     - test/built-ins/Temporal/ZonedDateTime/calendar-wrong-type.js
     - test/built-ins/Temporal/ZonedDateTime/construction-and-properties.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/add-duration.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/add-large-subseconds.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/argument-duration-max.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/argument-duration-max-plus-min-date.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/argument-duration-out-of-range.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/argument-mixed-sign.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/argument-not-object.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/argument-propertybag-optional-properties.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/argument-string-fractional-units-rounding-mode.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/argument-string-negative-fractional-units.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/basic-arithmetic.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/blank-duration.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/builtin.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/casts-argument.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/constrain-when-ambiguous-result.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/cross-epoch.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/length.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/math-order-of-operations-add-constrain.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/math-order-of-operations-add-none.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/math-order-of-operations-add-reject.js
+    # Depends on ZonedDateTime daysInMonth property
     - test/built-ins/Temporal/ZonedDateTime/prototype/add/month-boundary.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/name.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/negative-epochnanoseconds.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/non-integer-throws-rangeerror.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/not-a-constructor.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/options-object.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/options-read-before-algorithmic-validation.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/options-undefined.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/order-of-operations.js
+    # Depends on PlainDate.toZonedDateTime
     - test/built-ins/Temporal/ZonedDateTime/prototype/add/overflow-adding-months-to-max-year.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/overflow-invalid-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/overflow.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/overflow-undefined.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/overflow-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/subclassing-ignored.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/symmetrical-wrt-negative-durations-in-time-part.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/throw-when-ambiguous-result-with-reject.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/throw-when-intermediate-datetime-outside-valid-limits.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/day/basic.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/dayOfWeek/branding.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/dayOfWeek/prop-desc.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/dayOfYear/basic.js
@@ -710,45 +673,8 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/startOfDay/prop-desc.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/startOfDay/subclassing-ignored.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/startOfDay/throws-if-epoch-nanoseconds-outside-valid-limits.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/argument-duration-max.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/argument-duration-max-plus-min-date.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/argument-duration-out-of-range.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/argument-mixed-sign.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/argument-not-object.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/argument-propertybag-optional-properties.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/argument-string-fractional-units-rounding-mode.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/argument-string-negative-fractional-units.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/basic-arithmetic.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/blank-duration.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/builtin.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/casts-argument.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/constrain-when-ambiguous-result.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/length.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/math-order-of-operations-subtract-constrain.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/math-order-of-operations-subtract-none.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/math-order-of-operations-subtract-reject.js
+    # Depends on ZonedDateTime daysInMonth property
     - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/month-boundary.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/name.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/negative-epochnanoseconds.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/non-integer-throws-rangeerror.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/not-a-constructor.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/options-object.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/options-read-before-algorithmic-validation.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/options-undefined.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/order-of-operations.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/overflow-invalid-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/overflow.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/overflow-subtracting-months-from-min-year.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/overflow-undefined.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/overflow-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/subclassing-ignored.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/subtract-duration-object.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/subtract-large-subseconds.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/symmetrical-wrt-negative-durations.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/throw-when-ambiguous-result-with-reject.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/throw-when-intermediate-datetime-outside-valid-limits.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/timeZoneId/branding.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/timeZoneId/prop-desc.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/argument-at-limits.js
@@ -862,6 +788,9 @@ skip:
     - test/intl402/Temporal/Instant/prototype/toString/timezone-offset.js
     - test/intl402/Temporal/Instant/prototype/toString/timezone-string-datetime.js
 
+    # Depends on named time zones
+    - test/built-ins/Temporal/ZonedDateTime/prototype/add/add-large-subseconds.js
+    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/subtract-large-subseconds.js
 
     # transferToImmutable() is not implemented yet
     - test/built-ins/ArrayBuffer/prototype/resize/this-is-immutable-arraybuffer-object.js

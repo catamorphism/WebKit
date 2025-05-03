@@ -236,6 +236,55 @@ TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject,
         globalObject->zonedDateTimeStructure(), WTF::move(epochNanoseconds), WTF::move(thisTimeZone)));
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal-addzoneddatetime
+static inline ISO8601::ExactTime addZonedDateTime(JSGlobalObject* globalObject, ISO8601::ExactTime epochNanoseconds, ISO8601::TimeZone timeZone, TemporalCalendar* calendar, ISO8601::InternalDuration duration, TemporalOverflow overflow)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    // FIXME: support non-ISO8601 calendars
+    (void) calendar;
+
+    if (!duration.sign())
+        RELEASE_AND_RETURN(scope, TemporalInstant::addInstant(globalObject,
+            epochNanoseconds, duration.time()));
+    auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, timeZone, epochNanoseconds);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto addedDate = TemporalCalendar::isoDateAdd(globalObject, isoDateTime.date(),
+        duration.dateDuration(), overflow);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto intermediateDateTime =
+        TemporalPlainDateTime::combineISODateAndTimeRecord(addedDate, isoDateTime.time());
+    if (!isoDateTimeWithinLimits(intermediateDateTime)) {
+        throwRangeError(globalObject, scope, "result of adding duration to ZonedDateTime is out of range"_s);
+        return { };
+    }
+    auto intermediateNs = TemporalTimeZone::getEpochNanosecondsFor(globalObject, timeZone,
+        intermediateDateTime, TemporalDisambiguation::Compatible);
+    RETURN_IF_EXCEPTION(scope, { });
+    RELEASE_AND_RETURN(scope, TemporalInstant::addInstant(globalObject,
+        intermediateNs, duration.time()));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-adddurationtozoneddatetime
+TemporalZonedDateTime* TemporalZonedDateTime::addDurationToZonedDateTime(JSGlobalObject* globalObject, AddOrSubtract op, ISO8601::Duration duration, JSObject* options)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    if (op == AddOrSubtract::Subtract)
+        duration = -duration;
+    auto overflow = toTemporalOverflow(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto internalDuration = TemporalDuration::toInternalDuration(duration);
+    // FIXME: handle other calendars
+    TemporalCalendar* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), iso8601CalendarID());
+    auto epochNanoseconds = addZonedDateTime(globalObject, exactTime(), timeZone(),
+        calendar, internalDuration, overflow);
+    RETURN_IF_EXCEPTION(scope, { });
+    RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), WTF::move(epochNanoseconds), timeZone()));
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal-temporalzoneddatetimetostring
 String TemporalZonedDateTime::temporalZonedDateTimeToString(JSGlobalObject* globalObject, ISO8601::ExactTime exactTime,
     ISO8601::TimeZone timeZone, PrecisionData precision, TemporalShowCalendar showCalendar,

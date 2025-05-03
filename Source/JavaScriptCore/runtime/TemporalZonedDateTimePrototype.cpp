@@ -43,6 +43,8 @@ static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncWith);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncWithPlainTime);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncWithTimeZone);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncWithCalendar);
+static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncAdd);
+static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncSubtract);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncEquals);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToString);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToLocaleString);
@@ -83,6 +85,8 @@ const ClassInfo TemporalZonedDateTimePrototype::s_info = { "Temporal.ZonedDateTi
   withPlainTime         temporalZonedDateTimePrototypeFuncWithPlainTime         DontEnum|Function 0
   withTimeZone          temporalZonedDateTimePrototypeFuncWithTimeZone          DontEnum|Function 1
   withCalendar          temporalZonedDateTimePrototypeFuncWithCalendar          DontEnum|Function 1
+  add                   temporalZonedDateTimePrototypeFuncAdd                   DontEnum|Function 1
+  subtract              temporalZonedDateTimePrototypeFuncSubtract              DontEnum|Function 1
   equals                temporalZonedDateTimePrototypeFuncEquals                DontEnum|Function 1
   toString              temporalZonedDateTimePrototypeFuncToString              DontEnum|Function 0
   toLocaleString        temporalZonedDateTimePrototypeFuncToLocaleString        DontEnum|Function 0
@@ -133,6 +137,37 @@ void TemporalZonedDateTimePrototype::finishCreation(VM& vm, JSGlobalObject*)
     Base::finishCreation(vm);
     ASSERT(inherits(info()));
     JSC_TO_STRING_TAG_WITHOUT_TRANSITION();
+}
+
+template<AddOrSubtract op>
+static EncodedJSValue addOrSubtract(JSGlobalObject* globalObject, CallFrame* callFrame)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* zonedDateTime = jsDynamicCast<TemporalZonedDateTime*>(callFrame->thisValue());
+    if (!zonedDateTime)
+        return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.add called on value that's not a ZonedDateTime"_s);
+
+    auto duration = TemporalDuration::toISO8601Duration(globalObject, callFrame->argument(0));
+    RETURN_IF_EXCEPTION(scope, { });
+
+    JSObject* options = intlGetOptionsObject(globalObject, callFrame->argument(1));
+    RETURN_IF_EXCEPTION(scope, { });
+
+    RELEASE_AND_RETURN(scope, JSValue::encode(zonedDateTime->addDurationToZonedDateTime(globalObject, op, duration, options)));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.add
+JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncAdd, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    return addOrSubtract<AddOrSubtract::Add>(globalObject, callFrame);
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.subtract
+JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncSubtract, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    return addOrSubtract<AddOrSubtract::Subtract>(globalObject, callFrame);
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.with

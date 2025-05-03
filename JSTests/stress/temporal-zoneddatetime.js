@@ -184,3 +184,19 @@ shouldBe(Temporal.ZonedDateTime.prototype.toPlainDateTime.length, 0);
 shouldBe(zdt.toPlainDateTime().toString(), (new Temporal.PlainDateTime(1970, 1, 1, 0, 0, 0, 0, 0, 0, 0)).toString());
 shouldBe(Temporal.ZonedDateTime.prototype.toPlainTime.length, 0);
 shouldBe(zdt.toPlainTime().toString(), (new Temporal.PlainTime(0, 0, 0, 0, 0, 0, 0)).toString());
+
+shouldBe(Temporal.ZonedDateTime.prototype.add.length, 1);
+{
+    shouldBe(zdt.add(new Temporal.Duration()).toString(), zdt.toString());
+    shouldBe(zdt.add(new Temporal.Duration(1, 1, 1, 1, 1, 1, 1, 1, 1, 1)).toString(), '1971-02-09T01:01:01.001001001+00:00[UTC]');
+    shouldBe(zdt.add({ hours: 24 }).toString(), '1970-01-02T00:00:00+00:00[UTC]');
+    shouldThrow(() => zdt.add({ years: 300000 }), RangeError);
+}
+
+shouldBe(Temporal.ZonedDateTime.prototype.subtract.length, 1);
+{
+    shouldBe(zdt.subtract(new Temporal.Duration()).toString(), zdt.toString());
+    shouldBe(zdt.subtract(new Temporal.Duration(1, 1, 1, 1, 1, 1, 1, 1, 1, 1)).toString(), '1968-11-22T22:58:58.998998999+00:00[UTC]');
+    shouldBe(zdt.subtract({ hours: 24 }).toString(), '1969-12-31T00:00:00+00:00[UTC]');
+    shouldThrow(() => zdt.subtract({ years: 300000 }), RangeError);
+}

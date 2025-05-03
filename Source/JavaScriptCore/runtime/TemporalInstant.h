@@ -58,6 +58,7 @@ public:
     static TemporalInstant* fromEpochMilliseconds(JSGlobalObject*, JSValue);
     static TemporalInstant* fromEpochNanoseconds(JSGlobalObject*, JSValue);
     static JSValue compare(JSGlobalObject*, JSValue, JSValue);
+    static ISO8601::ExactTime addInstant(JSGlobalObject*, ISO8601::ExactTime, Int128);
     static Int128 roundTemporalInstant(Int128, unsigned, TemporalUnit, RoundingMode);
 
     ISO8601::ExactTime exactTime() const { return m_exactTime.get(); }

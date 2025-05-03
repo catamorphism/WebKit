@@ -275,6 +275,20 @@ static constexpr double maximumIncrement(TemporalUnit smallestUnit)
     RELEASE_ASSERT_NOT_REACHED();
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal-addinstant
+ISO8601::ExactTime TemporalInstant::addInstant(JSGlobalObject* globalObject,
+    ISO8601::ExactTime epochNanoseconds, Int128 timeDuration)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto result = ISO8601::ExactTime(timeDuration + epochNanoseconds.epochNanoseconds());
+    if (!result.isValid()) {
+        throwRangeError(globalObject, scope, "result out of range in addInstant"_s);
+        return { };
+    }
+    return result;
+}
 
 // https://tc39.es/proposal-temporal/#sec-temporal-roundtemporalinstant
 Int128 TemporalInstant::roundTemporalInstant(Int128 ns, unsigned increment, TemporalUnit unit, RoundingMode roundingMode)
