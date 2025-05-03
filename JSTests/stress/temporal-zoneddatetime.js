@@ -175,3 +175,12 @@ shouldBe(Temporal.ZonedDateTime.prototype.equals.length, 1);
 
 shouldBe(Temporal.ZonedDateTime.prototype.valueOf.length, 0);
 shouldThrow(() => zdt.valueOf(), TypeError);
+
+shouldBe(Temporal.ZonedDateTime.prototype.toInstant.length, 0);
+shouldBe(zdt.toInstant().toString(), (new Temporal.Instant(0n)).toString());
+shouldBe(Temporal.ZonedDateTime.prototype.toPlainDate.length, 0);
+shouldBe(zdt.toPlainDate().toString(), (new Temporal.PlainDate(1970, 1, 1)).toString());
+shouldBe(Temporal.ZonedDateTime.prototype.toPlainDateTime.length, 0);
+shouldBe(zdt.toPlainDateTime().toString(), (new Temporal.PlainDateTime(1970, 1, 1, 0, 0, 0, 0, 0, 0, 0)).toString());
+shouldBe(Temporal.ZonedDateTime.prototype.toPlainTime.length, 0);
+shouldBe(zdt.toPlainTime().toString(), (new Temporal.PlainTime(0, 0, 0, 0, 0, 0, 0)).toString());
