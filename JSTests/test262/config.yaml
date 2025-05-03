@@ -26,7 +26,6 @@ skip:
     - test/built-ins/Temporal/PlainDate/prototype/toZonedDateTime
     - test/built-ins/Temporal/PlainDate/prototype/withCalendar
     - test/built-ins/Temporal/PlainDateTime/prototype/since
-    - test/built-ins/Temporal/PlainDateTime/prototype/toZonedDateTime
     - test/built-ins/Temporal/PlainDateTime/prototype/until
     - test/built-ins/Temporal/PlainDateTime/prototype/withCalendar
     - test/intl402/Temporal/Instant/prototype/toZonedDateTimeISO
@@ -802,11 +801,6 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/zoneddatetime-string-multiple-offsets.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/weekOfYear/branding.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/weekOfYear/prop-desc.js
-    # Next four tests depend on Temporal.PlainDateTime.toZonedDateTime
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/basic.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/incorrectly-spelled-properties-ignored.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/overflow-options.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/with/overflow-reject-throws.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/yearOfWeek/basic.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/yearOfWeek/branding.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/yearOfWeek/prop-desc.js
