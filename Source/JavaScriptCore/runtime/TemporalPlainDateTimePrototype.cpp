@@ -33,6 +33,8 @@
 #include "TemporalPlainDate.h"
 #include "TemporalPlainDateTime.h"
 #include "TemporalPlainTime.h"
+#include "TemporalTimeZone.h"
+#include "TemporalZonedDateTime.h"
 
 namespace JSC {
 
@@ -45,6 +47,7 @@ static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncRound);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncEquals);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncToPlainDate);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncToPlainTime);
+static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncToZonedDateTime);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncToString);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncToJSON);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncToLocaleString);
@@ -89,6 +92,7 @@ const ClassInfo TemporalPlainDateTimePrototype::s_info = { "Temporal.PlainDateTi
   equals           temporalPlainDateTimePrototypeFuncEquals             DontEnum|Function 1
   toPlainDate      temporalPlainDateTimePrototypeFuncToPlainDate        DontEnum|Function 0
   toPlainTime      temporalPlainDateTimePrototypeFuncToPlainTime        DontEnum|Function 0
+  toZonedDateTime  temporalPlainDateTimePrototypeFuncToZonedDateTime    DontEnum|Function 1
   toString         temporalPlainDateTimePrototypeFuncToString           DontEnum|Function 0
   toJSON           temporalPlainDateTimePrototypeFuncToJSON             DontEnum|Function 0
   toLocaleString   temporalPlainDateTimePrototypeFuncToLocaleString     DontEnum|Function 0
@@ -302,6 +306,31 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncToPlainTime, (JSGloba
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDateTime.prototype.toPlainTime called on value that's not a PlainDateTime"_s);
 
     return JSValue::encode(TemporalPlainTime::create(vm, globalObject->plainTimeStructure(), plainDateTime->plainTime()));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.plaindatetime.prototype.tozoneddatetime
+JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncToZonedDateTime, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* plainDateTime = jsDynamicCast<TemporalPlainDateTime*>(callFrame->thisValue());
+    if (!plainDateTime)
+        return throwVMTypeError(globalObject, scope, "Temporal.PlainDateTime.prototype.toZonedDateTime called on value that's not a PlainDateTime"_s);
+
+    auto timeZone = TemporalTimeZone::toTemporalTimeZoneIdentifier(globalObject, callFrame->argument(0));
+    RETURN_IF_EXCEPTION(scope, { });
+
+    auto resolvedOptions = intlGetOptionsObject(globalObject, callFrame->argument(1));
+    RETURN_IF_EXCEPTION(scope, { });
+    auto disambiguation = getTemporalDisambiguationOption(globalObject, resolvedOptions);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    auto epochNs = TemporalTimeZone::getEpochNanosecondsFor(globalObject,
+        timeZone, ISO8601::PlainDateTime(plainDateTime->plainDate(), plainDateTime->plainTime()), disambiguation);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::create(vm, globalObject->zonedDateTimeStructure(), WTF::move(epochNs), WTF::move(timeZone))));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindatetime.prototype.tostring

@@ -650,8 +650,8 @@ test/intl402/Temporal/Duration/prototype/round/adjust-rounded-duration-days.js:
   default: 'RangeError: in Temporal.ZonedDateTime, parsing strings with named time zones not implemented yet'
   strict mode: 'RangeError: in Temporal.ZonedDateTime, parsing strings with named time zones not implemented yet'
 test/intl402/Temporal/Duration/prototype/round/dst-balancing-result.js:
-  default: "TypeError: Temporal.PlainDateTime.from(\"2000-04-02\").toZonedDateTime is not a function. (In 'Temporal.PlainDateTime.from(\"2000-04-02\").toZonedDateTime(timeZone)', 'Temporal.PlainDateTime.from(\"2000-04-02\").toZonedDateTime' is undefined)"
-  strict mode: "TypeError: Temporal.PlainDateTime.from(\"2000-04-02\").toZonedDateTime is not a function. (In 'Temporal.PlainDateTime.from(\"2000-04-02\").toZonedDateTime(timeZone)', 'Temporal.PlainDateTime.from(\"2000-04-02\").toZonedDateTime' is undefined)"
+  default: 'RangeError: error parsing time zone from string America/Vancouver'
+  strict mode: 'RangeError: error parsing time zone from string America/Vancouver'
 test/intl402/Temporal/Duration/prototype/round/dst-rounding-result.js:
   default: "RangeError: Couldn't parse time zone name"
   strict mode: "RangeError: Couldn't parse time zone name"
@@ -662,8 +662,8 @@ test/intl402/Temporal/Duration/prototype/toLocaleString/returns-same-results-as-
   default: 'Test262Error: locale="undefined", options="undefined", duration=""P1Y2M3W4DT5H6M7.00800901S"" Expected SameValue(«"P1Y2M3W4DT5H6M7.00800901S"», «"1 yr, 2 mths, 3 wks, 4 days, 5 hr, 6 min, 7 sec, 8 ms, 9 μs, 10 ns"») to be true'
   strict mode: 'Test262Error: locale="undefined", options="undefined", duration=""P1Y2M3W4DT5H6M7.00800901S"" Expected SameValue(«"P1Y2M3W4DT5H6M7.00800901S"», «"1 yr, 2 mths, 3 wks, 4 days, 5 hr, 6 min, 7 sec, 8 ms, 9 μs, 10 ns"») to be true'
 test/intl402/Temporal/Duration/prototype/total/dst-balancing-result.js:
-  default: "TypeError: Temporal.PlainDateTime.from(\"2011-12-29T12:00\").toZonedDateTime is not a function. (In 'Temporal.PlainDateTime.from(\"2011-12-29T12:00\").toZonedDateTime(\"Pacific/Apia\")', 'Temporal.PlainDateTime.from(\"2011-12-29T12:00\").toZonedDateTime' is undefined)"
-  strict mode: "TypeError: Temporal.PlainDateTime.from(\"2011-12-29T12:00\").toZonedDateTime is not a function. (In 'Temporal.PlainDateTime.from(\"2011-12-29T12:00\").toZonedDateTime(\"Pacific/Apia\")', 'Temporal.PlainDateTime.from(\"2011-12-29T12:00\").toZonedDateTime' is undefined)"
+  default: 'RangeError: error parsing time zone from string Pacific/Apia'
+  strict mode: 'RangeError: error parsing time zone from string Pacific/Apia'
 test/intl402/Temporal/Duration/prototype/total/dst-day-length.js:
   default: "RangeError: Couldn't parse time zone name"
   strict mode: "RangeError: Couldn't parse time zone name"

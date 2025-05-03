@@ -297,3 +297,6 @@ shouldThrow(() => { pdt.round({}); }, RangeError);
 shouldThrow(() => { pdt.round({ smallestUnit: 'bogus' }); }, RangeError);
 shouldThrow(() => { pdt.round({ smallestUnit: 'minute', roundingIncrement: 24 }); }, RangeError);
 shouldThrow(() => { pdt.round({ smallestUnit: 'minute', roundingMode: 'bogus' }); }, RangeError);
+
+shouldBe(Temporal.PlainDateTime.prototype.toZonedDateTime.length, 1);
+shouldBe(pdt.toZonedDateTime("UTC").toString(), '0001-02-03T04:05:06.007008009+00:00[UTC]');
