@@ -200,3 +200,35 @@ shouldBe(Temporal.ZonedDateTime.prototype.subtract.length, 1);
     shouldBe(zdt.subtract({ hours: 24 }).toString(), '1969-12-31T00:00:00+00:00[UTC]');
     shouldThrow(() => zdt.subtract({ years: 300000 }), RangeError);
 }
+
+shouldBe(Temporal.ZonedDateTime.prototype.since.length, 1);
+shouldBe(Temporal.ZonedDateTime.prototype.until.length, 1);
+
+{
+    shouldBe(zdt.since('2019-02-28[UTC]').toString(), '-PT430920H');
+    shouldBe(zdt.until('2019-02-28[UTC]').toString(), 'PT430920H');
+    shouldBe(zdt.since('2019-02-28[UTC]', { largestUnit: 'year' }).toString(), "-P49Y1M27D");
+    shouldBe(zdt.until('2019-02-28[UTC]', { largestUnit: 'year' }).toString(), "P49Y1M27D");
+
+    shouldBe(zdt.since('1970-03-01[UTC]', { largestUnit: 'month' }).toString(), "-P2M");
+    shouldBe(zdt.until('1970-03-01[UTC]', { largestUnit: 'month' }).toString(), "P2M");
+    shouldBe(zdt.since('1969-11-01[UTC]', { largestUnit: 'month' }).toString(), "P2M");
+    shouldBe(zdt.until('1969-11-01[UTC]', { largestUnit: 'month' }).toString(), "-P2M");
+
+    shouldBe(zdt.since('1970-01-17[UTC]', { largestUnit: 'week' }).toString(), "-P2W2D");
+    shouldBe(zdt.until('1970-01-17[UTC]', { largestUnit: 'week' }).toString(), "P2W2D");
+    shouldBe(zdt.since('1970-01-17[UTC]', { roundingMode: 'halfExpand', roundingIncrement: 2 }).toString(), "-PT384H");
+    shouldBe(zdt.until('1970-01-17[UTC]', { roundingMode: 'halfExpand', roundingIncrement: 2 }).toString(), "PT384H");
+    shouldBe(zdt.since('1969-12-16[UTC]', { largestUnit: 'week' }).toString(), 'P2W2D');
+    shouldBe(zdt.until('1969-12-16[UTC]', { largestUnit: 'week' }).toString(), '-P2W2D');
+    shouldBe(zdt.since('1969-12-16[UTC]', { largestUnit: 'hour' }).toString(), 'PT384H');
+    shouldBe(zdt.until('1969-12-16[UTC]', { largestUnit: 'hour' }).toString(), '-PT384H');
+
+    const earlier = Temporal.ZonedDateTime.from('1968-11-01[UTC]');
+    const later = Temporal.ZonedDateTime.from('1971-08-07[UTC]');
+
+    shouldBe(later.since(earlier, { smallestUnit: "years", roundingIncrement: 4, roundingMode: "halfExpand" }).toString(), "P4Y");
+    shouldBe(earlier.until(later, { smallestUnit: "years", roundingIncrement: 4, roundingMode: "halfExpand" }).toString(), "P4Y");
+
+    shouldThrow(() => zdt.until('1969-01-01[UTC]', { largestUnit: 'day', smallestUnit: 'month' }), RangeError);
+}

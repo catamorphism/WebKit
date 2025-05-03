@@ -597,6 +597,8 @@ constexpr static inline Int128 makeTime(Int128 hour, Int128 min, Int128 sec, Int
     return (((hour * msPerHour) + min * msPerMinute) + sec * msPerSecond) + ms;
 }
 
+Int128 roundTimeDurationToIncrement(JSGlobalObject*, Int128, Int128, RoundingMode);
+
 } // namespace ISO8601
 
 using CheckedInt128 = Checked<Int128, RecordOverflow>;

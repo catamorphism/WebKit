@@ -99,13 +99,19 @@ public:
 
     static int sign(const ISO8601::Duration&);
     static ISO8601::InternalDuration round(JSGlobalObject*, ISO8601::InternalDuration, double increment, TemporalUnit, RoundingMode);
-    static void roundRelativeDuration(JSGlobalObject*, ISO8601::InternalDuration&, Int128, ISO8601::PlainDate, TemporalUnit, double, TemporalUnit, RoundingMode);
+    static std::optional<ISO8601::PlainDate> regulateISODate(double, double, double, TemporalOverflow);
     static std::tuple<ISO8601::PlainDate, ISO8601::PlainTime> combineISODateAndTimeRecord(ISO8601::PlainDate, ISO8601::PlainTime);
+    static ISO8601::InternalDuration roundRelativeDuration(JSGlobalObject*, ISO8601::InternalDuration&, Int128, ISO8601::PlainDateTime, std::optional<ISO8601::TimeZone>, TemporalUnit, unsigned, TemporalUnit, RoundingMode);
     static ISO8601::Duration toDateDurationRecordWithoutTime(JSGlobalObject*, const ISO8601::Duration&);
     static ISO8601::Duration adjustDateDurationRecord(JSGlobalObject*, const ISO8601::Duration&, double, std::optional<double>, std::optional<double>);
     static std::optional<double> balance(ISO8601::Duration&, TemporalUnit largestUnit);
-    static Nudged nudgeToCalendarUnit(JSGlobalObject*, int32_t, const ISO8601::InternalDuration&, Int128, ISO8601::PlainDate, double, TemporalUnit, RoundingMode);
-    static ISO8601::InternalDuration bubbleRelativeDuration(JSGlobalObject*, int32_t, ISO8601::InternalDuration, Int128, ISO8601::PlainDate, TemporalUnit, TemporalUnit);
+    static ISO8601::Duration toDateDurationWithoutTime(ISO8601::Duration);
+    static Nudged nudgeToCalendarUnit(JSGlobalObject*, int32_t, const ISO8601::InternalDuration&, Int128, ISO8601::PlainDate, ISO8601::PlainTime, std::optional<ISO8601::TimeZone>, unsigned, TemporalUnit, RoundingMode);
+    static ISO8601::InternalDuration bubbleRelativeDuration(JSGlobalObject*, int32_t, ISO8601::InternalDuration, Int128, ISO8601::PlainDate, ISO8601::PlainTime, std::optional<ISO8601::TimeZone>, TemporalUnit, TemporalUnit);
+    static Int128 timeDurationFromEpochNanosecondsDifference(ISO8601::ExactTime, ISO8601::ExactTime);
+    static int32_t timeDurationSign(Int128);
+    static Int128 add24HourDaysToTimeDuration(JSGlobalObject*, Int128, double);
+
 private:
     TemporalDuration(VM&, Structure*, ISO8601::Duration&&);
     DECLARE_DEFAULT_FINISH_CREATION;
@@ -115,6 +121,7 @@ private:
 
     static String toString(JSGlobalObject*, const ISO8601::Duration&, std::tuple<Precision, unsigned> precision);
 
+    static NudgeResult nudgeToZonedTime(JSGlobalObject*, int32_t, ISO8601::InternalDuration, ISO8601::PlainDate, ISO8601::PlainTime, ISO8601::TimeZone, unsigned, TemporalUnit, RoundingMode);
     ISO8601::Duration m_duration;
 };
 

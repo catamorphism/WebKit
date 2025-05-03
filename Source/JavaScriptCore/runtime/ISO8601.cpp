@@ -2010,7 +2010,7 @@ ExactTime ExactTime::round(JSGlobalObject* globalObject, unsigned increment,
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-roundtimedurationtoincrement
-static Int128 roundTimeDurationToIncrement(JSGlobalObject* globalObject, Int128 d, Int128 increment,
+Int128 roundTimeDurationToIncrement(JSGlobalObject* globalObject, Int128 d, Int128 increment,
     RoundingMode roundingMode)
 {
     VM& vm = globalObject->vm();

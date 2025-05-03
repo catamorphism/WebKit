@@ -448,14 +448,7 @@ ISO8601::PlainDate TemporalPlainDate::with(JSGlobalObject* globalObject, JSObjec
         y, m, d, optionalMonthCode, overflow));
 }
 
-// https://tc39.es/proposal-temporal/#sec-getutcepochnanoseconds
-static Int128 getUTCEpochNanoseconds(ISO8601::PlainDate isoDate)
-{
-    return getUTCEpochNanoseconds(
-        std::tuple<ISO8601::PlainDate, ISO8601::PlainTime>(
-            isoDate, ISO8601::PlainTime()));
-}
-
+// https://tc39.es/proposal-temporal/#sec-temporal-differencetemporalplaindate
 ISO8601::Duration TemporalPlainDate::differenceTemporalPlainDate(JSGlobalObject* globalObject, DifferenceOperation op, TemporalPlainDate* other, TemporalUnit smallestUnit, TemporalUnit largestUnit, RoundingMode roundingMode, double increment)
 {
     VM& vm = globalObject->vm();
@@ -468,12 +461,10 @@ ISO8601::Duration TemporalPlainDate::differenceTemporalPlainDate(JSGlobalObject*
     ASSERT(dateDifference);
     ISO8601::InternalDuration duration = ISO8601::InternalDuration::combineDateAndTimeDuration(dateDifference.value(), 0);
     if (smallestUnit != TemporalUnit::Day || increment != 1) {
-        auto isoDate = plainDate();
-        auto isoDateOther = other->plainDate();
-        Int128 destEpochNs = getUTCEpochNanoseconds(isoDateOther);
-        TemporalDuration::roundRelativeDuration(
-            globalObject, duration, destEpochNs, isoDate, largestUnit,
-            increment, smallestUnit, roundingMode);
+        auto isoDateTime = TemporalPlainDateTime::combineISODateAndTimeRecord(plainDate(), ISO8601::PlainTime());
+        auto isoDateTimeOther = TemporalPlainDateTime::combineISODateAndTimeRecord(other->plainDate(), ISO8601::PlainTime());
+        Int128 destEpochNs = ISO8601::getUTCEpochNanoseconds(isoDateTimeOther);
+        TemporalDuration::roundRelativeDuration(globalObject, duration, destEpochNs, isoDateTime, std::nullopt, largestUnit, increment, smallestUnit, roundingMode);
         RETURN_IF_EXCEPTION(scope, { });
     }
     auto result = TemporalDuration::temporalDurationFromInternal(duration, TemporalUnit::Day);

@@ -56,6 +56,8 @@ public:
 
     TemporalZonedDateTime* addDurationToZonedDateTime(JSGlobalObject*, AddOrSubtract, ISO8601::Duration, JSObject*);
     TemporalZonedDateTime* with(JSGlobalObject*, JSObject* temporalDateLike, JSValue options);
+    ISO8601::Duration since(JSGlobalObject*, JSValue, TemporalZonedDateTime*);
+    ISO8601::Duration until(JSGlobalObject*, JSValue, TemporalZonedDateTime*);
 
     ExactTime exactTime() const { return m_exactTime.get(); }
     TimeZone timeZone() const { return m_timeZone; }
@@ -77,6 +79,8 @@ public:
 private:
     TemporalZonedDateTime(VM&, Structure*, ExactTime&&, TimeZone&&);
     void finishCreation(VM&);
+
+    ISO8601::Duration differenceTemporalZonedDateTime(DifferenceOperation, JSGlobalObject*, JSValue, TemporalZonedDateTime*);
 
     Packed<ExactTime> m_exactTime;
     TimeZone m_timeZone;

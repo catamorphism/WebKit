@@ -45,6 +45,8 @@ static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncWithTimeZone)
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncWithCalendar);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncAdd);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncSubtract);
+static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncUntil);
+static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncSince);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncEquals);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToString);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToLocaleString);
@@ -87,6 +89,8 @@ const ClassInfo TemporalZonedDateTimePrototype::s_info = { "Temporal.ZonedDateTi
   withCalendar          temporalZonedDateTimePrototypeFuncWithCalendar          DontEnum|Function 1
   add                   temporalZonedDateTimePrototypeFuncAdd                   DontEnum|Function 1
   subtract              temporalZonedDateTimePrototypeFuncSubtract              DontEnum|Function 1
+  until                 temporalZonedDateTimePrototypeFuncUntil                 DontEnum|Function 1
+  since                 temporalZonedDateTimePrototypeFuncSince                 DontEnum|Function 1
   equals                temporalZonedDateTimePrototypeFuncEquals                DontEnum|Function 1
   toString              temporalZonedDateTimePrototypeFuncToString              DontEnum|Function 0
   toLocaleString        temporalZonedDateTimePrototypeFuncToLocaleString        DontEnum|Function 0
@@ -249,6 +253,44 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncWithCalendar, (JSGlob
 
     // TODO: calendars
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), zonedDateTime->exactTime(), zonedDateTime->timeZone())));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.until
+JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncUntil, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* zonedDateTime = jsDynamicCast<TemporalZonedDateTime*>(callFrame->thisValue());
+    if (!zonedDateTime)
+        return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.until called on value that's not a ZonedDateTime"_s);
+
+    TemporalZonedDateTime* other = TemporalZonedDateTime::from(globalObject, callFrame->argument(0), std::nullopt);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    ISO8601::Duration result = zonedDateTime->until(globalObject, callFrame->argument(1), other);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalDuration::tryCreateIfValid(globalObject, WTF::move(result))));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.since
+JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncSince, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* zonedDateTime = jsDynamicCast<TemporalZonedDateTime*>(callFrame->thisValue());
+    if (!zonedDateTime)
+        return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.since called on value that's not a ZonedDateTime"_s);
+
+    TemporalZonedDateTime* other = TemporalZonedDateTime::from(globalObject, callFrame->argument(0), std::nullopt);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    ISO8601::Duration result = zonedDateTime->since(globalObject, callFrame->argument(1), other);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalDuration::tryCreateIfValid(globalObject, WTF::move(result))));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.equals
