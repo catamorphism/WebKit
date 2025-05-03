@@ -287,6 +287,13 @@ TemporalOverflow toTemporalOverflow(JSGlobalObject*, JSObject*);
 TemporalOverflow toTemporalOverflow(JSGlobalObject*, JSValue);
 String toTemporalCalendarName(JSGlobalObject*, JSObject*);
 
+static constexpr Int128 absInt128(const Int128& value)
+{
+    if (value < 0)
+        return -value;
+    return value;
+}
+
 enum class TemporalDateFormat : uint8_t {
     Date,
     YearMonth,

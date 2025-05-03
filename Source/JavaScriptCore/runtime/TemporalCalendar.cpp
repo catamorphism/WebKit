@@ -1050,10 +1050,11 @@ ISO8601::Duration TemporalCalendar::differenceTemporalPlainYearMonth(JSGlobalObj
         0);
 
     if (smallestUnit != TemporalUnit::Month || increment != 1) {
-        auto isoDateTimeOther = TemporalDuration::combineISODateAndTimeRecord(otherDate, ISO8601::PlainTime());
-        auto destEpochNs = getUTCEpochNanoseconds(isoDateTimeOther);
-        TemporalDuration::roundRelativeDuration(globalObject,
-            duration, destEpochNs, thisDate, largestUnit, increment, smallestUnit, roundingMode);
+        auto isoDateTimeOther = TemporalPlainDateTime::combineISODateAndTimeRecord(otherDate, ISO8601::PlainTime());
+        auto destEpochNs = ISO8601::getUTCEpochNanoseconds(isoDateTimeOther);
+        TemporalDuration::roundRelativeDuration(globalObject, duration, destEpochNs,
+            TemporalPlainDateTime::combineISODateAndTimeRecord(thisDate, ISO8601::PlainTime()),
+            std::nullopt, largestUnit, increment, smallestUnit, roundingMode);
         RETURN_IF_EXCEPTION(scope, { });
     }
     auto result = TemporalDuration::temporalDurationFromInternal(duration, TemporalUnit::Day);

@@ -56,6 +56,8 @@ public:
 
     TemporalZonedDateTime* addDurationToZonedDateTime(JSGlobalObject*, bool, ISO8601::Duration, JSObject*);
     TemporalZonedDateTime* with(JSGlobalObject*, JSObject* temporalDateLike, JSValue options);
+    ISO8601::Duration since(JSGlobalObject*, JSValue, TemporalZonedDateTime*);
+    ISO8601::Duration until(JSGlobalObject*, JSValue, TemporalZonedDateTime*);
 
     String monthCode() const;
     uint8_t dayOfWeek() const;
@@ -82,6 +84,9 @@ public:
 private:
     TemporalZonedDateTime(VM&, Structure*, ExactTime&&, TimeZone&&);
     void finishCreation(VM&);
+
+    ISO8601::Duration differenceTemporalZonedDateTime(bool, JSGlobalObject*, JSValue,
+        TemporalZonedDateTime*);
 
     Packed<ExactTime> m_exactTime;
     TimeZone m_timeZone;

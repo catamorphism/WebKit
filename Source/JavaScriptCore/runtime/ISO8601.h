@@ -490,13 +490,9 @@ Int128 roundTimeDuration(JSGlobalObject*, Int128, unsigned, TemporalUnit, Roundi
 Int128 getUTCEpochNanoseconds(PlainDateTime);
 Int128 getNamedTimeZoneOffsetNanoseconds(TimeZoneID timeZoneIdentifier, Int128);
 
-} // namespace ISO8601
+Int128 roundTimeDurationToIncrement(JSGlobalObject*, Int128, Int128, RoundingMode);
 
-static constexpr Int128 absInt128(const Int128& value)
-{
-    if (value < 0)
-        return -value;
-    return value;
-}
+
+} // namespace ISO8601
 
 } // namespace JSC

@@ -314,14 +314,7 @@ ISO8601::PlainDate TemporalPlainDate::with(JSGlobalObject* globalObject, JSObjec
     RELEASE_AND_RETURN(scope, TemporalCalendar::isoDateFromFields(globalObject, TemporalDateFormat::Date, y, m, d, overflow));
 }
 
-// https://tc39.es/proposal-temporal/#sec-getutcepochnanoseconds
-static Int128 getUTCEpochNanoseconds(ISO8601::PlainDate isoDate)
-{
-    return getUTCEpochNanoseconds(
-        std::tuple<ISO8601::PlainDate, ISO8601::PlainTime>(
-            isoDate, ISO8601::PlainTime()));
-}
-
+// https://tc39.es/proposal-temporal/#sec-temporal-differencetemporalplaindate
 ISO8601::Duration TemporalPlainDate::differenceTemporalPlainDate(JSGlobalObject* globalObject, bool isSince, TemporalPlainDate* other, TemporalUnit smallestUnit, TemporalUnit largestUnit, RoundingMode roundingMode, double increment)
 {
     VM& vm = globalObject->vm();
@@ -332,11 +325,11 @@ ISO8601::Duration TemporalPlainDate::differenceTemporalPlainDate(JSGlobalObject*
     ISO8601::Duration dateDifference = TemporalCalendar::calendarDateUntil(plainDate(), other->plainDate(), largestUnit);
     ISO8601::InternalDuration duration = ISO8601::InternalDuration::combineDateAndTimeDuration(dateDifference, 0);
     if (smallestUnit != TemporalUnit::Day || increment != 1) {
-        auto isoDate = plainDate();
-        auto isoDateOther = other->plainDate();
-        Int128 destEpochNs = getUTCEpochNanoseconds(isoDateOther);
+        auto isoDateTime = TemporalPlainDateTime::combineISODateAndTimeRecord(plainDate(), ISO8601::PlainTime());
+        auto isoDateTimeOther = TemporalPlainDateTime::combineISODateAndTimeRecord(other->plainDate(), ISO8601::PlainTime());
+        Int128 destEpochNs = ISO8601::getUTCEpochNanoseconds(isoDateTimeOther);
         TemporalDuration::roundRelativeDuration(
-            globalObject, duration, destEpochNs, isoDate, largestUnit,
+            globalObject, duration, destEpochNs, isoDateTime, std::nullopt, largestUnit,
             increment, smallestUnit, roundingMode);
         RETURN_IF_EXCEPTION(scope, { });
     }
