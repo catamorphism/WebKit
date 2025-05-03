@@ -310,18 +310,22 @@ std::optional<TemporalUnit> temporalLargestUnit(JSGlobalObject* globalObject, JS
 
 // ToSmallestTemporalUnit ( normalizedOptions, disallowedUnits, fallback )
 // https://tc39.es/proposal-temporal/#sec-temporal-tosmallesttemporalunit
-std::optional<TemporalUnit> temporalSmallestUnit(JSGlobalObject* globalObject, JSObject* options, std::initializer_list<TemporalUnit> disallowedUnits)
+std::optional<TemporalUnit> temporalSmallestUnit(JSGlobalObject* globalObject, std::variant<JSObject*, TemporalUnit> optionsOrUnit, std::initializer_list<TemporalUnit> disallowedUnits)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    String smallestUnit = intlStringOption(globalObject, options, vm.propertyNames->smallestUnit, { }, { }, { });
-    RETURN_IF_EXCEPTION(scope, std::nullopt);
+    std::optional<TemporalUnit> unitType;
+    if (std::holds_alternative<JSObject*>(optionsOrUnit)) {
+        auto options = std::get<JSObject*>(optionsOrUnit);
+        String smallestUnit = intlStringOption(globalObject, options, vm.propertyNames->smallestUnit, { }, { }, { });
+        RETURN_IF_EXCEPTION(scope, std::nullopt);
+        if (!smallestUnit)
+            return std::nullopt;
+        unitType = temporalUnitType(smallestUnit);
+    } else
+        unitType = std::get<TemporalUnit>(optionsOrUnit);
 
-    if (!smallestUnit)
-        return std::nullopt;
-
-    auto unitType = temporalUnitType(smallestUnit);
     if (!unitType) {
         throwRangeError(globalObject, scope, "smallestUnit is an invalid Temporal unit"_s);
         return std::nullopt;
@@ -571,6 +575,21 @@ TemporalDisambiguation getTemporalDisambiguationOption(JSGlobalObject* globalObj
         }, "disambiguation must be \"compatible\", \"earlier\", \"later\", or \"reject\""_s, TemporalDisambiguation::Reject);
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal-getroundingincrementoption
+unsigned getRoundingIncrementOption(JSGlobalObject* globalObject, JSObject* roundTo)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    unsigned integerIncrement = doubleNumberOption(globalObject, roundTo, vm.propertyNames->roundingIncrement, 1);
+    RETURN_IF_EXCEPTION(scope, { });
+    if (integerIncrement < 1 || integerIncrement > 1000000000) {
+        throwRangeError(globalObject, scope, "rounding increment must be at least 1 and at most 1e9"_s);
+        return { };
+    }
+    return integerIncrement;
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal-negatetemporalroundingmode
 RoundingMode negateTemporalRoundingMode(RoundingMode roundingMode)
 {
@@ -685,6 +704,23 @@ double temporalRoundingIncrement(JSGlobalObject* globalObject, double increment,
     }
 
     return increment;
+}
+
+// https://tc39.es/proposal-temporal/#sec-validatetemporalroundingincrement
+bool validateTemporalRoundingIncrement(unsigned increment, unsigned dividend, bool inclusive)
+{
+    unsigned maximum;
+    if (inclusive)
+        maximum = dividend;
+    else {
+        ASSERT(dividend > 1);
+        maximum = dividend - 1;
+    }
+    if (increment > maximum)
+        return false;
+    if (dividend % increment)
+        return false;
+    return true;
 }
 
 // TODO: See comment on roundNumberToIncrementInt128()
