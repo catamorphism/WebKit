@@ -232,3 +232,17 @@ shouldBe(Temporal.ZonedDateTime.prototype.until.length, 1);
 
     shouldThrow(() => zdt.until('1969-01-01[UTC]', { largestUnit: 'day', smallestUnit: 'month' }), RangeError);
 }
+
+shouldBe(Temporal.ZonedDateTime.prototype.round.length, 1);
+{
+    const zdt1 = (new Temporal.PlainDateTime(1, 2, 3, 4, 5, 6, 7, 8, 9)).toZonedDateTime("UTC");
+
+    shouldBe(zdt1.round('hour').toString(), '0001-02-03T04:00:00+00:00[UTC]');
+    shouldBe(zdt1.round({ smallestUnit: 'hour' }).toString(), zdt1.round('hour').toString());
+    shouldBe(zdt1.round({ smallestUnit: 'minute', roundingIncrement: 2 }).toString(), '0001-02-03T04:06:00+00:00[UTC]');
+    shouldBe(zdt1.round({ smallestUnit: 'minute', roundingIncrement: 2, roundingMode: 'floor' }).toString(), '0001-02-03T04:04:00+00:00[UTC]');
+    shouldThrow(() => zdt.round({}), RangeError);
+    shouldThrow(() => zdt.round({ smallestUnit: 'bogus' }), RangeError);
+    shouldThrow(() => zdt.round({ smallestUnit: 'minute', roundingIncrement: 24 }), RangeError);
+    shouldThrow(() => zdt.round({ smallestUnit: 'minute', roundingMode: 'bogus' }), RangeError);
+}

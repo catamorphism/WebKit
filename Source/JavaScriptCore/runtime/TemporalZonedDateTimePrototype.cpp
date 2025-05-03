@@ -47,6 +47,7 @@ static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncAdd);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncSubtract);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncUntil);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncSince);
+static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncRound);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncEquals);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToString);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToLocaleString);
@@ -91,6 +92,7 @@ const ClassInfo TemporalZonedDateTimePrototype::s_info = { "Temporal.ZonedDateTi
   subtract              temporalZonedDateTimePrototypeFuncSubtract              DontEnum|Function 1
   until                 temporalZonedDateTimePrototypeFuncUntil                 DontEnum|Function 1
   since                 temporalZonedDateTimePrototypeFuncSince                 DontEnum|Function 1
+  round                 temporalZonedDateTimePrototypeFuncRound                 DontEnum|Function 1
   equals                temporalZonedDateTimePrototypeFuncEquals                DontEnum|Function 1
   toString              temporalZonedDateTimePrototypeFuncToString              DontEnum|Function 0
   toLocaleString        temporalZonedDateTimePrototypeFuncToLocaleString        DontEnum|Function 0
@@ -291,6 +293,23 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncSince, (JSGlobalObjec
     RETURN_IF_EXCEPTION(scope, { });
 
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalDuration::tryCreateIfValid(globalObject, WTF::move(result))));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.round
+JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncRound, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* zonedDateTime = jsDynamicCast<TemporalZonedDateTime*>(callFrame->thisValue());
+    if (!zonedDateTime)
+        return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.round called on value that's not a ZonedDateTime"_s);
+
+    auto options = callFrame->argument(0);
+    if (options.isUndefined())
+        return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.round requires an options argument"_s);
+
+    RELEASE_AND_RETURN(scope, JSValue::encode(zonedDateTime->round(globalObject, options)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.equals

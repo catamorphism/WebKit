@@ -601,6 +601,21 @@ TemporalDisambiguation getTemporalDisambiguationOption(JSGlobalObject* globalObj
         }, "disambiguation must be \"compatible\", \"earlier\", \"later\", or \"reject\""_s, TemporalDisambiguation::Reject);
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal-getroundingincrementoption
+unsigned getRoundingIncrementOption(JSGlobalObject* globalObject, JSObject* roundTo)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    unsigned integerIncrement = doubleNumberOption(globalObject, roundTo, vm.propertyNames->roundingIncrement, 1);
+    RETURN_IF_EXCEPTION(scope, { });
+    if (integerIncrement < 1 || integerIncrement > 1000000000) {
+        throwRangeError(globalObject, scope, "rounding increment must be at least 1 and at most 1e9"_s);
+        return { };
+    }
+    return integerIncrement;
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal-negatetemporalroundingmode
 RoundingMode negateTemporalRoundingMode(RoundingMode roundingMode)
 {
@@ -769,7 +784,7 @@ std::optional<String> temporalTimeZone(JSGlobalObject* globalObject, JSObject* o
     return timeZone;
 }
 
-static double doubleNumberOption(JSGlobalObject* globalObject, JSObject* options, PropertyName property, double defaultValue)
+double doubleNumberOption(JSGlobalObject* globalObject, JSObject* options, PropertyName property, double defaultValue)
 {
     // https://tc39.es/proposal-temporal/#sec-getoption
     // 'number' case.

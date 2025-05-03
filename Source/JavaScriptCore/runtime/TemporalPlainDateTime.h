@@ -70,6 +70,8 @@ public:
     TemporalPlainDateTime* round(JSGlobalObject*, JSValue options);
     static ISO8601::PlainDateTime balanceISODateTime(JSGlobalObject*, Int128, Int128, Int128, Int128, Int128, Int128, Int128, Int128, Int128);
     static ISO8601::PlainDateTime balanceISODateTime(JSGlobalObject*, double, double, double, double, double, double, double, double, double);
+    static ISO8601::PlainDateTime roundISODateTime(JSGlobalObject*, ISO8601::PlainDateTime, unsigned, TemporalUnit, RoundingMode);
+
     TemporalPlainDateTime* addDurationToDateTime(JSGlobalObject*, bool, ISO8601::Duration, JSObject*);
     static ISO8601::PlainDateTime combineISODateAndTimeRecord(ISO8601::PlainDate, ISO8601::PlainTime);
 

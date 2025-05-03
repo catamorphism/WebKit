@@ -162,6 +162,103 @@ static ISO8601::ExactTime interpretISODateTimeOffset(JSGlobalObject* globalObjec
         possibleEpochNs, timeZone, ISO8601::PlainDateTime(isoDate, time), disambiguation));
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.round
+TemporalZonedDateTime* TemporalZonedDateTime::round(JSGlobalObject* globalObject, JSValue roundToValue)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    JSValue paramString;
+    auto roundingIncrement = 1;
+    auto roundingMode = RoundingMode::HalfExpand;
+    std::optional<TemporalUnit> smallestUnitOptional;
+
+    if (!roundToValue.isString()) {
+        JSObject* roundTo = intlGetOptionsObject(globalObject, roundToValue);
+        RETURN_IF_EXCEPTION(scope, { });
+
+        roundingIncrement = getRoundingIncrementOption(globalObject, roundTo);
+        RETURN_IF_EXCEPTION(scope, { });
+        roundingMode = temporalRoundingMode(globalObject, roundTo, RoundingMode::HalfExpand);
+        RETURN_IF_EXCEPTION(scope, { });
+        auto smallestUnitOptionalString = temporalSmallestUnit(globalObject, roundTo);
+        RETURN_IF_EXCEPTION(scope, { });
+        smallestUnitOptional = validateSmallestUnit(globalObject, smallestUnitOptionalString,  { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week });
+
+    } else {
+        auto smallestUnit = roundToValue.toWTFString(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+        smallestUnitOptional = validateSmallestUnit(globalObject, smallestUnit, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week });
+    }
+    RETURN_IF_EXCEPTION(scope, { });
+
+    if (!smallestUnitOptional) {
+        throwRangeError(globalObject, scope, "Bad value given for smallestUnit in Temporal.ZonedDateTime.round()"_s);
+        return { };
+    }
+    auto smallestUnit = smallestUnitOptional.value();
+
+    auto maximum = 1;
+    auto inclusive = Inclusivity::Inclusive;
+    if (smallestUnit != TemporalUnit::Day) {
+        switch (smallestUnit) {
+        case TemporalUnit::Hour:
+            maximum = 24;
+            break;
+        case TemporalUnit::Minute:
+        case TemporalUnit::Second:
+            maximum = 60;
+            break;
+        case TemporalUnit::Millisecond:
+        case TemporalUnit::Microsecond:
+        case TemporalUnit::Nanosecond:
+            maximum = 1000;
+            break;
+        default:
+            RELEASE_ASSERT_NOT_REACHED();
+        }
+        inclusive = Inclusivity::Exclusive;
+    }
+
+    validateTemporalRoundingIncrement(globalObject, roundingIncrement, maximum, inclusive);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    if (smallestUnit == TemporalUnit::Nanosecond && roundingIncrement == 1)
+        RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), exactTime(), timeZone()));
+
+    auto thisNs = m_exactTime.get();
+    auto timeZone = m_timeZone;
+    auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, timeZone, thisNs);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    ISO8601::ExactTime epochNanoseconds;
+    if (smallestUnit == TemporalUnit::Day) {
+        auto dateStart = isoDateTime.date();
+        auto dateEnd = TemporalCalendar::balanceISODate(globalObject, static_cast<Int128>(dateStart.year()), static_cast<Int128>(dateStart.month()), static_cast<Int128>(dateStart.day()) + 1);
+        RETURN_IF_EXCEPTION(scope, { });
+        auto startNs = TemporalTimeZone::getStartOfDay(globalObject, timeZone, dateStart);
+        RETURN_IF_EXCEPTION(scope, { });
+        ASSERT(thisNs >= startNs);
+        auto endNs = TemporalTimeZone::getStartOfDay(globalObject, timeZone, dateEnd);
+        RETURN_IF_EXCEPTION(scope, { });
+        ASSERT(thisNs < endNs);
+        Int128 dayLengthNs = endNs.epochNanoseconds() - startNs.epochNanoseconds();
+        Int128 dayProgressNs = TemporalDuration::timeDurationFromEpochNanosecondsDifference(thisNs, startNs);
+        std::optional<Int128> roundedDayNsOptional = ISO8601::roundTimeDurationToIncrement(globalObject,
+            dayProgressNs, dayLengthNs, roundingMode);
+        RETURN_IF_EXCEPTION(scope, { });
+        epochNanoseconds = ISO8601::ExactTime(startNs.epochNanoseconds() + roundedDayNsOptional.value());
+    } else {
+        auto roundResult = TemporalPlainDateTime::roundISODateTime(globalObject, isoDateTime, roundingIncrement, smallestUnit, roundingMode);
+        RETURN_IF_EXCEPTION(scope, { });
+        int64_t offsetNanoseconds = static_cast<int64_t>(TemporalTimeZone::getOffsetNanosecondsFor(timeZone, thisNs.epochNanoseconds()));
+        epochNanoseconds = interpretISODateTimeOffset(globalObject, roundResult.date(), roundResult.time(), TemporalOffsetBehavior::Option, offsetNanoseconds, timeZone, TemporalDisambiguation::Compatible, TemporalOffset::Prefer, TemporalMatchBehavior::Exactly);
+        RETURN_IF_EXCEPTION(scope, { });
+    }
+    RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(),
+        WTF::move(epochNanoseconds), WTF::move(timeZone)));
+}
+
 TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject, JSObject* temporalZonedDateTimeLike, JSValue options)
 {
     VM& vm = globalObject->vm();

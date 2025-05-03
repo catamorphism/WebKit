@@ -409,6 +409,25 @@ TemporalPlainDateTime* TemporalPlainDateTime::round(JSGlobalObject* globalObject
     RELEASE_AND_RETURN(scope, TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), WTF::move(plainDate), WTF::move(plainTime)));
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal-roundisodatetime
+ISO8601::PlainDateTime TemporalPlainDateTime::roundISODateTime(JSGlobalObject* globalObject,
+    ISO8601::PlainDateTime isoDateTime, unsigned increment, TemporalUnit unit, RoundingMode roundingMode)
+{
+    auto isoDate = isoDateTime.date();
+    auto isoTime = isoDateTime.time();
+
+    ASSERT(ISO8601::isDateTimeWithinLimits(isoDate.year(), isoDate.month(), isoDate.day(),
+        isoTime.hour(), isoTime.minute(), isoTime.second(), isoTime.millisecond(),
+        isoTime.microsecond(), isoTime.nanosecond()));
+    auto roundedTime = TemporalPlainTime::roundTime(isoTime, increment, unit, roundingMode, std::nullopt);
+
+    auto balanceResult = TemporalCalendar::balanceISODate(globalObject,
+        isoDate.year(), isoDate.month(), isoDate.day() + roundedTime.days());
+    return combineISODateAndTimeRecord(balanceResult,
+        ISO8601::PlainTime(roundedTime.hours(), roundedTime.minutes(), roundedTime.seconds(),
+            roundedTime.milliseconds(), roundedTime.microseconds(), roundedTime.nanoseconds()));
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal-balanceisodatetime
 // The way this is currently called, only `nanosecond` needs to be an Int128; everything
 // else can be an int32_t. But for consistency, everything is an Int128.

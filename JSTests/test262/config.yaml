@@ -529,50 +529,6 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/offsetNanoseconds/branding.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/offsetNanoseconds/prop-desc.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/offset/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/builtin.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/day-rounding-out-of-range.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/get-start-of-day-throws.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/length.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/name.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/negative-epochnanoseconds.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/negative-time.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/not-a-constructor.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/options-read-before-algorithmic-validation.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/order-of-operations.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/round-dst-boundaries.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/rounded-date-time-outside-valid-limits.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/rounding-direction.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingincrement-nan.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingincrement-non-integer.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingincrement-out-of-range.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/rounding-increments.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingincrement-undefined.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingincrement-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/rounding-is-noop.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingmode-ceil.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingmode-expand.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingmode-floor.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingmode-halfCeil.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingmode-halfEven.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingmode-halfExpand.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingmode-halfFloor.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingmode-halfTrunc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingmode-invalid-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingmode-trunc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingmode-undefined.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundingmode-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/roundto-invalid-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/smallestunit-invalid-string.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/smallestunit.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/smallestunit-plurals-accepted.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/smallestunit-string-shorthand.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/smallestunit-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/subclassing-ignored.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/throws-on-invalid-increments.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/throws-without-smallestunit.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/round/valid-increments.js
     # Buggy test, see https://github.com/tc39/test262/pull/5001
     - test/built-ins/Temporal/ZonedDateTime/prototype/since/no-fractional-minutes-hours.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/startOfDay/branding.js
@@ -603,9 +559,9 @@ skip:
     - test/intl402/Temporal/Duration/prototype/total/relativeto-dst-back-transition.js
     - test/intl402/Temporal/Instant/prototype/toString/timezone-offset.js
     - test/intl402/Temporal/Instant/prototype/toString/timezone-string-datetime.js
-
     # Depends on named time zones
     - test/built-ins/Temporal/ZonedDateTime/prototype/add/add-large-subseconds.js
+    - test/built-ins/Temporal/ZonedDateTime/prototype/round/round-dst-boundaries.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/subtract-large-subseconds.js
 
     # transferToImmutable() is not implemented yet
