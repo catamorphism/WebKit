@@ -462,3 +462,10 @@ const maxValue = new Temporal.Instant(86400_0000_0000_000_000_000n);
     shouldBe(inst.epochNanoseconds, zdt.epochNanoseconds);
     shouldBe(zdt.timeZoneId, "UTC");
 }
+
+// from() works with ZonedDateTime argument
+{
+    const zdt = new Temporal.ZonedDateTime(0n, "UTC");
+    const inst = Temporal.Instant.from(zdt);
+    shouldBe(inst.epochNanoseconds, zdt.epochNanoseconds);
+}

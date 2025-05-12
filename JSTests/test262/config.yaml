@@ -445,16 +445,11 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-unknown-annotation.js
 
     # Depends on Temporal.ZonedDateTime
-    - test/built-ins/Temporal/Instant/compare/argument-zoneddatetime.js
-    - test/built-ins/Temporal/Instant/from/argument-zoneddatetime.js
-    - test/built-ins/Temporal/Instant/prototype/equals/argument-zoneddatetime.js
-    - test/built-ins/Temporal/Instant/prototype/since/argument-zoneddatetime.js
     - test/built-ins/Temporal/Instant/prototype/toString/timezone-offset.js
     - test/built-ins/Temporal/Instant/prototype/toString/timezone-string.js
     - test/built-ins/Temporal/Instant/prototype/toString/timezone-string-datetime.js
     - test/built-ins/Temporal/Instant/prototype/toString/timezone-string-leap-second.js
     - test/built-ins/Temporal/Instant/prototype/toString/timezone-string-multiple-offsets.js
-    - test/built-ins/Temporal/Instant/prototype/until/argument-zoneddatetime.js
     - test/built-ins/Temporal/PlainDate/compare/argument-zoneddatetime-slots.js
     - test/built-ins/Temporal/PlainDate/from/argument-zoneddatetime-slots.js
     - test/built-ins/Temporal/PlainDate/prototype/equals/argument-zoneddatetime-slots.js
