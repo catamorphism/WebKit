@@ -227,6 +227,12 @@ static Int128 getNamedTimeZoneOffsetNanosecondsImpl(TimeZoneID timeZoneIdentifie
     return 0;
 }
 
+// FIXME: named time zones
+std::optional<ISO8601::ExactTime> TemporalTimeZone::getNamedTimeZonePreviousTransition(TimeZoneID, Int128)
+{
+    return std::nullopt;
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal-getnamedtimezonenexttransition
 std::optional<ISO8601::ExactTime> TemporalTimeZone::getNamedTimeZoneNextTransition(TimeZoneID timeZoneIdentifier,
 Int128 epochNanoseconds)

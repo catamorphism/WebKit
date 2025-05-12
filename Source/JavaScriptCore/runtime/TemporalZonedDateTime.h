@@ -59,6 +59,7 @@ public:
     TemporalZonedDateTime* round(JSGlobalObject*, JSValue options);
     ISO8601::Duration since(JSGlobalObject*, JSValue, TemporalZonedDateTime*);
     ISO8601::Duration until(JSGlobalObject*, JSValue, TemporalZonedDateTime*);
+    JSValue getTimeZoneTransition(JSGlobalObject*, JSValue);
 
     ExactTime exactTime() const { return m_exactTime.get(); }
     TimeZone timeZone() const { return m_timeZone; }

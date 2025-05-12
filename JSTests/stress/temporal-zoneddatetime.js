@@ -246,3 +246,17 @@ shouldBe(Temporal.ZonedDateTime.prototype.round.length, 1);
     shouldThrow(() => zdt.round({ smallestUnit: 'minute', roundingIncrement: 24 }), RangeError);
     shouldThrow(() => zdt.round({ smallestUnit: 'minute', roundingMode: 'bogus' }), RangeError);
 }
+
+shouldBe(Temporal.ZonedDateTime.prototype.startOfDay.length, 0);
+{
+    shouldBe(zdt.toString(), zdt.startOfDay().toString());
+
+    var zdt1 = new Temporal.ZonedDateTime(-864n * 10n**19n, "-01");
+    shouldThrow(() => zdt1.startOfDay(), RangeError);
+}
+
+shouldBe(Temporal.ZonedDateTime.prototype.getTimeZoneTransition.length, 1);
+{
+    shouldBe(zdt.getTimeZoneTransition("next"), null);
+    shouldBe(zdt.getTimeZoneTransition("previous"), null);
+}

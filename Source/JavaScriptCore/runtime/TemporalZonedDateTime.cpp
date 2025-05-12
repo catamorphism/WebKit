@@ -99,6 +99,61 @@ TemporalZonedDateTime* TemporalZonedDateTime::tryCreateIfValid(JSGlobalObject* g
     return TemporalZonedDateTime::create(vm, structure, WTF::move(epochNanoseconds), WTF::move(timeZone));
 }
 
+// https://tc39.es/proposal-temporal/#sec-isoffsettimezoneidentifier
+static bool isOffsetTimeZoneIdentifier(const ISO8601::TimeZone& t)
+{
+    return t.isOffset();
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.gettimezonetransition
+JSValue TemporalZonedDateTime::getTimeZoneTransition(JSGlobalObject* globalObject, JSValue directionParam)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    if (directionParam.isUndefined()) {
+        throwTypeError(globalObject, scope, "getTimeZoneTransition: direction param must not be undefined"_s);
+        return { };
+    }
+
+    TemporalDirectionOption direction;
+    if (directionParam.isString()) {
+        auto paramString = directionParam.toWTFString(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+        if (paramString == "next"_s)
+            direction = TemporalDirectionOption::Next;
+        else if (paramString == "previous"_s)
+            direction = TemporalDirectionOption::Previous;
+        else {
+            throwRangeError(globalObject, scope, "getTimeZoneTransition: direction must be 'next' or 'previous'"_s);
+            return { };
+        }
+    } else {
+        JSObject* options = intlGetOptionsObject(globalObject, directionParam);
+        RETURN_IF_EXCEPTION(scope, { });
+        auto directionOptional = getDirectionOption(globalObject, options);
+        RETURN_IF_EXCEPTION(scope, { });
+        if (!directionOptional) {
+            throwRangeError(globalObject, scope, "getTimeZoneTransition: direction option must be present"_s);
+            return { };
+        }
+        direction = directionOptional.value();
+    }
+
+    if (isOffsetTimeZoneIdentifier(timeZone()))
+        return jsNull();
+    std::optional<ExactTime> transition;
+    if (direction == TemporalDirectionOption::Next) {
+        transition = TemporalTimeZone::getNamedTimeZoneNextTransition(timeZone().asID(),
+            exactTime().epochNanoseconds());
+    } else {
+        transition = TemporalTimeZone::getNamedTimeZonePreviousTransition(timeZone().asID(),
+            exactTime().epochNanoseconds());
+    }
+    if (!transition)
+        return jsNull();
+    RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), WTF::move(transition.value()), timeZone()));
+}
 
 // https://tc39.es/proposal-temporal/#sec-temporal-interpretisodatetimeoffset
 static ISO8601::ExactTime interpretISODateTimeOffset(JSGlobalObject* globalObject,

@@ -500,18 +500,6 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/era/prop-desc.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/eraYear/branding.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/eraYear/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/builtin.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/direction-undefined.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/direction-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/length.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/name.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/not-a-constructor.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/offset-timezone-no-transitions.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/order-of-operations.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/utc-no-transitions.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/wrong-string.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/basic.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/branding.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/get-start-of-day-throws.js
@@ -531,14 +519,6 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/offset/prop-desc.js
     # Buggy test, see https://github.com/tc39/test262/pull/5001
     - test/built-ins/Temporal/ZonedDateTime/prototype/since/no-fractional-minutes-hours.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/startOfDay/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/startOfDay/builtin.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/startOfDay/length.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/startOfDay/name.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/startOfDay/not-a-constructor.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/startOfDay/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/startOfDay/subclassing-ignored.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/startOfDay/throws-if-epoch-nanoseconds-outside-valid-limits.js
     # Depends on ZonedDateTime daysInMonth property
     - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/month-boundary.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/timeZoneId/branding.js

@@ -53,6 +53,8 @@ static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToString);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToLocaleString);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToJSON);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncValueOf);
+static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncStartOfDay);
+static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncGetTimeZoneTransition);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToInstant);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToPlainDate);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToPlainTime);
@@ -98,6 +100,8 @@ const ClassInfo TemporalZonedDateTimePrototype::s_info = { "Temporal.ZonedDateTi
   toLocaleString        temporalZonedDateTimePrototypeFuncToLocaleString        DontEnum|Function 0
   toJSON                temporalZonedDateTimePrototypeFuncToJSON                DontEnum|Function 0
   valueOf               temporalZonedDateTimePrototypeFuncValueOf               DontEnum|Function 0
+  startOfDay            temporalZonedDateTimePrototypeFuncStartOfDay            DontEnum|Function 0
+  getTimeZoneTransition temporalZonedDateTimePrototypeFuncGetTimeZoneTransition DontEnum|Function 1
   toInstant             temporalZonedDateTimePrototypeFuncToInstant             DontEnum|Function 0
   toPlainDate           temporalZonedDateTimePrototypeFuncToPlainDate           DontEnum|Function 0
   toPlainTime           temporalZonedDateTimePrototypeFuncToPlainTime           DontEnum|Function 0
@@ -425,6 +429,38 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncValueOf, (JSGlobalObj
     auto scope = DECLARE_THROW_SCOPE(vm);
 
     return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.valueOf must not be called. To compare ZonedDateTime values, use Temporal.ZonedDateTime.compare"_s);
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.startofday
+JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncStartOfDay, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* zonedDateTime = jsDynamicCast<TemporalZonedDateTime*>(callFrame->thisValue());
+    if (!zonedDateTime)
+        return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.startOfDay called on value that's not a ZonedDateTime"_s);
+
+    auto timeZone = zonedDateTime->timeZone();
+    auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, timeZone, zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
+    auto epochNanoseconds = TemporalTimeZone::getStartOfDay(globalObject, timeZone, isoDateTime.date());
+    RETURN_IF_EXCEPTION(scope, { });
+
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), WTF::move(epochNanoseconds), WTF::move(timeZone))));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.gettimezonetransition
+JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncGetTimeZoneTransition, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* zonedDateTime = jsDynamicCast<TemporalZonedDateTime*>(callFrame->thisValue());
+    if (!zonedDateTime)
+        return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.getTimeZoneTransition called on value that's not a ZonedDateTime"_s);
+
+    RELEASE_AND_RETURN(scope, JSValue::encode(zonedDateTime->getTimeZoneTransition(globalObject, callFrame->argument(0))));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.toinstant

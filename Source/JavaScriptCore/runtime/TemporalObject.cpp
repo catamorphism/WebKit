@@ -571,6 +571,13 @@ TemporalShowOffset getTemporalShowOffsetOption(JSGlobalObject* globalObject, JSO
         }, "offset must be \"auto\" or \"never\""_s, TemporalShowOffset::Auto);
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal-getdirectionoption
+std::optional<TemporalDirectionOption> getDirectionOption(JSGlobalObject* globalObject, JSObject* options)
+{
+    return intlOption<std::optional<TemporalDirectionOption>>(globalObject, options, globalObject->vm().propertyNames->direction, {
+        { "next"_s, TemporalDirectionOption::Next }, { "previous"_s, TemporalDirectionOption::Previous } },
+        "direction must be \"next\" or \"previous\""_s, std::nullopt);
+}
 
 // https://tc39.es/proposal-temporal/#sec-temporal-gettemporaloffsetoption
 TemporalOffset getTemporalOffsetOption(JSGlobalObject* globalObject, JSObject* options, TemporalOffset fallback)

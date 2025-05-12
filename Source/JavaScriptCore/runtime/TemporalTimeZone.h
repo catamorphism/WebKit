@@ -62,6 +62,7 @@ public:
     static ISO8601::ExactTime getStartOfDay(JSGlobalObject*, ISO8601::TimeZone, ISO8601::PlainDate);
 
     static std::optional<ISO8601::ExactTime> getNamedTimeZoneNextTransition(TimeZoneID, Int128);
+    static std::optional<ISO8601::ExactTime> getNamedTimeZonePreviousTransition(TimeZoneID, Int128);
 
     static std::optional<ISO8601::TimeZone> getAvailableNamedTimeZoneIdentifier(JSGlobalObject*, TimeZoneID);
     static std::optional<ISO8601::TimeZone> getAvailableNamedTimeZoneIdentifier(JSGlobalObject*,

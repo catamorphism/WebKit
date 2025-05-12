@@ -228,6 +228,11 @@ enum class FieldName : uint8_t {
     TimeZone,
 };
 
+enum class TemporalDirectionOption : bool {
+    Next,
+    Previous,
+};
+
 WTF::String ellipsizeAt(unsigned maxLength, const WTF::String&);
 PropertyName temporalUnitPluralPropertyName(VM&, TemporalUnit);
 PropertyName temporalUnitSingularPropertyName(VM&, TemporalUnit);
@@ -242,6 +247,7 @@ std::optional<TemporalUnit> validateSmallestUnit(JSGlobalObject*, std::optional<
 std::tuple<TemporalUnit, TemporalUnit, RoundingMode, double> extractDifferenceOptions(JSGlobalObject*, JSValue, UnitGroup, TemporalUnit defaultSmallestUnit, TemporalUnit defaultLargestUnit);
 TemporalShowCalendar getTemporalShowCalendarNameOption(JSGlobalObject*, JSObject*);
 TemporalShowOffset getTemporalShowOffsetOption(JSGlobalObject*, JSObject*);
+std::optional<TemporalDirectionOption> getDirectionOption(JSGlobalObject*, JSObject*);
 TemporalOffset getTemporalOffsetOption(JSGlobalObject*, JSObject*, TemporalOffset);
 TemporalShowTimeZone getTemporalShowTimeZoneNameOption(JSGlobalObject*, JSObject*);
 TemporalDisambiguation getTemporalDisambiguationOption(JSGlobalObject*, JSObject*);
