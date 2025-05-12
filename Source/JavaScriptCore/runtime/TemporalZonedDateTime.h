@@ -59,6 +59,7 @@ public:
     TemporalZonedDateTime* round(JSGlobalObject*, JSValue options);
     ISO8601::Duration since(JSGlobalObject*, JSValue, TemporalZonedDateTime*);
     ISO8601::Duration until(JSGlobalObject*, JSValue, TemporalZonedDateTime*);
+    JSValue getTimeZoneTransition(JSGlobalObject*, JSValue);
 
     String monthCode() const;
     uint8_t dayOfWeek() const;
