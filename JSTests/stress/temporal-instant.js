@@ -453,3 +453,12 @@ const maxValue = new Temporal.Instant(86400_0000_0000_000_000_000n);
     shouldBe(diff1.milliseconds, diff.milliseconds);
     shouldBe(diff1.seconds, diff.seconds);
 }
+
+// toZonedDateTimeISO()
+{
+    const inst = new Temporal.Instant(1_000_000_000_000_000_000n);
+
+    const zdt = inst.toZonedDateTimeISO("UTC");
+    shouldBe(inst.epochNanoseconds, zdt.epochNanoseconds);
+    shouldBe(zdt.timeZoneId, "UTC");
+}

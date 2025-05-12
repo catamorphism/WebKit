@@ -437,3 +437,10 @@ shouldBe(Temporal.PlainDate.prototype.toPlainYearMonth.length, 0);
     shouldBe(date.toPlainMonthDay().toString(), '02-28');
     shouldBe(date.toPlainYearMonth().toString(), '2020-02');
 }
+
+shouldBe(Temporal.PlainDate.prototype.toZonedDateTime.length, 1);
+{
+    const date = Temporal.PlainDate.from('2020-02-28');
+
+    shouldBe(date.toZonedDateTime({ timeZone: "UTC" }).toString(), '2020-02-28T00:00:00+00:00[UTC]');
+}
