@@ -33,6 +33,8 @@
 #include "LazyPropertyInlines.h"
 #include "TemporalDuration.h"
 #include "TemporalPlainDateTime.h"
+#include "TemporalTimeZone.h"
+#include "TemporalZonedDateTime.h"
 #include "VMTrapsInlines.h"
 
 namespace JSC {
