@@ -445,11 +445,6 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-unknown-annotation.js
 
     # Depends on Temporal.ZonedDateTime
-    - test/built-ins/Temporal/PlainDate/compare/argument-zoneddatetime-slots.js
-    - test/built-ins/Temporal/PlainDate/from/argument-zoneddatetime-slots.js
-    - test/built-ins/Temporal/PlainDate/prototype/equals/argument-zoneddatetime-slots.js
-    - test/built-ins/Temporal/PlainDate/prototype/since/argument-zoneddatetime-slots.js
-    - test/built-ins/Temporal/PlainDate/prototype/until/argument-zoneddatetime-slots.js
     - test/built-ins/Temporal/PlainDate/prototype/with/plaindatelike-invalid.js
     - test/built-ins/Temporal/PlainMonthDay/prototype/with/monthdaylike-invalid.js
     - test/built-ins/Temporal/PlainTime/prototype/with/plaintimelike-invalid.js
