@@ -244,7 +244,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalInstantPrototypeFuncToJSON, (JSGlobalObject* gl
     if (!instant)
         return throwVMTypeError(globalObject, scope, "Temporal.Instant.prototype.toJSON called on value that's not a Instant"_s);
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(jsString(vm, instant->toString())));
+    RELEASE_AND_RETURN(scope, JSValue::encode(jsString(vm, instant->toString(globalObject))));
 }
 
 // FIXME: Is this better as a JSBuiltin?

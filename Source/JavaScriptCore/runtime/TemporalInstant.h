@@ -30,6 +30,7 @@
 #include "JSObject.h"
 #include "TemporalDuration.h"
 #include "TemporalObject.h"
+#include "TemporalTimeZone.h"
 #include "VM.h"
 #include <wtf/Packed.h>
 
@@ -66,9 +67,9 @@ public:
     ISO8601::Duration difference(JSGlobalObject*, TemporalInstant*, JSValue options) const;
     ISO8601::ExactTime round(JSGlobalObject*, JSValue options) const;
     String toString(JSGlobalObject*, JSValue options) const;
-    String toString(JSObject* timeZone = nullptr, PrecisionData precision = { { Precision::Auto, 0 }, TemporalUnit::Nanosecond, 1 }) const
+    String toString(JSGlobalObject* globalObject, TemporalTimeZone* timeZone = nullptr, PrecisionData precision = { { Precision::Auto, 0 }, TemporalUnit::Nanosecond, 1 }) const
     {
-        return toString(exactTime(), timeZone, precision);
+        return toString(globalObject, exactTime(), timeZone, precision);
     }
 
 private:
@@ -78,7 +79,7 @@ private:
     static std::optional<ISO8601::ExactTime> parse(StringParsingBuffer<CharacterType>&);
     static ISO8601::ExactTime fromObject(JSGlobalObject*, JSObject*);
 
-    static String toString(ISO8601::ExactTime, JSObject* timeZone, PrecisionData);
+    static String toString(JSGlobalObject*, ISO8601::ExactTime, TemporalTimeZone*, PrecisionData);
 
     Packed<ISO8601::ExactTime> m_exactTime;
 };
