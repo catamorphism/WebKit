@@ -435,12 +435,6 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/argument-string-unknown-annotation.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-unknown-annotation.js
 
-    # Depends on Temporal.ZonedDateTime
-    - test/built-ins/Temporal/PlainDate/prototype/with/plaindatelike-invalid.js
-    - test/built-ins/Temporal/PlainMonthDay/prototype/with/monthdaylike-invalid.js
-    - test/built-ins/Temporal/PlainTime/prototype/with/plaintimelike-invalid.js
-    - test/built-ins/Temporal/PlainYearMonth/prototype/with/yearmonthlike-invalid.js
-
     # Depends on Temporal support in IntlDateTimeFormat::handleDateTimeValue()
     - test/intl402/DateTimeFormat/prototype/format/temporal-objects-resolved-time-zone.js
     - test/intl402/DateTimeFormat/prototype/formatRange/temporal-objects-resolved-time-zone.js
