@@ -245,6 +245,11 @@ shouldThrow(() => new Temporal.Instant('abc123'), SyntaxError);
         const i5 = Temporal.Instant.from('1999-12-31T23:59:59.999999999Z');
         shouldBe(i5.toString({ fractionalSecondDigits: 8, roundingMode: 'halfExpand' }), '2000-01-01T00:00:00.00000000Z');
     }
+
+    // Time zone option
+    const instance = new Temporal.Instant(0n);
+    shouldBe(instance.toString({ timeZone: "UTC" }).substr(-6), "+00:00");
+    shouldBe(instance.toString({ timeZone: "-01:30" }).substr(-6), "-01:30");
 }
 
 // leap second is constrained
