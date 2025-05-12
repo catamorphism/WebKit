@@ -124,33 +124,57 @@ TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject,
         if (itemValue.inherits<TemporalPlainDateTime>())
             return jsCast<TemporalPlainDateTime*>(itemValue);
 
-        if (itemValue.inherits<TemporalPlainDate>())
+        if (itemValue.inherits<TemporalPlainDate>()) {
+            if (optionsValue) {
+                toTemporalOverflow(globalObject, optionsValue.value());
+                RETURN_IF_EXCEPTION(scope, { });
+            }
             return TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(), jsCast<TemporalPlainDate*>(itemValue)->plainDate(), { });
+        }
 
-        JSObject* calendar = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, itemValue);
+        JSObject* calendarObject = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, itemValue);
         RETURN_IF_EXCEPTION(scope, { });
 
         // FIXME: Implement after fleshing out Temporal.Calendar.
-        if (!calendar->inherits<TemporalCalendar>() || !jsCast<TemporalCalendar*>(calendar)->isISO8601()) {
+        TemporalCalendar* calendar;
+        if (!calendarObject->inherits<TemporalCalendar>()) {
+            throwRangeError(globalObject, scope, "bad calendar object in Temporal.PlainDateTime.from"_s);
+            return { };
+        }
+        calendar = jsCast<TemporalCalendar*>(calendarObject);
+        if (!calendar->isISO8601()) {
             throwRangeError(globalObject, scope, "unimplemented: from non-ISO8601 calendar"_s);
             return { };
         }
 
-        std::variant<JSObject*, TemporalOverflow> optionsOrOverflow = TemporalOverflow::Constrain;
-        if (optionsValue)
-            optionsOrOverflow = optionsValue.value();
+        auto fields =  Vector { FieldName::Day, FieldName::Hour, FieldName::Microsecond, FieldName::Millisecond,
+            FieldName::Minute, FieldName::Month, FieldName::MonthCode, FieldName::Nanosecond, FieldName::Second,
+            FieldName::Year };
+        auto [optionalYear, optionalMonth, optionalMonthCode, optionalDay, optionalHour, optionalMinute,
+            optionalSecond, optionalMillisecond, optionalMicrosecond, optionalNanosecond, optionalOffset,
+            timeZoneOptional] = TemporalCalendar::prepareCalendarFields(globalObject, calendar->identifier(),
+                asObject(itemValue), fields, std::nullopt);
+        RETURN_IF_EXCEPTION(scope, { });
+
+        auto hour = optionalHour.value_or(0);
+        auto minute = optionalMinute.value_or(0);
+        auto second = optionalSecond.value_or(0);
+        auto millisecond = optionalMillisecond.value_or(0);
+        auto microsecond = optionalMicrosecond.value_or(0);
+        auto nanosecond = optionalNanosecond.value_or(0);
+
         auto overflow = TemporalOverflow::Constrain;
-        auto plainDate = TemporalCalendar::isoDateFromFields(globalObject, asObject(itemValue), TemporalDateFormat::Date, optionsOrOverflow, overflow);
+        if (optionsValue) {
+            overflow = toTemporalOverflow(globalObject, optionsValue.value());
+            RETURN_IF_EXCEPTION(scope, { });
+        }
+
+        auto result = TemporalCalendar::interpretTemporalDateTimeFields(globalObject, calendar->identifier(),
+            optionalYear, optionalMonth, optionalMonthCode, optionalDay, hour, minute, second,
+            millisecond, microsecond, nanosecond, overflow);
         RETURN_IF_EXCEPTION(scope, { });
 
-        constexpr bool skipRelevantPropertyCheck = true;
-        auto timeDuration = TemporalPlainTime::toTemporalTimeRecord(globalObject, asObject(itemValue), skipRelevantPropertyCheck);
-        RETURN_IF_EXCEPTION(scope, { });
-
-        auto plainTime = TemporalPlainTime::regulateTime(globalObject, WTFMove(timeDuration), overflow);
-        RETURN_IF_EXCEPTION(scope, { });
-
-        RELEASE_AND_RETURN(scope, TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), WTFMove(plainDate), WTFMove(plainTime)));
+        RELEASE_AND_RETURN(scope, TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), result.date(), result.time()));
     }
 
     if (!itemValue.isString()) {
@@ -434,6 +458,86 @@ ISO8601::PlainDateTime TemporalPlainDateTime::balanceISODateTime(double year, do
         ISO8601::PlainTime(balancedTime.hours(), balancedTime.minutes(),
             balancedTime.seconds(), balancedTime.milliseconds(),
             balancedTime.microseconds(), balancedTime.nanoseconds()));
+}
+
+static ISO8601::InternalDuration differenceISODateTime(JSGlobalObject* globalObject,
+    const ISO8601::PlainDateTime& isoDateTime1, const ISO8601::PlainDateTime& isoDateTime2,
+    TemporalUnit largestUnit)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    ASSERT(isoDateTimeWithinLimits(isoDateTime1));
+    ASSERT(isoDateTimeWithinLimits(isoDateTime2));
+
+    auto timeDuration = TemporalPlainTime::differenceTime(isoDateTime1.time(), isoDateTime2.time());
+    auto timeSign = TemporalDuration::timeDurationSign(timeDuration);
+    auto dateSign = TemporalCalendar::isoDateCompare(isoDateTime1.date(), isoDateTime2.date());
+    auto adjustedDate = isoDateTime2.date();
+    if (timeSign == dateSign) {
+        adjustedDate = TemporalCalendar::balanceISODate(adjustedDate.year(),
+            adjustedDate.month(), adjustedDate.day() + timeSign);
+        timeDuration = TemporalDuration::add24HourDaysToTimeDuration(globalObject, timeDuration, -timeSign);
+        RETURN_IF_EXCEPTION(scope, { });
+    }
+    auto dateLargestUnit = largestUnit < TemporalUnit::Day ? largestUnit : TemporalUnit::Day;
+    auto dateDifference = TemporalCalendar::calendarDateUntil(isoDateTime1.date(),
+        adjustedDate, dateLargestUnit);
+    if (largestUnit != dateLargestUnit) {
+        timeDuration = TemporalDuration::add24HourDaysToTimeDuration(globalObject, timeDuration,
+            dateDifference.days());
+        RETURN_IF_EXCEPTION(scope, { });
+        dateDifference.setDays(0);
+    }
+    return ISO8601::InternalDuration::combineDateAndTimeDuration(dateDifference, timeDuration);
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-differenceplaindatetimewithrounding
+static ISO8601::InternalDuration differencePlainDateTimeWithRounding(JSGlobalObject* globalObject,
+    const ISO8601::PlainDateTime& isoDateTime1, const ISO8601::PlainDateTime& isoDateTime2,
+    TemporalUnit largestUnit, double roundingIncrement, TemporalUnit smallestUnit,
+    RoundingMode roundingMode)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    if (!TemporalCalendar::isoDateTimeCompare(isoDateTime1, isoDateTime2)) {
+        return ISO8601::InternalDuration::combineDateAndTimeDuration(ISO8601::Duration(), 0);
+    }
+    if (!isoDateTimeWithinLimits(isoDateTime1) || !isoDateTimeWithinLimits(isoDateTime2))
+        throwRangeError(globalObject, scope, "Date/time out of range in differencePlainDateTimeWithRounding"_s);
+    auto diff = differenceISODateTime(globalObject, isoDateTime1, isoDateTime2, largestUnit);
+    RETURN_IF_EXCEPTION(scope, { });
+    if (smallestUnit == TemporalUnit::Nanosecond && roundingIncrement == 1)
+        return diff;
+    auto destEpochNs = getUTCEpochNanoseconds(isoDateTime2);
+    RELEASE_AND_RETURN(scope, TemporalDuration::roundRelativeDuration(globalObject,
+        diff, destEpochNs, isoDateTime1, std::nullopt,
+        largestUnit, roundingIncrement, smallestUnit, roundingMode));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-differencetemporalplaindatetime
+ISO8601::Duration TemporalPlainDateTime::differenceTemporalPlainDateTime(JSGlobalObject* globalObject,
+    bool isSince, TemporalPlainDateTime* other, TemporalUnit smallestUnit, TemporalUnit largestUnit,
+    RoundingMode roundingMode, double increment)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto plainDateTimeThis = ISO8601::PlainDateTime(plainDate(), plainTime());
+    auto plainDateTimeOther = ISO8601::PlainDateTime(other->plainDate(), other->plainTime());
+
+    if (!TemporalCalendar::isoDateTimeCompare(plainDateTimeThis, plainDateTimeOther))
+        return ISO8601::Duration();
+
+    auto internalDuration = differencePlainDateTimeWithRounding(globalObject, plainDateTimeThis,
+        plainDateTimeOther, largestUnit, increment, smallestUnit, roundingMode);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    auto result = TemporalDuration::temporalDurationFromInternal(internalDuration, largestUnit);
+    if (isSince)
+        result = -result;
+    return result;
 }
 
 } // namespace JSC

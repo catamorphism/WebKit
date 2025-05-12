@@ -492,6 +492,7 @@ Int128 getNamedTimeZoneOffsetNanoseconds(TimeZoneID timeZoneIdentifier, Int128);
 
 Int128 roundTimeDurationToIncrement(JSGlobalObject*, Int128, Int128, RoundingMode);
 
+int32_t compareTimeRecord(const PlainTime&, const PlainTime&);
 
 } // namespace ISO8601
 
