@@ -380,7 +380,7 @@ JSObject* TemporalCalendar::from(JSGlobalObject* globalObject, JSValue calendarL
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-isodatefromfields
-ISO8601::PlainDate TemporalCalendar::isoDateFromFields(JSGlobalObject* globalObject, JSObject* temporalDateLike, TemporalDateFormat format, Variant<JSObject*, TemporalOverflow> optionsOrOverflow, TemporalOverflow& overflow)
+ISO8601::PlainDate TemporalCalendar::isoDateFromFields(JSGlobalObject* globalObject, JSObject* temporalDateLike, TemporalDateFormat format, JSValue optionsValue, TemporalOverflow& overflow)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -462,14 +462,9 @@ ISO8601::PlainDate TemporalCalendar::isoDateFromFields(JSGlobalObject* globalObj
         }
     }
 
-    if (std::holds_alternative<TemporalOverflow>(optionsOrOverflow))
-        overflow = std::get<TemporalOverflow>(optionsOrOverflow);
-    else {
-        JSObject* options = std::get<JSObject*>(optionsOrOverflow);
-        if (options) {
-            overflow = toTemporalOverflow(globalObject, options);
-            RETURN_IF_EXCEPTION(scope, { });
-        }
+    if (!optionsValue.isUndefined()) {
+        overflow = toTemporalOverflow(globalObject, optionsValue);
+        RETURN_IF_EXCEPTION(scope, { });
     }
 
     // Check month code if applicable

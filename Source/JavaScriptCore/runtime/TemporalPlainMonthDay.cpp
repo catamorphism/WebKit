@@ -145,7 +145,7 @@ TemporalPlainMonthDay* TemporalPlainMonthDay::from(JSGlobalObject* globalObject,
         return result;
     }
 
-    JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
+    intlGetOptionsObject(globalObject, optionsValue);
     RETURN_IF_EXCEPTION(scope, { });
 
     if (itemValue.isObject()) {
@@ -164,11 +164,8 @@ TemporalPlainMonthDay* TemporalPlainMonthDay::from(JSGlobalObject* globalObject,
             return { };
         }
 
-        Variant<JSObject*, TemporalOverflow> optionsOrOverflow = TemporalOverflow::Constrain;
-        if (options)
-            optionsOrOverflow = options;
         auto overflow = TemporalOverflow::Constrain;
-        auto plainMonthDay = TemporalCalendar::isoDateFromFields(globalObject, asObject(itemValue), TemporalDateFormat::MonthDay, optionsOrOverflow, overflow);
+        auto plainMonthDay = TemporalCalendar::isoDateFromFields(globalObject, asObject(itemValue), TemporalDateFormat::MonthDay, optionsValue, overflow);
         RETURN_IF_EXCEPTION(scope, { });
 
         auto plainDate = ISO8601::PlainDate(1972, plainMonthDay.month(), plainMonthDay.day());

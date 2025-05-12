@@ -143,7 +143,7 @@ TemporalPlainYearMonth* TemporalPlainYearMonth::from(JSGlobalObject* globalObjec
         RELEASE_AND_RETURN(scope, result);
     }
 
-    JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
+    intlGetOptionsObject(globalObject, optionsValue);
     RETURN_IF_EXCEPTION(scope, { });
 
     if (item.isObject()) {
@@ -159,11 +159,8 @@ TemporalPlainYearMonth* TemporalPlainYearMonth::from(JSGlobalObject* globalObjec
             return { };
         }
 
-        Variant<JSObject*, TemporalOverflow> optionsOrOverflow = TemporalOverflow::Constrain;
-        if (options)
-            optionsOrOverflow = options;
-        auto overflow = TemporalOverflow::Constrain;
-        auto plainYearMonth = TemporalCalendar::isoDateFromFields(globalObject, asObject(item), TemporalDateFormat::YearMonth, optionsOrOverflow, overflow);
+        TemporalOverflow overflow = TemporalOverflow::Constrain;
+        auto plainYearMonth = TemporalCalendar::isoDateFromFields(globalObject, asObject(item), TemporalDateFormat::YearMonth, optionsValue, overflow);
         RETURN_IF_EXCEPTION(scope, { });
 
         return TemporalPlainYearMonth::create(vm, globalObject->plainYearMonthStructure(), WTF::move(plainYearMonth));

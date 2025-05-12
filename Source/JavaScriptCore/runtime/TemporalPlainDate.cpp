@@ -153,17 +153,32 @@ String TemporalPlainDate::toString(JSGlobalObject* globalObject, JSValue options
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-totemporaldate
-TemporalPlainDate* TemporalPlainDate::from(JSGlobalObject* globalObject, JSValue itemValue, Variant<JSObject*, TemporalOverflow> optionsOrOverflow)
+TemporalPlainDate* TemporalPlainDate::from(JSGlobalObject* globalObject, JSValue itemValue, JSValue optionsValue)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
     if (itemValue.isObject()) {
-        if (itemValue.inherits<TemporalPlainDate>())
+        if (itemValue.inherits<TemporalPlainDate>()) {
+            validateTemporalOverflow(globalObject, optionsValue);
+            RETURN_IF_EXCEPTION(scope, { });
             return jsCast<TemporalPlainDate*>(itemValue);
+        }
 
-        if (itemValue.inherits<TemporalPlainDateTime>())
+        if (itemValue.inherits<TemporalZonedDateTime>()) {
+            auto zdt = jsCast<TemporalZonedDateTime*>(itemValue);
+            auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zdt->timeZone(), zdt->exactTime());
+            RETURN_IF_EXCEPTION(scope, { });
+            validateTemporalOverflow(globalObject, optionsValue);
+            RETURN_IF_EXCEPTION(scope, { });
+            return TemporalPlainDate::create(vm, globalObject->plainDateStructure(), isoDateTime.date());
+        }
+
+        if (itemValue.inherits<TemporalPlainDateTime>()) {
+            validateTemporalOverflow(globalObject, optionsValue);
+            RETURN_IF_EXCEPTION(scope, { });
             return TemporalPlainDate::create(vm, globalObject->plainDateStructure(), jsCast<TemporalPlainDateTime*>(itemValue)->plainDate());
+        }
 
         JSObject* calendar = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, itemValue);
         RETURN_IF_EXCEPTION(scope, { });
@@ -175,7 +190,7 @@ TemporalPlainDate* TemporalPlainDate::from(JSGlobalObject* globalObject, JSValue
         }
 
         auto overflow = TemporalOverflow::Constrain;
-        auto plainDate = TemporalCalendar::isoDateFromFields(globalObject, asObject(itemValue), TemporalDateFormat::Date, optionsOrOverflow, overflow);
+        auto plainDate = TemporalCalendar::isoDateFromFields(globalObject, asObject(itemValue), TemporalDateFormat::Date, optionsValue, overflow);
         RETURN_IF_EXCEPTION(scope, { });
         return TemporalPlainDate::create(vm, globalObject->plainDateStructure(), WTF::move(plainDate));
     }
@@ -193,6 +208,8 @@ TemporalPlainDate* TemporalPlainDate::from(JSGlobalObject* globalObject, JSValue
     //     CalendarDateTime
     auto dateTime = ISO8601::parseCalendarDateTime(string, TemporalDateFormat::Date);
     if (dateTime) {
+        validateTemporalOverflow(globalObject, optionsValue);
+        RETURN_IF_EXCEPTION(scope, { });
         auto [plainDate, plainTimeOptional, timeZoneOptional, calendarOptional] = WTF::move(dateTime.value());
         if (!(timeZoneOptional && timeZoneOptional->m_z))
             RELEASE_AND_RETURN(scope, TemporalPlainDate::tryCreateIfValid(globalObject, globalObject->plainDateStructure(), WTF::move(plainDate)));
@@ -285,8 +302,11 @@ TemporalPlainDate::mergeDateFields(JSGlobalObject* globalObject, JSObject* tempo
         }
     }
 
-    TemporalOverflow overflow = toTemporalOverflow(globalObject, optionsValue);
-    RETURN_IF_EXCEPTION(scope, { });
+    TemporalOverflow overflow = TemporalOverflow::Constrain;
+    if (!optionsValue.isUndefined()) {
+        overflow = toTemporalOverflow(globalObject, optionsValue);
+        RETURN_IF_EXCEPTION(scope, { });
+    }
 
     // Duplicate code from TemporalPlainDate::toPlainDate so we can convert from
     // double to int32_t / unsigned here

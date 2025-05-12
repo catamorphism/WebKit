@@ -962,9 +962,39 @@ TemporalOverflow toTemporalOverflow(JSGlobalObject* globalObject, JSValue val)
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
+    if (val.isUndefined())
+        return TemporalOverflow::Constrain;
+
+    if (!val.isObject()) {
+        throwTypeError(globalObject, scope, "options must be an object"_s);
+        return { };
+    }
     JSObject* options = intlGetOptionsObject(globalObject, val);
     RETURN_IF_EXCEPTION(scope, { });
     RELEASE_AND_RETURN(scope, toTemporalOverflow(globalObject, options));
+}
+
+void validateTemporalOverflow(JSGlobalObject* globalObject, JSValue val)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    if (val.isUndefined())
+        return;
+
+    if (val.isString()) {
+        StringView str = val.toWTFString(globalObject);
+        RETURN_IF_EXCEPTION(scope, void());
+        if (str != "constrain"_s && str != "reject"_s)
+            throwTypeError(globalObject, scope, "overflow string must be either \"constrain\" or \"reject\""_s);
+        return;
+    }
+    if (val.isObject()) {
+        toTemporalOverflow(globalObject, val);
+        RETURN_IF_EXCEPTION(scope, void());
+        return;
+    }
+    throwTypeError(globalObject, scope, "overflow must be object or string"_s);
 }
 
 String toTemporalCalendarName(JSGlobalObject* globalObject, JSObject* options)
