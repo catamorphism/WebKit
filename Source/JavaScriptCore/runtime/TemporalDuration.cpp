@@ -587,7 +587,7 @@ ISO8601::Duration TemporalDuration::subtract(JSGlobalObject* globalObject, JSVal
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-totaltimeduration
-static double totalTimeDuration(Int128 timeDuration, TemporalUnit unit)
+/* static */ double TemporalDuration::totalTimeDuration(Int128 timeDuration, TemporalUnit unit)
 {
     double divisor = static_cast<double>(lengthInNanoseconds(unit));
     // guaranteed, maximum lengthInNanoseconds is 86400e9
@@ -786,8 +786,8 @@ static NudgeResult nudgeToDayOrTime(JSGlobalObject* globalObject, ISO8601::Inter
     Int128 unitLength = lengthInNanoseconds(smallestUnit);
     Int128 roundedTime = roundNumberToIncrementInt128(timeDuration, unitLength * static_cast<Int128>(increment), roundingMode);
     Int128 diffTime = roundedTime - timeDuration;
-    double wholeDays = std::trunc(totalTimeDuration(timeDuration, TemporalUnit::Day));
-    double roundedWholeDays = std::trunc(totalTimeDuration(roundedTime, TemporalUnit::Day));
+    double wholeDays = std::trunc(TemporalDuration::totalTimeDuration(timeDuration, TemporalUnit::Day));
+    double roundedWholeDays = std::trunc(TemporalDuration::totalTimeDuration(roundedTime, TemporalUnit::Day));
     auto dayDelta = roundedWholeDays - wholeDays;
     auto dayDeltaSign = dayDelta < 0 ? -1 : dayDelta > 0 ? 1 : 0;
     bool didExpandDays = dayDeltaSign == (timeDuration < 0 ? -1 : timeDuration > 0 ? 1 : 0);

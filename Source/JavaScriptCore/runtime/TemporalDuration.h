@@ -102,6 +102,7 @@ public:
     static std::optional<ISO8601::PlainDate> regulateISODate(double, double, double, TemporalOverflow);
     static std::tuple<ISO8601::PlainDate, ISO8601::PlainTime> combineISODateAndTimeRecord(ISO8601::PlainDate, ISO8601::PlainTime);
     static ISO8601::InternalDuration roundRelativeDuration(JSGlobalObject*, ISO8601::InternalDuration&, Int128, ISO8601::PlainDateTime, std::optional<ISO8601::TimeZone>, TemporalUnit, unsigned, TemporalUnit, RoundingMode);
+    static double totalTimeDuration(Int128 timeDuration, TemporalUnit unit);
     static ISO8601::Duration toDateDurationRecordWithoutTime(JSGlobalObject*, const ISO8601::Duration&);
     static ISO8601::Duration adjustDateDurationRecord(JSGlobalObject*, const ISO8601::Duration&, double, std::optional<double>, std::optional<double>);
     static std::optional<double> balance(ISO8601::Duration&, TemporalUnit largestUnit);

@@ -34,6 +34,20 @@
 
 namespace JSC {
 
+// https://tc39.es/proposal-temporal/#sec-year-week-record-specification-type
+struct YearWeekRecord {
+    std::optional<int32_t> week;
+    std::optional<int32_t> year;
+};
+
+// https://tc39.es/proposal-temporal/#sec-temporal-calendar-date-records
+// (Modified to only include fields that are currently used)
+struct CalendarDateRecord {
+    int32_t dayOfWeek;
+    int32_t dayOfYear;
+    int32_t daysInYear;
+};
+
 class TemporalCalendar final : public JSNonFinalObject {
 public:
     using Base = JSNonFinalObject;
@@ -75,6 +89,7 @@ public:
     static int32_t isoDateTimeCompare(const ISO8601::PlainDateTime&, const ISO8601::PlainDateTime&);
     static String formatCalendarAnnotation(TemporalShowCalendar);
     static ISO8601::PlainDateTime getISOPartsFromEpoch(ISO8601::ExactTime);
+    static YearWeekRecord calendarDateWeekOfYear(JSGlobalObject*, const ISO8601::PlainDate&);
 
     CalendarID identifier() const { return m_identifier; }
     bool isISO8601() const { return m_identifier == iso8601CalendarID(); }

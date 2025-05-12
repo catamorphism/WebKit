@@ -349,6 +349,10 @@ skip:
     - test/built-ins/Temporal/PlainYearMonth/refisoday-undefined.js
     - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-calendar-case-insensitive.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/equals/argument-propertybag-calendar-case-insensitive.js
+    - test/built-ins/Temporal/ZonedDateTime/prototype/era/branding.js
+    - test/built-ins/Temporal/ZonedDateTime/prototype/era/prop-desc.js
+    - test/built-ins/Temporal/ZonedDateTime/prototype/eraYear/branding.js
+    - test/built-ins/Temporal/ZonedDateTime/prototype/eraYear/prop-desc.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/since/argument-propertybag-calendar-case-insensitive.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/argument-propertybag-calendar-case-insensitive.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/calendar-case-insensitive.js
@@ -487,51 +491,10 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/calendar-number.js
     - test/built-ins/Temporal/ZonedDateTime/calendar-wrong-type.js
     - test/built-ins/Temporal/ZonedDateTime/construction-and-properties.js
-    # Depends on ZonedDateTime daysInMonth property
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/month-boundary.js
-    # Depends on PlainDate.toZonedDateTime
-    - test/built-ins/Temporal/ZonedDateTime/prototype/add/overflow-adding-months-to-max-year.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/dayOfWeek/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/dayOfWeek/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/dayOfYear/basic.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/dayOfYear/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/dayOfYear/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/daysInMonth/basic.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/daysInMonth/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/daysInMonth/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/daysInWeek/basic.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/daysInWeek/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/daysInWeek/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/daysInYear/basic.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/daysInYear/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/daysInYear/prop-desc.js
     # Buggy test, see https://github.com/tc39/test262/pull/5001
     - test/built-ins/Temporal/ZonedDateTime/prototype/equals/no-fractional-minutes-hours.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/era/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/era/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/eraYear/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/eraYear/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/basic.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/get-start-of-day-throws.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/next-day-out-of-range.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/hoursInDay/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/inLeapYear/basic.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/inLeapYear/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/inLeapYear/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/monthCode/no-leap-months.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/monthsInYear/basic.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/monthsInYear/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/monthsInYear/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/offset/basic.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/offset/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/offsetNanoseconds/branding.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/offsetNanoseconds/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/offset/prop-desc.js
     # Buggy test, see https://github.com/tc39/test262/pull/5001
     - test/built-ins/Temporal/ZonedDateTime/prototype/since/no-fractional-minutes-hours.js
-    # Depends on ZonedDateTime daysInMonth property
-    - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/month-boundary.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/timeZoneId/branding.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/timeZoneId/prop-desc.js
     # Buggy test, see https://github.com/tc39/test262/pull/5001
@@ -554,6 +517,8 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/add/add-large-subseconds.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/round/round-dst-boundaries.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/subtract-large-subseconds.js
+    - test/intl402/Temporal/Duration/prototype/round/relativeto-dst-back-transition.js
+    - test/intl402/Temporal/Duration/prototype/total/relativeto-dst-back-transition.js
 
     # transferToImmutable() is not implemented yet
     - test/built-ins/ArrayBuffer/prototype/resize/this-is-immutable-arraybuffer-object.js
@@ -592,3 +557,11 @@ skip:
     - test/built-ins/Temporal/Now/plainTimeISO/return-value.js
     - test/built-ins/Temporal/Now/zonedDateTimeISO/return-value.js
     - test/built-ins/Temporal/Now/zonedDateTimeISO/time-zone-undefined.js
+    - test/intl402/DateTimeFormat/prototype/format/temporal-zoneddatetime-not-supported.js
+    - test/intl402/Intl/DateTimeFormat/prototype/formatRange/fails-on-distinct-temporal-types.js
+    - test/intl402/DateTimeFormat/prototype/formatRange/temporal-zoneddatetime-not-supported.js
+    - test/intl402/DateTimeFormat/prototype/formatToParts/temporal-zoneddatetime-not-supported.js
+    - test/intl402/Intl/DateTimeFormat/prototype/formatRangeToParts/fails-on-distinct-temporal-types.js
+    - test/intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-zoneddatetime-not-supported.js
+    - test/intl402/Temporal/Instant/prototype/toString/timezone-offset.js
+    - test/intl402/Temporal/Instant/prototype/toString/timezone-string-datetime.js

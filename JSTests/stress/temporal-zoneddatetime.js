@@ -260,3 +260,18 @@ shouldBe(Temporal.ZonedDateTime.prototype.getTimeZoneTransition.length, 1);
     shouldBe(zdt.getTimeZoneTransition("next"), null);
     shouldBe(zdt.getTimeZoneTransition("previous"), null);
 }
+
+{
+    shouldBe(zdt.dayOfWeek, 4);
+    shouldBe(zdt.dayOfYear, 1);
+    shouldBe(zdt.weekOfYear, 1);
+    shouldBe(zdt.yearOfWeek, 1970);
+    shouldBe(zdt.hoursInDay, 24);
+    shouldBe(zdt.daysInWeek, 7);
+    shouldBe(zdt.daysInMonth, 31);
+    shouldBe(zdt.daysInYear, 365);
+    shouldBe(zdt.monthsInYear, 12);
+    shouldBe(zdt.inLeapYear, false);
+    shouldBe(zdt.offset, "+00:00");
+    shouldBe(zdt.offsetNanoseconds, 0);
+}
