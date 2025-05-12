@@ -300,3 +300,35 @@ shouldThrow(() => { pdt.round({ smallestUnit: 'minute', roundingMode: 'bogus' })
 
 shouldBe(Temporal.PlainDateTime.prototype.toZonedDateTime.length, 1);
 shouldBe(pdt.toZonedDateTime("UTC").toString(), '0001-02-03T04:05:06.007008009+00:00[UTC]');
+
+shouldBe(Temporal.PlainDateTime.prototype.since.length, 1);
+shouldBe(Temporal.PlainDateTime.prototype.until.length, 1);
+
+{
+    shouldBe(pdt.since('2019-02-28').toString(), '-P737083DT19H54M53.992991991S');
+    shouldBe(pdt.until('2019-02-28').toString(), 'P737083DT19H54M53.992991991S');
+    shouldBe(pdt.since('2019-02-28', { largestUnit: 'year' }).toString(), "-P2018Y24DT19H54M53.992991991S");
+    shouldBe(pdt.until('2019-02-28', { largestUnit: 'year' }).toString(), "P2018Y24DT19H54M53.992991991S");
+
+    shouldBe(pdt.since('0001-04-03T04:05:06.007008009', { largestUnit: 'month' }).toString(), "-P2M");
+    shouldBe(pdt.until('0001-04-03T04:05:06.007008009', { largestUnit: 'month' }).toString(), "P2M");
+    shouldBe(pdt.since('0000-12-03T04:05:06.007008009', { largestUnit: 'month' }).toString(), "P2M");
+    shouldBe(pdt.until('0000-12-03T04:05:06.007008009', { largestUnit: 'month' }).toString(), "-P2M");
+
+    shouldBe(pdt.since('0001-02-19T04:05:06.007008009', { largestUnit: 'week' }).toString(), "-P2W2D");
+    shouldBe(pdt.until('0001-02-19T04:05:06.007008009', { largestUnit: 'week' }).toString(), "P2W2D");
+    shouldBe(pdt.since('0001-02-19', { roundingMode: 'halfExpand', roundingIncrement: 2, smallestUnit: 'day' }).toString(), "-P16D");
+    shouldBe(pdt.until('0001-02-19', { roundingMode: 'halfExpand', roundingIncrement: 2, smallestUnit: 'day' }).toString(), "P16D");
+
+    const pdt1 = new Temporal.PlainDateTime(1970, 1, 1);
+    shouldBe(pdt1.since('1969-12-16', { largestUnit: 'week' }).toString(), 'P2W2D');
+    shouldBe(pdt1.until('1969-12-16', { largestUnit: 'week' }).toString(), '-P2W2D');
+
+    const earlier = Temporal.PlainDateTime.from('1968-11-01');
+    const later = Temporal.PlainDateTime.from('1971-08-07');
+
+    shouldBe(later.since(earlier, { smallestUnit: "years", roundingIncrement: 4, roundingMode: "halfExpand" }).toString(), "P4Y");
+    shouldBe(earlier.until(later, { smallestUnit: "years", roundingIncrement: 4, roundingMode: "halfExpand" }).toString(), "P4Y");
+
+    shouldThrow(() => pdt1.until('1969-01-01', { largestUnit: 'day', smallestUnit: 'month' }), RangeError);
+}

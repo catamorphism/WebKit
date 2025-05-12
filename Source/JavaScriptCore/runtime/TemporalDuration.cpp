@@ -786,13 +786,13 @@ static NudgeResult nudgeToDayOrTime(JSGlobalObject* globalObject, ISO8601::Inter
     Int128 unitLength = lengthInNanoseconds(smallestUnit);
     Int128 roundedTime = roundNumberToIncrementInt128(timeDuration, unitLength * static_cast<Int128>(increment), roundingMode);
     Int128 diffTime = roundedTime - timeDuration;
-    double wholeDays = totalTimeDuration(timeDuration, TemporalUnit::Day);
-    double roundedWholeDays = totalTimeDuration(roundedTime, TemporalUnit::Day);
+    double wholeDays = std::trunc(totalTimeDuration(timeDuration, TemporalUnit::Day));
+    double roundedWholeDays = std::trunc(totalTimeDuration(roundedTime, TemporalUnit::Day));
     auto dayDelta = roundedWholeDays - wholeDays;
     auto dayDeltaSign = dayDelta < 0 ? -1 : dayDelta > 0 ? 1 : 0;
     bool didExpandDays = dayDeltaSign == (timeDuration < 0 ? -1 : timeDuration > 0 ? 1 : 0);
     auto nudgedEpochNs = diffTime + destEpochNs;
-    auto days = 0;
+    Int128 days = 0;
     auto remainder = roundedTime;
     if (largestUnit <= TemporalUnit::Day) {
         days = roundedWholeDays;

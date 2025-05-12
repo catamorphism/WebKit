@@ -2130,11 +2130,33 @@ Int128 getUTCEpochNanoseconds(PlainDateTime isoDateTime)
         + (static_cast<Int128>(isoTime.nanosecond())));
 }
 
-// https://tc39.es/proposal-temporal/#sec-temporal-create-iso-date-record
-PlainDate createISODateRecord(double year, double month, double day)
+int32_t compareTimeRecord(const PlainTime& time1, const PlainTime& time2)
 {
-    ASSERT(TemporalPlainDate::isValidISODate(year, month, day));
-    return PlainDate(year, month, day);
+    if (time1.hour() > time2.hour())
+        return 1;
+    if (time1.hour() < time2.hour())
+        return -1;
+    if (time1.minute() > time2.minute())
+        return 1;
+    if (time1.minute() < time2.minute())
+        return -1;
+    if (time1.second() > time2.second())
+        return 1;
+    if (time1.second() < time2.second())
+        return -1;
+    if (time1.millisecond() > time2.millisecond())
+        return 1;
+    if (time1.millisecond() < time2.millisecond())
+        return -1;
+    if (time1.microsecond() > time2.microsecond())
+        return 1;
+    if (time1.microsecond() < time2.microsecond())
+        return -1;
+    if (time1.nanosecond() > time2.nanosecond())
+        return 1;
+    if (time1.nanosecond() < time2.nanosecond())
+        return -1;
+    return 0;
 }
 
 } // namespace ISO8601

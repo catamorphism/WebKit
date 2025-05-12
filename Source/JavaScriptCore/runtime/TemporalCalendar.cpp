@@ -301,7 +301,6 @@ JSObject* TemporalCalendar::from(JSGlobalObject* globalObject, JSValue calendarL
     auto scope = DECLARE_THROW_SCOPE(vm);
 
     if (calendarLike.isObject()) {
-        // FIXME: Also support PlainMonthDay, PlainYearMonth, ZonedDateTime.
         if (calendarLike.inherits<TemporalPlainDate>())
             return jsCast<TemporalPlainDate*>(calendarLike)->calendar();
 
@@ -310,6 +309,15 @@ JSObject* TemporalCalendar::from(JSGlobalObject* globalObject, JSValue calendarL
 
         if (calendarLike.inherits<TemporalPlainTime>())
             return jsCast<TemporalPlainTime*>(calendarLike)->calendar();
+
+        if (calendarLike.inherits<TemporalPlainMonthDay>())
+            return jsCast<TemporalPlainMonthDay*>(calendarLike)->calendar();
+
+        if (calendarLike.inherits<TemporalPlainYearMonth>())
+            return jsCast<TemporalPlainYearMonth*>(calendarLike)->calendar();
+
+        if (calendarLike.inherits<TemporalZonedDateTime>())
+            return jsCast<TemporalZonedDateTime*>(calendarLike)->calendar();
 
         JSObject* calendarLikeObject = jsCast<JSObject*>(calendarLike);
         bool hasProperty = calendarLikeObject->hasProperty(globalObject, vm.propertyNames->calendar);
@@ -326,6 +334,10 @@ JSObject* TemporalCalendar::from(JSGlobalObject* globalObject, JSValue calendarL
         }
     }
 
+    if (!calendarLike.isString()) {
+        throwTypeError(globalObject, scope, "calendar must be a string"_s);
+        return { };
+    }
     auto identifier = calendarLike.toWTFString(globalObject);
     RETURN_IF_EXCEPTION(scope, { });
 
@@ -1162,6 +1174,15 @@ int32_t TemporalCalendar::isoDateCompare(const ISO8601::PlainDate& d1, const ISO
     if (d1.day() < d2.day())
         return -1;
     return 0;
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-compareisodate
+int32_t TemporalCalendar::isoDateTimeCompare(const ISO8601::PlainDateTime& d1, const ISO8601::PlainDateTime& d2)
+{
+    auto dateResult = isoDateCompare(d1.date(), d2.date());
+    if (dateResult)
+        return dateResult;
+    return ISO8601::compareTimeRecord(d1.time(), d2.time());
 }
 
 bool TemporalCalendar::equals(JSGlobalObject* globalObject, TemporalCalendar* other)

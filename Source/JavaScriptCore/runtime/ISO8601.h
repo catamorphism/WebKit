@@ -599,6 +599,8 @@ constexpr static inline Int128 makeTime(Int128 hour, Int128 min, Int128 sec, Int
 
 Int128 roundTimeDurationToIncrement(JSGlobalObject*, Int128, Int128, RoundingMode);
 
+int32_t compareTimeRecord(const PlainTime&, const PlainTime&);
+
 } // namespace ISO8601
 
 using CheckedInt128 = Checked<Int128, RecordOverflow>;
