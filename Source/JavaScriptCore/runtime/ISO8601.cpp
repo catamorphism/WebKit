@@ -30,8 +30,11 @@
 #include "DateConstructor.h"
 #include "IntlObject.h"
 #include "ParseInt.h"
+#include "TemporalCalendar.h"
+#include "TemporalInstant.h"
 #include "TemporalObject.h"
 #include "TemporalPlainDate.h"
+#include "TemporalPlainTime.h"
 #include <limits>
 #include <wtf/CheckedArithmetic.h>
 #include <wtf/DateMath.h>
@@ -369,7 +372,8 @@ static std::optional<PlainTime> parseTimeSpec(StringParsingBuffer<CharacterType>
     Vector<LChar, 9> padded(9, '0');
     for (size_t i = 0; i < digits; ++i)
         padded[i] = buffer[i];
-    buffer.advanceBy(digits);
+
+    buffer.consume(digits);
 
     unsigned millisecond = parseDecimalInt32(padded.span().first(3));
     unsigned microsecond = parseDecimalInt32(padded.subspan(3, 3));
@@ -377,6 +381,7 @@ static std::optional<PlainTime> parseTimeSpec(StringParsingBuffer<CharacterType>
 
     return PlainTime(hour, minute, second, millisecond, microsecond, nanosecond);
 }
+
 
 template<typename CharacterType>
 static std::optional<int64_t> parseUTCOffset(StringParsingBuffer<CharacterType>& buffer, bool parseSubMinutePrecision = true)
@@ -1012,6 +1017,7 @@ static std::optional<std::tuple<PlainTime, std::optional<TimeZoneRecord>>> parse
     // https://tc39.es/proposal-temporal/#prod-Time
     // Time :
     //     TimeSpec TimeZone[opt]
+    Vector<LChar> chars;
     auto plainTime = parseTimeSpec(buffer, Second60Mode::Accept);
     if (!plainTime)
         return std::nullopt;
@@ -1145,7 +1151,9 @@ static std::optional<PlainDate> parseDate(StringParsingBuffer<CharacterType>& bu
                 return std::nullopt;
         }
     }
-    // We ensured that buffer has enough length for month and day. We do not need to check length.
+
+    if (buffer.lengthRemaining() < 2)
+        return std::nullopt;
 
     unsigned month = 0;
     auto firstMonthCharacter = *buffer;
@@ -1306,6 +1314,7 @@ static std::optional<std::tuple<PlainTime, std::optional<TimeZoneRecord>, std::o
     if (*buffer == 'T' || *buffer == 't')
         buffer.advance();
 
+    Vector<LChar> chars;
     auto plainTime = parseTimeSpec(buffer, Second60Mode::Accept);
     if (!plainTime)
         return std::nullopt;
@@ -1939,14 +1948,6 @@ std::optional<ExactTime> ExactTime::add(Duration duration) const
     return result;
 }
 
-// https://tc39.es/proposal-temporal/#sec-temporal-roundtemporalinstant
-static Int128 roundTemporalInstant(Int128 ns, unsigned increment, TemporalUnit unit, RoundingMode roundingMode)
-{
-    auto unitLength = lengthInNanoseconds(unit);
-    auto incrementNs = increment * unitLength;
-    return roundNumberToIncrementAsIfPositive(ns, incrementNs, roundingMode);
-}
-
 // https://tc39.es/proposal-temporal/#sec-validatetemporalroundingincrement
 static void validateTemporalRoundingIncrement(JSGlobalObject* globalObject, unsigned increment,
     Int128 dividend, IsInclusive inclusive)
@@ -1968,6 +1969,14 @@ static void validateTemporalRoundingIncrement(JSGlobalObject* globalObject, unsi
         throwRangeError(globalObject, scope, "Rounding increment exceeds maximum value"_s);
     else if (dividend % increment)
         throwRangeError(globalObject, scope, "Rounding increment does not divide evenly into maximum value"_s);
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-roundtemporalinstant
+Int128 roundTemporalInstant(Int128 ns, unsigned increment, TemporalUnit unit, RoundingMode roundingMode)
+{
+    auto unitLength = lengthInNanoseconds(unit);
+    auto incrementNs = increment * unitLength;
+    return roundNumberToIncrementAsIfPositive(ns, incrementNs, roundingMode);
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.instant.prototype.round

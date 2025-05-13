@@ -28,7 +28,9 @@
 
 #include "ISO8601.h"
 #include "JSObjectInlines.h"
+#include "ParseInt.h"
 #include "TemporalZonedDateTime.h"
+#include <wtf/text/StringParsingBuffer.h>
 
 namespace JSC {
 

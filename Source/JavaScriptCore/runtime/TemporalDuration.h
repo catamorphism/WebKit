@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include "DateConstructor.h"
 #include "ISO8601.h"
 
 namespace JSC {
@@ -100,8 +101,6 @@ public:
 
     static int sign(const ISO8601::Duration&);
     static ISO8601::InternalDuration round(JSGlobalObject*, ISO8601::InternalDuration, double increment, TemporalUnit, RoundingMode);
-    static std::tuple<ISO8601::PlainDate, ISO8601::PlainTime>
-        combineISODateAndTimeRecord(ISO8601::PlainDate, ISO8601::PlainTime);
     static ISO8601::InternalDuration roundRelativeDuration(JSGlobalObject*, ISO8601::InternalDuration&, Int128,
         ISO8601::PlainDateTime, std::optional<ISO8601::TimeZone>, TemporalUnit, double, TemporalUnit, RoundingMode);
     static ISO8601::Duration toDateDurationRecordWithoutTime(JSGlobalObject*, const ISO8601::Duration&);
@@ -135,8 +134,5 @@ private:
         ISO8601::TimeZone, double, TemporalUnit, RoundingMode);
     ISO8601::Duration m_duration;
 };
-
-// TODO: Move to TemporalPlainDateTime once that's created
-Int128 getUTCEpochNanoseconds(std::tuple<ISO8601::PlainDate, ISO8601::PlainTime>);
 
 } // namespace JSC

@@ -103,6 +103,7 @@ public:
 
     constexpr ExactTime() = default;
     constexpr ExactTime(const ExactTime&) = default;
+    constexpr ExactTime& operator=(const ExactTime&) = default;
     constexpr explicit ExactTime(Int128 epochNanoseconds) : m_epochNanoseconds(epochNanoseconds) { }
 
     static constexpr ExactTime fromEpochMilliseconds(int64_t epochMilliseconds)
@@ -269,9 +270,9 @@ public:
 
     friend bool operator==(const PlainDate&, const PlainDate&) = default;
 
-    int32_t year() const { return m_year; }
-    uint8_t month() const { return m_month; }
-    uint8_t day() const { return m_day; }
+    constexpr int32_t year() const { return m_year; }
+    constexpr uint8_t month() const { return m_month; }
+    constexpr uint8_t day() const { return m_day; }
 
 private:
     // It would be tempting to write m_year : 21 because
@@ -477,7 +478,6 @@ bool validMonthCode(StringView);
 uint8_t monthFromCode(StringView);
 
 bool isValidDuration(const Duration&);
-PlainDate createISODateRecord(double, double, double);
 void checkISODaysRange(JSGlobalObject*, ISO8601::PlainDate);
 
 std::optional<ExactTime> parseInstant(StringView);
@@ -491,6 +491,7 @@ Int128 getUTCEpochNanoseconds(PlainDateTime);
 Int128 getNamedTimeZoneOffsetNanoseconds(TimeZoneID timeZoneIdentifier, Int128);
 
 Int128 roundTimeDurationToIncrement(JSGlobalObject*, Int128, Int128, RoundingMode);
+Int128 roundTemporalInstant(Int128, unsigned, TemporalUnit, RoundingMode);
 
 int32_t compareTimeRecord(const PlainTime&, const PlainTime&);
 

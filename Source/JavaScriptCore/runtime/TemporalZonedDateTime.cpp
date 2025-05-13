@@ -575,7 +575,7 @@ String TemporalZonedDateTime::temporalZonedDateTimeToString(ISO8601::ExactTime e
     TemporalShowTimeZone showTimeZone, TemporalShowOffset showOffset, unsigned increment,
     TemporalUnit unit, RoundingMode roundingMode)
 {
-    Int128 epochNs = TemporalInstant::roundTemporalInstant(exactTime.epochNanoseconds(), increment, unit, roundingMode);
+    Int128 epochNs = ISO8601::roundTemporalInstant(exactTime.epochNanoseconds(), increment, unit, roundingMode);
     auto offsetNanoseconds = TemporalTimeZone::getOffsetNanosecondsFor(timeZone, epochNs);
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(timeZone, ISO8601::ExactTime(epochNs));
     auto dateTimeString = temporalDateTimeToString(isoDateTime.date(), isoDateTime.time(), precision.precision);

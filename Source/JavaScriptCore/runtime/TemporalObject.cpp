@@ -196,9 +196,9 @@ static StringView singularUnit(StringView unit)
     return unit.endsWith('s') ? unit.left(unit.length() - 1) : unit;
 }
 
-double nonNegativeModulo(double x, double y)
+Int128 nonNegativeModulo(Int128 x, Int128 y)
 {
-    double result = std::fmod(x, y);
+    Int128 result = x % y;
     if (!result)
         return 0;
     if (result < 0)

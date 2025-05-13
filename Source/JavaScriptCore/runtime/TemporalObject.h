@@ -137,6 +137,7 @@ enum IsInclusive : bool {
 };
 
 double nonNegativeModulo(double x, double y);
+
 enum class TemporalShowCalendar : uint8_t {
     Auto,
     Never,
@@ -204,6 +205,7 @@ enum class TemporalDirectionOption : bool {
     Previous,
 };
 
+Int128 nonNegativeModulo(Int128 x, Int128 y);
 WTF::String ellipsizeAt(unsigned maxLength, const WTF::String&);
 PropertyName temporalUnitPluralPropertyName(VM&, TemporalUnit);
 PropertyName temporalUnitSingularPropertyName(VM&, TemporalUnit);
@@ -312,6 +314,13 @@ enum class TemporalOffsetBehavior : uint8_t {
     Option,
     Exact,
     Wall,
+};
+
+enum class TemporalOffsetOption : uint8_t {
+    Ignore,
+    Use,
+    Prefer,
+    Reject,
 };
 
 enum class TemporalMatchBehavior : bool {
