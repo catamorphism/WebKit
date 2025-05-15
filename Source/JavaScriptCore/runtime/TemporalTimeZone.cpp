@@ -103,28 +103,27 @@ static UCalendarMonths toICUMonth(double month)
 {
     if (month == 1)
         return UCAL_JANUARY;
-    else if (month == 2)
+    if (month == 2)
         return UCAL_FEBRUARY;
-    else if (month == 3)
+    if (month == 3)
         return UCAL_MARCH;
-    else if (month == 4)
+    if (month == 4)
         return UCAL_APRIL;
-    else if (month == 5)
+    if (month == 5)
         return UCAL_MAY;
-    else if (month == 6)
+    if (month == 6)
         return UCAL_JUNE;
-    else if (month == 7)
+    if (month == 7)
         return UCAL_JULY;
-    else if (month == 8)
+    if (month == 8)
         return UCAL_AUGUST;
-    else if (month == 9)
+    if (month == 9)
         return UCAL_SEPTEMBER;
-    else if (month == 10)
+    if (month == 10)
         return UCAL_OCTOBER;
-    else if (month == 11)
+    if (month == 11)
         return UCAL_NOVEMBER;
-    else
-        return UCAL_DECEMBER;
+    return UCAL_DECEMBER;
 }
 
 // https://tc39.es/proposal-temporal/#sec-getnamedtimezoneepochnanoseconds
@@ -595,9 +594,8 @@ std::optional<ISO8601::TimeZone> TemporalTimeZone::parseTimeZoneIdentifier(Strin
 
     auto parseResult = ISO8601::parseUTCOffset(identifier, false); // Don't accept sub-minute precision
     bool isIANAName = false;
-    if (!parseResult) {
+    if (!parseResult)
         isIANAName = parseTimeZoneIANAName(identifier);
-    }
     if (isIANAName) {
         std::optional<TimeZoneID> id = ISO8601::parseTimeZoneName(identifier);
         if (!id)

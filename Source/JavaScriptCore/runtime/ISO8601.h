@@ -472,7 +472,7 @@ struct RFC9557Annotation {
 // https://tc39.es/proposal-temporal/#sup-isvalidtimezonename
 std::optional<TimeZoneID> parseTimeZoneName(StringView);
 std::optional<TimeZoneRecord> parseTimeZone(StringView);
-std::optional<String> getTimeZoneNameFromId(TimeZoneID id);
+std::optional<String> getTimeZoneNameFromId(TimeZoneID);
 std::optional<Duration> parseDuration(StringView);
 std::optional<int64_t> parseUTCOffset(StringView, bool parseSubMinutePrecision = true);
 std::optional<int64_t> parseUTCOffsetInMinutes(StringView);
@@ -606,6 +606,8 @@ Int128 roundTimeDurationToIncrement(JSGlobalObject*, Int128, Int128, RoundingMod
 int32_t compareTimeRecord(const PlainTime&, const PlainTime&);
 
 Int128 roundTemporalInstant(Int128, unsigned, TemporalUnit, RoundingMode);
+
+PlainDate addDaysToISODate(const PlainDate&, int32_t);
 
 } // namespace ISO8601
 

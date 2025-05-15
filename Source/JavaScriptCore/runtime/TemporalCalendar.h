@@ -90,6 +90,7 @@ public:
     static String formatCalendarAnnotation(TemporalShowCalendar);
     static ISO8601::PlainDateTime getISOPartsFromEpoch(ISO8601::ExactTime);
     static YearWeekRecord calendarDateWeekOfYear(JSGlobalObject*, const ISO8601::PlainDate&);
+    static ISO8601::PlainDate addDaysToISODate(const ISO8601::PlainDate&, int32_t);
 
     CalendarID identifier() const { return m_identifier; }
     bool isISO8601() const { return m_identifier == iso8601CalendarID(); }

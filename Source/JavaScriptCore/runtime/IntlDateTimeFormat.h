@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include "ISO8601.h"
 #include "JSObject.h"
 #include <unicode/udat.h>
 #include <wtf/unicode/icu/ICUHelpers.h>
@@ -42,9 +43,25 @@ struct UDateIntervalFormatDeleter {
     JS_EXPORT_PRIVATE void operator()(UDateIntervalFormat*);
 };
 
+enum class TemporalDateTimeFormat : uint8_t {
+    Instant,
+    PlainDate,
+    PlainDateTime,
+    PlainMonthDay,
+    PlainTime,
+    PlainYearMonth,
+};
+
+static inline bool isPlain(std::optional<TemporalDateTimeFormat> format)
+{
+    return format && format.value() != TemporalDateTimeFormat::Instant;
+}
+
 class IntlDateTimeFormat final : public JSNonFinalObject {
 public:
     using Base = JSNonFinalObject;
+
+    using ExactTime = ISO8601::ExactTime;
 
     static constexpr DestructionMode needsDestruction = NeedsDestruction;
 
@@ -69,11 +86,14 @@ public:
     enum class RequiredComponent : uint8_t { Date, Time, Any };
     enum class Defaults : uint8_t { Date, Time, All };
     void initializeDateTimeFormat(JSGlobalObject*, JSValue locales, JSValue options, RequiredComponent, Defaults);
-    JSValue format(JSGlobalObject*, double value) const;
-    JSValue formatToParts(JSGlobalObject*, double value, JSString* sourceType = nullptr) const;
-    JSValue formatRange(JSGlobalObject*, double startDate, double endDate);
-    JSValue formatRangeToParts(JSGlobalObject*, double startDate, double endDate);
+    JSValue format(JSGlobalObject*, ExactTime value, std::optional<TemporalDateTimeFormat>) const;
+    JSValue formatToParts(JSGlobalObject*, ExactTime value, std::optional<TemporalDateTimeFormat>,
+        JSString* sourceType = nullptr) const;
+    JSValue formatRange(JSGlobalObject*, ExactTime, ExactTime, std::optional<TemporalDateTimeFormat>);
+    JSValue formatRangeToParts(JSGlobalObject*, ExactTime, ExactTime, std::optional<TemporalDateTimeFormat>);
     JSObject* resolvedOptions(JSGlobalObject*) const;
+    std::tuple<ExactTime, std::optional<TemporalDateTimeFormat>>
+    handleDateTimeValue(JSGlobalObject*, JSValue);
 
     JSBoundFunction* boundFormat() const LIFETIME_BOUND { return m_boundFormat.get(); }
     void setBoundFormat(VM&, JSBoundFunction*);
@@ -89,7 +109,7 @@ private:
 
     static Vector<String> localeData(const String&, RelevantExtensionKey);
 
-    UDateIntervalFormat* createDateIntervalFormatIfNecessary(JSGlobalObject*);
+    UDateIntervalFormat* createDateIntervalFormatIfNecessary(JSGlobalObject*, std::optional<TemporalDateTimeFormat>);
 
     enum class Weekday : uint8_t { None, Narrow, Short, Long };
     enum class Era : uint8_t { None, Narrow, Short, Long };
@@ -104,6 +124,13 @@ private:
     enum class DateTimeStyle : uint8_t { None, Full, Long, Medium, Short };
 
     void NODELETE setFormatsFromPattern(StringView);
+
+    void checkTimeOptions(JSGlobalObject*, StringView);
+    void checkDateOptions(JSGlobalObject*, StringView);
+    void checkOptionsCompatibility(JSGlobalObject*, JSValue);
+    String dateTimeStyleToICUDateFormat(TemporalDateTimeFormat) const;
+    String dateTimeFormatToICUDateFormat(TemporalDateTimeFormat) const;
+
     static ASCIILiteral hourCycleString(HourCycle);
     static ASCIILiteral weekdayString(Weekday);
     static ASCIILiteral eraString(Era);
@@ -126,14 +153,20 @@ private:
     using UDateFormatDeleter = ICUDeleter<udat_close>;
 
     WriteBarrier<JSBoundFunction> m_boundFormat;
-    std::unique_ptr<UDateFormat, UDateFormatDeleter> m_dateFormat;
-    std::unique_ptr<UDateIntervalFormat, UDateIntervalFormatDeleter> m_dateIntervalFormat;
+    // The time zone can only be set when the date/time formatter is created,
+    // but we need to use UTC sometimes (when calling with a Plain Temporal object),
+    // so we need to create two formatters.
+    // FIXME: this could be done lazily
+    std::unique_ptr<UDateFormat, UDateFormatDeleter> m_dateFormatTimeZone;
+    std::unique_ptr<UDateFormat, UDateFormatDeleter> m_dateFormatUTC;
+    std::unique_ptr<UDateIntervalFormat, UDateIntervalFormatDeleter> m_dateIntervalFormatTimeZone;
+    std::unique_ptr<UDateIntervalFormat, UDateIntervalFormatDeleter> m_dateIntervalFormatUTC;
 
     String m_locale;
     String m_dataLocale;
     String m_calendar;
     String m_numberingSystem;
-    String m_timeZone;
+    ISO8601::TimeZone m_timeZone;
     String m_timeZoneForICU;
     HourCycle m_hourCycle { HourCycle::None };
     Weekday m_weekday { Weekday::None };
@@ -146,6 +179,15 @@ private:
     Minute m_minute { Minute::None };
     Second m_second { Second::None };
     uint8_t m_fractionalSecondDigits { 0 };
+
+    bool m_userSpecifiedWeekday = false;
+    bool m_userSpecifiedYear = false;
+    bool m_userSpecifiedMonth = false;
+    bool m_userSpecifiedDay = false;
+    bool m_userSpecifiedHour = false;
+    bool m_userSpecifiedMinute = false;
+    bool m_userSpecifiedSecond = false;
+
     TimeZoneName m_timeZoneName { TimeZoneName::None };
     DateTimeStyle m_dateStyle { DateTimeStyle::None };
     DateTimeStyle m_timeStyle { DateTimeStyle::None };

@@ -399,7 +399,7 @@ ISO8601::ExactTime TemporalZonedDateTime::addZonedDateTime(JSGlobalObject* globa
     // FIXME: support non-ISO8601 calendars
     (void) calendar;
 
-    if (!duration.sign()) {
+    if (!dateDurationSign(duration.dateDuration())) {
         RELEASE_AND_RETURN(scope, TemporalInstant::addInstant(globalObject,
             epochNanoseconds, duration.time()));
     }
@@ -459,16 +459,20 @@ static ISO8601::InternalDuration differenceZonedDateTime(JSGlobalObject* globalO
     auto endDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, timeZone, ns2);
     RETURN_IF_EXCEPTION(scope, { });
     auto endDate = endDateTime.date();
-    auto sign = (ns2.epochNanoseconds() - ns1.epochNanoseconds() < 0) ? -1 : 1;
-    auto maxDayCorrection = (sign == 1) ? 2 : 1;
+    if (startDate == endDate) {
+        auto timeDuration = TemporalDuration::timeDurationFromEpochNanosecondsDifference(ns2, ns1);
+        return ISO8601::InternalDuration::combineDateAndTimeDuration(ISO8601::Duration(), timeDuration);
+    }
+    auto sign = (ns2.epochNanoseconds() - ns1.epochNanoseconds() < 0) ? 1 : -1;
+    auto maxDayCorrection = (sign == -1) ? 2 : 1;
     auto dayCorrection = 0;
     auto timeDuration = TemporalPlainTime::differenceTime(startTime, endDateTime.time());
-    if (TemporalDuration::timeDurationSign(timeDuration) == -sign)
+    if (TemporalDuration::timeDurationSign(timeDuration) == sign)
         dayCorrection++;
     auto success = false;
     ISO8601::PlainDateTime intermediateDateTime;
     while (dayCorrection <= maxDayCorrection && !success) {
-        auto intermediateDate = TemporalCalendar::balanceISODate(globalObject, static_cast<Int128>(endDate.year()), static_cast<Int128>(endDate.month()), static_cast<Int128>(endDate.day()) - (dayCorrection * sign));
+        auto intermediateDate = TemporalCalendar::addDaysToISODate(endDate, dayCorrection * sign);
         RETURN_IF_EXCEPTION(scope, { });
         intermediateDateTime = TemporalPlainDateTime::combineISODateAndTimeRecord(intermediateDate,
             startTime);
@@ -477,7 +481,7 @@ static ISO8601::InternalDuration differenceZonedDateTime(JSGlobalObject* globalO
         RETURN_IF_EXCEPTION(scope, { });
         timeDuration = TemporalDuration::timeDurationFromEpochNanosecondsDifference(ns2, intermediateNs);
         auto timeSign = TemporalDuration::timeDurationSign(timeDuration);
-        if (sign != -timeSign)
+        if (sign != timeSign)
             success = true;
         dayCorrection++;
     }
@@ -530,6 +534,7 @@ double TemporalZonedDateTime::differenceZonedDateTimeWithTotal(JSGlobalObject* g
     auto difference = differenceZonedDateTime(globalObject, ns1, ns2, timeZone, calendar, unit);
     RETURN_IF_EXCEPTION(scope, 0);
     auto dateTime = TemporalTimeZone::getISODateTimeFor(globalObject, timeZone, ns1);
+    RETURN_IF_EXCEPTION(scope, 0);
     RELEASE_AND_RETURN(scope, TemporalDuration::totalRelativeDuration(globalObject,
         difference, ns1.epochNanoseconds(), ns2.epochNanoseconds(), dateTime, timeZone, unit));
 }

@@ -63,7 +63,8 @@ std::optional<TimeZoneID> parseTimeZoneName(StringView string)
     return std::nullopt;
 }
 
-std::optional<String> getTimeZoneNameFromId(TimeZoneID id) {
+std::optional<String> getTimeZoneNameFromId(TimeZoneID id)
+{
     const auto& timeZones = intlAvailableTimeZones();
     if (id >= timeZones.size())
         return std::nullopt;

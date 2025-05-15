@@ -944,7 +944,6 @@ NudgeWindow TemporalDuration::computeNudgeWindow(JSGlobalObject* globalObject, i
     return { r1, r2, startEpochNs, endEpochNs, ISO8601::InternalDuration::combineDateAndTimeDuration(startDuration, 0), ISO8601::InternalDuration::combineDateAndTimeDuration(endDuration, 0) };
 }
 
-
 // https://tc39.es/proposal-temporal/#sec-temporal-nudgetocalendarunit
 // NudgeToCalendarUnit ( sign, duration, destEpochNs, isoDateTime, timeZone, calendar, increment, unit, roundingMode )
 Nudged TemporalDuration::nudgeToCalendarUnit(JSGlobalObject* globalObject, int32_t sign, const ISO8601::InternalDuration& duration, Int128 originEpochNs, Int128 destEpochNs, ISO8601::PlainDate isoDate, ISO8601::PlainTime isoTime, std::optional<ISO8601::TimeZone> timeZoneOptional, unsigned increment, TemporalUnit unit, RoundingMode roundingMode)

@@ -1281,4 +1281,15 @@ YearWeekRecord TemporalCalendar::calendarDateWeekOfYear(JSGlobalObject* globalOb
     return { weekOfYear, yearOfWeek };
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal-adddaystoisodate
+ISO8601::PlainDate TemporalCalendar::addDaysToISODate(const ISO8601::PlainDate& isoDate, int32_t days)
+{
+    auto epochDays = makeDay(isoDate.year(), isoDate.month() - 1, isoDate.day() + days);
+    Int128 ms = makeDate(epochDays, 0);
+    auto year = epochTimeToEpochYear(ms);
+    auto month = epochTimeToMonthInYear(ms) + 1;
+    auto day = epochTimeToDate(ms);
+    return ISO8601::PlainDate(year, month, day);
+}
+
 } // namespace JSC
