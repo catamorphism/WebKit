@@ -410,9 +410,10 @@ ISO8601::ExactTime TemporalZonedDateTime::addZonedDateTime(JSGlobalObject* globa
     // TODO: support non-ISO8601 calendars
     (void) calendar;
 
-    if (!duration.sign())
+    if (!duration.sign()) {
         RELEASE_AND_RETURN(scope, TemporalInstant::addInstant(globalObject,
             epochNanoseconds, duration.time()));
+    }
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, timeZone, epochNanoseconds);
     RETURN_IF_EXCEPTION(scope, { });
     auto addedDate = TemporalCalendar::isoDateAdd(globalObject, isoDateTime.date(),
