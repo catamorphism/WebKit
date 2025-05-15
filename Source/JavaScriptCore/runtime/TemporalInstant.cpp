@@ -446,21 +446,27 @@ String TemporalInstant::toString(JSGlobalObject* globalObject, JSValue optionsVa
 // https://tc39.es/proposal-temporal/#sec-temporal-temporalinstanttostring
 String TemporalInstant::toString(JSGlobalObject* globalObject, ISO8601::ExactTime exactTime, TemporalTimeZone* timeZone, PrecisionData precision)
 {
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
     // We want to round down the epoch milliseconds so that we can add
     // the microseconds and nanoseconds back in -- hence the call to
     // floorEpochMilliseconds().
     GregorianDateTime gregorianDateTime { static_cast<double>(exactTime.floorEpochMilliseconds()), LocalTimeOffset { } };
+
     StringBuilder builder;
 
     auto outputTimeZone = timeZone ? timeZone->timeZone() : ISO8601::TimeZone::utc();
     auto epochNs = exactTime.epochNanoseconds();
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, outputTimeZone, exactTime);
+    RETURN_IF_EXCEPTION(scope, { });
     auto dateTimeString = ISO8601::temporalDateTimeToString(isoDateTime.date(), isoDateTime.time(), precision.precision);
     builder.append(dateTimeString);
 
     if (timeZone) {
-        auto offsetNanoseconds = TemporalTimeZone::getOffsetNanosecondsFor(outputTimeZone,
-            epochNs);
+        auto offsetNanoseconds = TemporalTimeZone::getOffsetNanosecondsFor(globalObject,
+            outputTimeZone, epochNs);
+        RETURN_IF_EXCEPTION(scope, { });
         builder.append(TemporalTimeZone::formatDateTimeUTCOffsetRounded(offsetNanoseconds));
     } else
         builder.append('Z');

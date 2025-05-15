@@ -383,7 +383,6 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToPlainTime, (JSGloba
 
     scope.release();
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
-
     return JSValue::encode(TemporalPlainTime::create(vm, globalObject->plainTimeStructure(), isoDateTime.time()));
 }
 
@@ -399,7 +398,6 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToPlainDateTime, (JSG
 
     scope.release();
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
-
     return JSValue::encode(TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(), isoDateTime.date(), isoDateTime.time()));
 }
 
@@ -862,8 +860,10 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterOffset, (JSGlobalOb
     if (!zonedDateTime)
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.offset called on value that's not a ZonedDateTime"_s);
 
-    auto offsetNanoseconds = TemporalTimeZone::getOffsetNanosecondsFor(zonedDateTime->timeZone(),
-        zonedDateTime->exactTime().epochNanoseconds());
+    auto offsetNanoseconds = TemporalTimeZone::getOffsetNanosecondsFor(globalObject,
+        zonedDateTime->timeZone(), zonedDateTime->exactTime().epochNanoseconds());
+    RETURN_IF_EXCEPTION(scope, { });
+
     return JSValue::encode(jsString(vm, ISO8601::formatUTCOffsetNanoseconds((int64_t) offsetNanoseconds)));
 }
 
@@ -877,8 +877,10 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterOffsetNanoseconds, 
     if (!zonedDateTime)
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.offsetNanoseconds called on value that's not a ZonedDateTime"_s);
 
-    auto result = TemporalTimeZone::getOffsetNanosecondsFor(zonedDateTime->timeZone(),
-        zonedDateTime->exactTime().epochNanoseconds());
+    auto result = TemporalTimeZone::getOffsetNanosecondsFor(globalObject,
+        zonedDateTime->timeZone(), zonedDateTime->exactTime().epochNanoseconds());
+    RETURN_IF_EXCEPTION(scope, { });
+
     return JSValue::encode(jsNumber((double) result));
 }
 } // namespace JSC

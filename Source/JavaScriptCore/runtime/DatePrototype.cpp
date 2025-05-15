@@ -937,6 +937,8 @@ JSC_DEFINE_HOST_FUNCTION(dateProtoFuncToJSON, (JSGlobalObject* globalObject, Cal
     return JSValue::encode(result);
 }
 
+using ExactTime = ISO8601::ExactTime;
+
 JSC_DEFINE_HOST_FUNCTION(dateProtoFuncToTemporalInstant, (JSGlobalObject* globalObject, CallFrame* callFrame))
 {
     VM& vm = globalObject->vm();
@@ -951,7 +953,7 @@ JSC_DEFINE_HOST_FUNCTION(dateProtoFuncToTemporalInstant, (JSGlobalObject* global
         return throwVMError(globalObject, scope, createRangeError(globalObject, "Invalid integer number of Epoch Millseconds"_s));
 
     ASSERT(epochMilliseconds >= std::numeric_limits<int64_t>::min() && epochMilliseconds <= static_cast<double>(std::numeric_limits<int64_t>::max()));
-    ISO8601::ExactTime exactTime = ISO8601::ExactTime::fromEpochMilliseconds(epochMilliseconds);
+    ExactTime exactTime = ExactTime::fromEpochMilliseconds(epochMilliseconds);
     return JSValue::encode(TemporalInstant::create(vm, globalObject->instantStructure(), exactTime));
 }
 

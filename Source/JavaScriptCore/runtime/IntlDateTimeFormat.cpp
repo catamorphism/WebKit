@@ -589,7 +589,7 @@ String IntlDateTimeFormat::buildSkeleton(Weekday weekday, Era era, Year year, Mo
         skeletonBuilder.append("BBBBB"_s);
         break;
     case DayPeriod::Short:
-        skeletonBuilder.append('B');
+        skeletonBuilder.append('a');
         break;
     case DayPeriod::Long:
         skeletonBuilder.append("BBBB"_s);

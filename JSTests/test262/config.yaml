@@ -290,6 +290,7 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/argument-propertybag-calendar-case-insensitive.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/calendar-case-insensitive.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-calendar-annotation.js
+    - test/built-ins/Temporal/ZonedDateTime/timezone-iso-string.js
     - test/intl402/Temporal/Duration/prototype/round/relativeto-infinity-throws-rangeerror.js
     - test/intl402/Temporal/Duration/prototype/total/relativeto-infinity-throws-rangeerror.js
 
@@ -415,19 +416,8 @@ skip:
     - test/intl402/DateTimeFormat/prototype/formatToParts/temporal-zoneddatetime-not-supported.js
     - test/intl402/Intl/DateTimeFormat/prototype/formatRangeToParts/fails-on-distinct-temporal-types.js
     - test/intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-zoneddatetime-not-supported.js
-    - test/intl402/Temporal/Duration/compare/relativeto-hour.js
-    - test/intl402/Temporal/Duration/compare/relativeto-string-datetime.js
+
+    # Bug
     - test/intl402/Temporal/Duration/compare/relativeto-sub-minute-offset.js
-    - test/intl402/Temporal/Duration/compare/twenty-five-hour-day.js
-    - test/intl402/Temporal/Duration/prototype/round/adjust-rounded-duration-days.js
-    - test/intl402/Temporal/Duration/prototype/round/dst-balancing-result.js
-    - test/intl402/Temporal/Duration/prototype/round/dst-rounding-result.js
-    - test/intl402/Temporal/Duration/prototype/round/relativeto-string-datetime.js
     - test/intl402/Temporal/Duration/prototype/round/relativeto-sub-minute-offset.js
-    - test/intl402/Temporal/Duration/prototype/total/dst-balancing-result.js
-    - test/intl402/Temporal/Duration/prototype/total/dst-day-length.js
-    - test/intl402/Temporal/Duration/prototype/total/dst-rounding-result.js
-    - test/intl402/Temporal/Duration/prototype/total/relativeto-string-datetime.js
     - test/intl402/Temporal/Duration/prototype/total/relativeto-sub-minute-offset.js
-    - test/intl402/Temporal/Instant/prototype/toString/timezone-offset.js
-    - test/intl402/Temporal/Instant/prototype/toString/timezone-string-datetime.js

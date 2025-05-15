@@ -34,6 +34,7 @@
 #include "TemporalObject.h"
 #include "TemporalPlainDate.h"
 #include <limits>
+#include <unicode/ucal.h>
 #include <wtf/CheckedArithmetic.h>
 #include <wtf/DateMath.h>
 #include <wtf/WallTime.h>
@@ -60,6 +61,13 @@ std::optional<TimeZoneID> parseTimeZoneName(StringView string)
             return index;
     }
     return std::nullopt;
+}
+
+std::optional<String> getTimeZoneNameFromId(TimeZoneID id) {
+    const auto& timeZones = intlAvailableTimeZones();
+    if (id >= timeZones.size())
+        return std::nullopt;
+    return timeZones[id];
 }
 
 template<typename CharType>
@@ -1610,7 +1618,9 @@ String formatTimeZone(TimeZone tz)
         return "UTC"_s;
     if (tz.isOffset())
         return formatUTCOffsetNanoseconds(tz.offsetNanoseconds());
-    return ""_s; // TODO: handle named time zones
+    auto timeZoneName = getTimeZoneNameFromId(tz.asID());
+    ASSERT(timeZoneName);
+    return timeZoneName.value();
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-formatfractionalseconds
@@ -1959,7 +1969,7 @@ std::optional<ExactTime> ExactTime::add(Duration duration) const
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-roundtemporalinstant
-static Int128 roundTemporalInstant(Int128 ns, unsigned increment, TemporalUnit unit, RoundingMode roundingMode)
+Int128 roundTemporalInstant(Int128 ns, unsigned increment, TemporalUnit unit, RoundingMode roundingMode)
 {
     auto unitLength = lengthInNanoseconds(unit);
     auto incrementNs = increment * unitLength;
@@ -2116,10 +2126,49 @@ void checkISODaysRange(JSGlobalObject* globalObject, ISO8601::PlainDate isoDate)
 }
 
 // https://tc39.es/ecma262/#sec-getnamedtimezoneoffsetnanoseconds
-Int128 getNamedTimeZoneOffsetNanoseconds(TimeZoneID timeZoneIdentifier, Int128)
+Int128 getNamedTimeZoneOffsetNanoseconds(JSGlobalObject* globalObject,
+    TimeZoneID timeZoneIdentifier, ExactTime epochNanoseconds)
 {
-    RELEASE_ASSERT(timeZoneIdentifier == utcTimeZoneID());
-    return 0;
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    if (timeZoneIdentifier == utcTimeZoneID())
+        return 0;
+    // TODO: cache this
+    std::optional<String> timeZoneString = getTimeZoneNameFromId(timeZoneIdentifier);
+    if (!timeZoneString) {
+        throwRangeError(globalObject, scope, "bad time zone ID in getNamedTimeZoneOffsetNanoseconds"_s);
+        return 0;
+    }
+    // copied from JSDateMath.cpp
+    UErrorCode status = U_ZERO_ERROR;
+    auto timeZoneName = timeZoneString->charactersWithNullTermination();
+    if (!timeZoneName) {
+        throwRangeError(globalObject, scope, "internal error getting time zone data"_s);
+        return 0;
+    }
+    UCalendar* calendar = ucal_open(timeZoneName->span().data(), -1, "", UCAL_DEFAULT, &status);
+    ASSERT_UNUSED(status, U_SUCCESS(status));
+    ucal_setMillis(calendar, epochNanoseconds.epochMilliseconds(), &status);
+    ASSERT_UNUSED(status, U_SUCCESS(status));
+
+    int32_t rawOffset = 0;
+    int32_t dstOffset = 0;
+
+    rawOffset = ucal_get(calendar, UCAL_ZONE_OFFSET, &status);
+    if (U_FAILURE(status)) {
+        throwRangeError(globalObject, scope, "error looking up time zone data"_s);
+        return 0;
+    }
+    dstOffset = ucal_get(calendar, UCAL_DST_OFFSET, &status);
+    if (U_FAILURE(status)) {
+        throwRangeError(globalObject, scope, "error looking up time zone data"_s);
+        return 0;
+    }
+
+    ucal_close(calendar);
+
+    return (static_cast<Int128>(rawOffset + dstOffset) * 1'000'000);
 }
 
 // https://tc39.es/proposal-temporal/#sec-getutcepochnanoseconds
