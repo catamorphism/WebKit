@@ -29,6 +29,7 @@
 
 #include "IntlObject.h"
 #include "ParseInt.h"
+#include "TemporalObject.h"
 #include <limits>
 #include <wtf/CheckedArithmetic.h>
 #include <wtf/DateMath.h>
@@ -1609,13 +1610,6 @@ template std::optional<Int128> Duration::totalNanoseconds<TemporalUnit::Second>(
 template std::optional<Int128> Duration::totalNanoseconds<TemporalUnit::Millisecond>() const;
 template std::optional<Int128> Duration::totalNanoseconds<TemporalUnit::Microsecond>() const;
 
-static constexpr Int128 absInt128(const Int128& value)
-{
-    if (value < 0)
-        return -value;
-    return value;
-}
-
 // IsValidDuration ( years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds )
 // https://tc39.es/proposal-temporal/#sec-temporal-isvalidduration
 bool isValidDuration(const Duration& duration)
@@ -1680,20 +1674,84 @@ std::optional<ExactTime> ExactTime::add(Duration duration) const
     return result;
 }
 
-Int128 ExactTime::round(Int128 quantity, unsigned increment, TemporalUnit unit, RoundingMode roundingMode)
+// https://tc39.es/proposal-temporal/#sec-temporal-roundtemporalinstant
+static Int128 roundTemporalInstant(Int128 ns, unsigned increment, TemporalUnit unit, RoundingMode roundingMode)
 {
-    Int128 incrementNs { increment };
+    auto unitLength = lengthInNanoseconds(unit);
+    auto incrementNs = increment * unitLength;
+    return roundNumberToIncrementAsIfPositive(ns, incrementNs, roundingMode);
+}
+
+// https://tc39.es/proposal-temporal/#sec-validatetemporalroundingincrement
+static void validateTemporalRoundingIncrement(JSGlobalObject* globalObject, unsigned increment,
+    Int128 dividend, bool inclusive)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    Int128 maximum = 0;
+    if (inclusive)
+        maximum = dividend;
+    else {
+        ASSERT(dividend > 1);
+        maximum = dividend - 1;
+    }
+    if (increment > maximum)
+        throwRangeError(globalObject, scope, "Rounding increment exceeds maximum value"_s);
+    else if (dividend % increment)
+        throwRangeError(globalObject, scope, "Rounding increment does not divide evenly into maximum value"_s);
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.instant.prototype.round
+// (Steps 10-17 only)
+ExactTime ExactTime::round(JSGlobalObject* globalObject, unsigned increment,
+    TemporalUnit unit, RoundingMode roundingMode) const
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    Int128 maximum = 0;
     switch (unit) {
-    case TemporalUnit::Hour: incrementNs *= ExactTime::nsPerHour; break;
-    case TemporalUnit::Minute: incrementNs *= ExactTime::nsPerMinute; break;
-    case TemporalUnit::Second: incrementNs *= ExactTime::nsPerSecond; break;
-    case TemporalUnit::Millisecond: incrementNs *= ExactTime::nsPerMillisecond; break;
-    case TemporalUnit::Microsecond: incrementNs *= ExactTime::nsPerMicrosecond; break;
-    case TemporalUnit::Nanosecond: break;
+    case TemporalUnit::Hour: maximum = (Int128) WTF::hoursPerDay; break;
+    case TemporalUnit::Minute: maximum = (Int128) (minutesPerHour * WTF::hoursPerDay); break;
+    case TemporalUnit::Second: maximum = (Int128) (secondsPerMinute * minutesPerHour * WTF::hoursPerDay); break;
+    case TemporalUnit::Millisecond: maximum = (Int128) msPerDay; break;
+    case TemporalUnit::Microsecond: maximum = (Int128) msPerDay * 1000; break;
+    case TemporalUnit::Nanosecond: maximum = nsPerDay; break;
     default:
         ASSERT_NOT_REACHED();
     }
-    return roundNumberToIncrement(quantity, incrementNs, roundingMode);
+    validateTemporalRoundingIncrement(globalObject, increment, maximum, true);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto roundedNs = roundTemporalInstant(m_epochNanoseconds, increment, unit, roundingMode);
+    return ExactTime { roundedNs };
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-roundtimedurationtoincrement
+static Int128 roundTimeDurationToIncrement(JSGlobalObject* globalObject, Int128 d, Int128 increment,
+    RoundingMode roundingMode)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    Int128 rounded = roundNumberToIncrementInt128(d, increment, roundingMode);
+    if (absInt128(rounded) > InternalDuration::maxTimeDuration) {
+        throwRangeError(globalObject, scope, "Rounded instant exceeds maximum time duration"_s);
+        return 0;
+    }
+    return rounded;
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-roundtimeduration
+static Int128 roundTimeDuration(JSGlobalObject* globalObject, Int128 timeDuration, unsigned increment,
+    TemporalUnit unit, RoundingMode roundingMode)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto divisor = lengthInNanoseconds(unit);
+    RELEASE_AND_RETURN(scope, roundTimeDurationToIncrement(globalObject, timeDuration,
+        (divisor * increment), roundingMode));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-datedurationsign
@@ -1739,15 +1797,15 @@ InternalDuration InternalDuration::combineDateAndTimeDuration(Duration dateDurat
 
 // DifferenceInstant ( ns1, ns2, roundingIncrement, smallestUnit, roundingMode )
 // https://tc39.es/proposal-temporal/#sec-temporal-differenceinstant
-Int128 ExactTime::difference(ExactTime other, unsigned increment, TemporalUnit unit, RoundingMode roundingMode) const
+InternalDuration ExactTime::difference(JSGlobalObject* globalObject, ExactTime other, unsigned roundingIncrement, TemporalUnit smallestUnit, RoundingMode roundingMode) const
 {
-    Int128 diff = other.m_epochNanoseconds - m_epochNanoseconds;
-    return round(diff, increment, unit, roundingMode);
-}
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
 
-ExactTime ExactTime::round(unsigned increment, TemporalUnit unit, RoundingMode roundingMode) const
-{
-    return ExactTime { round(m_epochNanoseconds, increment, unit, roundingMode) };
+    Int128 timeDuration = other.m_epochNanoseconds - m_epochNanoseconds;
+    timeDuration = roundTimeDuration(globalObject, timeDuration, roundingIncrement, smallestUnit, roundingMode);
+    RETURN_IF_EXCEPTION(scope, { });
+    return InternalDuration::combineDateAndTimeDuration(ISO8601::Duration(), timeDuration);
 }
 
 ExactTime ExactTime::now()
