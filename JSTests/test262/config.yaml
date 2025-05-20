@@ -20,7 +20,7 @@ skip:
   paths:
     - test/built-ins/Temporal/PlainDate/prototype/withCalendar
     - test/built-ins/Temporal/PlainDateTime/prototype/withCalendar
-    - test/intl402/Temporal/PlainDateTime
+    - test/intl402/Temporal/PlainDateTime/prototype/withCalendar
     - test/intl402/Temporal/PlainYearMonth
     - test/intl402/Temporal/ZonedDateTime
     - test/staging/Intl402
@@ -291,6 +291,7 @@ skip:
     - test/intl402/Temporal/PlainDate/from/canonicalize-era-codes.js
     - test/intl402/Temporal/PlainDate/from/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainDate/from/one-of-era-erayear-undefined.js
+    - test/intl402/Temporal/PlainDate/from/remapping-era.js
     - test/intl402/Temporal/PlainDate/prototype/equals/argument-object-valid.js
     - test/intl402/Temporal/PlainDate/prototype/equals/argument-string.js
     - test/intl402/Temporal/PlainDate/prototype/equals/canonicalize-calendar.js
@@ -322,6 +323,31 @@ skip:
     - test/intl402/Temporal/PlainDate/prototype/withCalendar/canonicalize-calendar.js
     - test/intl402/Temporal/PlainDate/prototype/yearOfWeek/gregory-iso-weekofyear.js
     - test/intl402/Temporal/PlainDate/prototype/yearOfWeek/non-iso-week-of-year.js
+    - test/intl402/Temporal/PlainDateTime/canonicalize-calendar.js
+    - test/intl402/Temporal/PlainDateTime/compare/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/PlainDateTime/from/calendar-not-supporting-eras.js
+    - test/intl402/Temporal/PlainDateTime/from/canonicalize-calendar.js
+    - test/intl402/Temporal/PlainDateTime/from/canonicalize-era-codes.js
+    - test/intl402/Temporal/PlainDateTime/from/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/PlainDateTime/prototype/equals/calendar-checked.js
+    - test/intl402/Temporal/PlainDateTime/prototype/equals/canonicalize-calendar.js
+    - test/intl402/Temporal/PlainDateTime/prototype/equals/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/PlainDateTime/prototype/since/canonicalize-calendar.js
+    - test/intl402/Temporal/PlainDateTime/prototype/since/different-calendars-throws.js
+    - test/intl402/Temporal/PlainDateTime/prototype/since/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/PlainDateTime/prototype/toLocaleString/calendar-mismatch.js
+    - test/intl402/Temporal/PlainDateTime/prototype/toString/calendarname-always.js
+    - test/intl402/Temporal/PlainDateTime/prototype/toString/calendarname-auto.js
+    - test/intl402/Temporal/PlainDateTime/prototype/toString/calendarname-critical.js
+    - test/intl402/Temporal/PlainDateTime/prototype/toString/calendarname-undefined.js
+    - test/intl402/Temporal/PlainDateTime/prototype/toString/calendarname-wrong-type.js
+    - test/intl402/Temporal/PlainDateTime/prototype/toString/options-undefined.js
+    - test/intl402/Temporal/PlainDateTime/prototype/until/canonicalize-calendar.js
+    - test/intl402/Temporal/PlainDateTime/prototype/until/different-calendars-throws.js
+    - test/intl402/Temporal/PlainDateTime/prototype/until/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/PlainDateTime/prototype/weekOfYear/gregory-iso-weekofyear.js
+    - test/intl402/Temporal/PlainDateTime/prototype/weekOfYear/non-iso-week-of-year.js
+    - test/intl402/Temporal/PlainDateTime/prototype/with/non-iso-calendar-fields.js
     - test/intl402/Temporal/PlainMonthDay/canonicalize-calendar.js
     - test/intl402/Temporal/PlainMonthDay/from/canonicalize-calendar.js
     - test/intl402/Temporal/PlainMonthDay/prototype/equals/calendars.js
@@ -438,3 +464,4 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/argument-string-calendar-annotation.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/argument-string-unknown-annotation.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-unknown-annotation.js
+

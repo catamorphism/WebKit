@@ -202,7 +202,11 @@ for (const method of ['toString', 'toJSON', 'toLocaleString']) {
     shouldBe(Temporal.PlainDateTime.prototype[method].length, 0);
     shouldThrow(() => Temporal.PlainDateTime.prototype[method].call({}), TypeError);
 
-    shouldBe(pdt[method](), '0001-02-03T04:05:06.007008009');
+    if (method == 'toLocaleString') {
+        shouldBe(pdt[method]("UTC"), "2/3/1, 4:05:06 AM");
+    } else {
+        shouldBe(pdt[method](), '0001-02-03T04:05:06.007008009');
+    }
 }
 shouldBe(pdt.toString({}), pdt.toString());
 
