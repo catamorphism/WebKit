@@ -438,8 +438,7 @@ ISO8601::Duration TemporalDuration::temporalDurationFromInternal(ISO8601::Intern
         milliseconds = microseconds / 1000;
         microseconds = microseconds % 1000;
     } else if (largestUnit == TemporalUnit::Microsecond) {
-        microseconds = (Int128) std::trunc(std::fma<double, unsigned, double>(
-            seconds, 6, std::trunc(((double) nanoseconds) / 1000)));
+        microseconds = nanoseconds / 1000;
         nanoseconds = nanoseconds % 1000;
     }
     // Otherwise, unit is nanoseconds -- nothing to do
