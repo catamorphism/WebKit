@@ -1684,17 +1684,20 @@ static Int128 roundTemporalInstant(Int128 ns, unsigned increment, TemporalUnit u
 
 // https://tc39.es/proposal-temporal/#sec-validatetemporalroundingincrement
 static void validateTemporalRoundingIncrement(JSGlobalObject* globalObject, unsigned increment,
-    Int128 dividend, bool inclusive)
+    Int128 dividend, IsInclusive inclusive)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
     Int128 maximum = 0;
-    if (inclusive)
+    switch (inclusive) {
+    case Inclusive:
         maximum = dividend;
-    else {
+        break;
+    case Exclusive:
         ASSERT(dividend > 1);
         maximum = dividend - 1;
+        break;
     }
     if (increment > maximum)
         throwRangeError(globalObject, scope, "Rounding increment exceeds maximum value"_s);
@@ -1719,9 +1722,9 @@ ExactTime ExactTime::round(JSGlobalObject* globalObject, unsigned increment,
     case TemporalUnit::Microsecond: maximum = (Int128) msPerDay * 1000; break;
     case TemporalUnit::Nanosecond: maximum = nsPerDay; break;
     default:
-        ASSERT_NOT_REACHED();
+        RELEASE_ASSERT_NOT_REACHED();
     }
-    validateTemporalRoundingIncrement(globalObject, increment, maximum, true);
+    validateTemporalRoundingIncrement(globalObject, increment, maximum, IsInclusive::Inclusive);
     RETURN_IF_EXCEPTION(scope, { });
     auto roundedNs = roundTemporalInstant(m_epochNanoseconds, increment, unit, roundingMode);
     return ExactTime { roundedNs };

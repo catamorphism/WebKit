@@ -122,6 +122,11 @@ enum class UnitGroup : uint8_t {
     Time,
 };
 
+enum IsInclusive : bool {
+    Inclusive,
+    Exclusive
+};
+
 double nonNegativeModulo(double x, double y);
 WTF::String ellipsizeAt(unsigned maxLength, const WTF::String&);
 PropertyName temporalUnitPluralPropertyName(VM&, TemporalUnit);
