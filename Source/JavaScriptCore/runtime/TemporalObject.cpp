@@ -631,7 +631,8 @@ Int128 roundNumberToIncrementAsIfPositive(Int128 x, Int128 increment, RoundingMo
 {
 // The following code follows the polyfill rather than the spec, because we don't have float128.
 // ApplyUnsignedRoundingMode is inlined here to mirror the polyfill's implementation of it,
-// which has a different type than in the spec
+// which has a different type than in the spec.
+// See https://github.com/tc39/proposal-temporal/blob/main/polyfill/lib/ecmascript.mjs#L4056
     Int128 quotient = x / increment;
     Int128 remainder = x % increment;
     auto unsignedRoundingMode = getUnsignedRoundingMode(roundingMode, false);
@@ -670,6 +671,7 @@ Int128 roundNumberToIncrementInt128(Int128 x, Int128 increment, RoundingMode mod
 {
 // This follows the polyfill code rather than the spec, in order to work around
 // being unable to apply floating-point division in x / increment.
+// See https://github.com/tc39/proposal-temporal/blob/main/polyfill/lib/ecmascript.mjs#L4043
     Int128 quotient = x / increment;
     Int128 remainder = x % increment;
     bool isNegative = x < 0;
