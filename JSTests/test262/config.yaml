@@ -69,12 +69,15 @@ skip:
     - test/built-ins/RegExp/regexp-modifiers/add-ignoreCase-affects-slash-lower-p.js
 
      # Depends on Calendar support
+    - test/built-ins/Temporal/Duration/prototype/round/relativeto-propertybag-calendar-invalid-iso-string.js
     - test/built-ins/Temporal/Duration/prototype/round/relativeto-propertybag-calendar-number.js
     - test/built-ins/Temporal/Duration/prototype/round/relativeto-propertybag-calendar-wrong-type.js
+    - test/built-ins/Temporal/Duration/prototype/total/relativeto-propertybag-calendar-invalid-iso-string.js
     - test/built-ins/Temporal/Duration/prototype/total/relativeto-propertybag-calendar-number.js
     - test/built-ins/Temporal/Duration/prototype/total/relativeto-propertybag-calendar-wrong-type.js
     - test/built-ins/Temporal/PlainDate/basic.js
     - test/built-ins/Temporal/PlainDate/calendar-case-insensitive.js
+    - test/built-ins/Temporal/PlainDate/calendar-invalid-iso-string.js
     - test/built-ins/Temporal/PlainDate/calendar-number.js
     - test/built-ins/Temporal/PlainDate/calendar-wrong-type.js
     - test/built-ins/Temporal/PlainDate/compare/argument-propertybag-calendar-case-insensitive.js
@@ -133,6 +136,7 @@ skip:
     - test/built-ins/Temporal/PlainDate/prototype/until/argument-string-invalid.js
     - test/built-ins/Temporal/PlainDate/prototype/until/calendar-temporal-object.js
     - test/built-ins/Temporal/PlainDate/prototype/until/order-of-operations.js
+    - test/built-ins/Temporal/PlainDateTime/calendar-invalid-iso-string.js
     - test/built-ins/Temporal/PlainDateTime/calendar-number.js
     - test/built-ins/Temporal/PlainDateTime/calendar-wrong-type.js
     - test/built-ins/Temporal/PlainDateTime/compare/argument-propertybag-calendar-case-insensitive.js
@@ -182,6 +186,7 @@ skip:
     - test/built-ins/Temporal/PlainDateTime/prototype/withPlainTime/argument-string-unknown-annotation.js
     - test/built-ins/Temporal/PlainMonthDay/calendar-case-insensitive.js
     - test/built-ins/Temporal/PlainMonthDay/calendar-invalid.js
+    - test/built-ins/Temporal/PlainMonthDay/calendar-invalid-iso-string.js
     - test/built-ins/Temporal/PlainMonthDay/calendar-iso-string.js
     - test/built-ins/Temporal/PlainMonthDay/calendar-number.js
     - test/built-ins/Temporal/PlainMonthDay/calendar-wrong-type.js
@@ -214,6 +219,7 @@ skip:
     - test/built-ins/Temporal/PlainYearMonth/calendar-always.js
     - test/built-ins/Temporal/PlainYearMonth/calendar-case-insensitive.js
     - test/built-ins/Temporal/PlainYearMonth/calendar-invalid.js
+    - test/built-ins/Temporal/PlainYearMonth/calendar-invalid-iso-string.js
     - test/built-ins/Temporal/PlainYearMonth/calendar-iso-string.js
     - test/built-ins/Temporal/PlainYearMonth/calendar-number.js
     - test/built-ins/Temporal/PlainYearMonth/calendar-string.js
@@ -262,6 +268,7 @@ skip:
     - test/built-ins/Temporal/PlainYearMonth/prototype/until/argument-string-unknown-annotation.js
     - test/built-ins/Temporal/PlainYearMonth/refisoday-undefined.js
     - test/built-ins/Temporal/ZonedDateTime/calendar-case-insensitive.js
+    - test/built-ins/Temporal/ZonedDateTime/calendar-invalid-iso-string.js
     - test/built-ins/Temporal/ZonedDateTime/calendar-iso-string.js
     - test/built-ins/Temporal/ZonedDateTime/calendar-number.js
     - test/built-ins/Temporal/ZonedDateTime/calendar-wrong-type.js
