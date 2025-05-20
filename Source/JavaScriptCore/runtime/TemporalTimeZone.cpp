@@ -180,7 +180,12 @@ static Vector<Int128> getNamedTimeZoneEpochNanoseconds(JSGlobalObject* globalObj
     status = callBufferProducingFunction(ucal_getCanonicalTimeZoneID, timeZoneName->span().data(), -1, buffer, &isSystemID);
     ASSERT_UNUSED(isSystemID, isSystemID);
     ASSERT_UNUSED(status, U_SUCCESS(status));
-    UCalendar* calendar = ucal_open(buffer.span().data(), buffer.size(), "", UCAL_DEFAULT, &status);
+    UCalendar* calendar = ucal_open(buffer.span().data(), buffer.size(), "", UCAL_GREGORIAN, &status);
+    ASSERT_UNUSED(status, U_SUCCESS(status));
+
+    // From IntlDateTimeFormat::initializeDateTimeFormat():
+    // "Gregorian calendar should be used from the beginning of ECMAScript time."
+    ucal_setGregorianChange(calendar, minECMAScriptTime, &status);
     ASSERT_UNUSED(status, U_SUCCESS(status));
 
     Vector<Int128> result;
@@ -190,7 +195,12 @@ static Vector<Int128> getNamedTimeZoneEpochNanoseconds(JSGlobalObject* globalObj
 
     // TODO: refactor w/ getNamedTimeZoneOffsetNanoseconds
 
+        // https://tc39.es/proposal-temporal/#sec-get-temporal.zoneddatetime.prototype.epochmilliseconds
+        // Let ms be floor(ℝ(ns) / 10**6).
         Int128 offsetMillis = offsetNanoseconds / 1'000'000;
+        if (offsetNanoseconds < 0 && offsetNanoseconds % 1'000'000)
+            offsetMillis--;
+
         ucal_setMillis(calendar, static_cast<double>(offsetMillis), &status);
         int32_t year = ucal_get(calendar, UCAL_YEAR, &status);
         int32_t month = ucal_get(calendar, UCAL_MONTH, &status);

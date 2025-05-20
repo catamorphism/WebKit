@@ -1407,10 +1407,7 @@ String IntlDateTimeFormat::dateTimeStyleToICUDateFormat(TemporalDateTimeFormat f
     case DateTimeStyle::None:
         break;
     case DateTimeStyle::Short:
-      //  if (m_timeStyle == DateTimeStyle::Long || m_timeStyle == DateTimeStyle::Full)
-      //      dateString = "M/d/yyyy"_s;
-      //  else
-            dateString = "M/d/yy"_s;
+        dateString = "M/d/yy"_s;
         break;
     case DateTimeStyle::Medium:
         dateString = "MMM d, yyyy"_s;
