@@ -499,14 +499,7 @@ ISO8601::ExactTime TemporalTimeZone::getEpochNanosecondsFor(JSGlobalObject* glob
         possibleEpochNs, timeZone, isoDateTime, disambiguation));
 }
 
-// https://tc39.es/proposal-temporal/#sec-getavailablenamedtimezoneidentifier
-std::optional<ISO8601::TimeZone> TemporalTimeZone::getAvailableNamedTimeZoneIdentifier(JSGlobalObject*, TimeZoneID timeZoneIdentifier)
-{
-    if (timeZoneIdentifier == utcTimeZoneID())
-        return ISO8601::TimeZone::offset(0);
-    return ISO8601::TimeZone::named(timeZoneIdentifier, std::nullopt);
-}
-
+/*
 // https://tc39.es/proposal-temporal/#sec-getavailablenamedtimezoneidentifier
 std::optional<ISO8601::TimeZone> TemporalTimeZone::getAvailableNamedTimeZoneIdentifier(JSGlobalObject* globalObject, const Vector<Latin1Character>& chars)
 {
@@ -518,6 +511,7 @@ std::optional<ISO8601::TimeZone> TemporalTimeZone::getAvailableNamedTimeZoneIden
     throwRangeError(globalObject, scope, "getAvailableNamedTimeZoneIdentifier() not yet implemented"_s);
     return { };
 }
+*/
 
 // https://tc39.es/proposal-temporal/#sec-temporal-totemporaltimezoneidentifier
 ISO8601::TimeZone TemporalTimeZone::toTemporalTimeZoneIdentifier(JSGlobalObject* globalObject,
@@ -542,17 +536,8 @@ ISO8601::TimeZone TemporalTimeZone::toTemporalTimeZoneIdentifier(JSGlobalObject*
         throwRangeError(globalObject, scope, makeString("error parsing time zone from string "_s, toParse));
         return { };
     }
-    auto parseResult = parseResultOptional.value();
-    if (parseResult.isOffset())
-        return parseResult;
-    auto name = parseResult.asID();
-    auto timeZoneIdentifierRecord = getAvailableNamedTimeZoneIdentifier(globalObject, name);
-    RETURN_IF_EXCEPTION(scope, { });
-    if (!timeZoneIdentifierRecord) {
-        throwRangeError(globalObject, scope, "time zone is invalid"_s);
-        return { };
-    }
-    return timeZoneIdentifierRecord.value();
+    auto timeZoneIdentifierRecord = parseResultOptional.value();
+    return timeZoneIdentifierRecord;
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-formatoffsettimezoneidentifier

@@ -622,13 +622,10 @@ skip:
     - test/intl402/Temporal/Duration/prototype/round/relativeto-sub-minute-offset.js
     - test/intl402/Temporal/Duration/prototype/total/relativeto-sub-minute-offset.js
 
-    # Skipping temporarily
-    # ?? - Asia/Ulan_Bator canonicalization
+    # Wrong time zone canonicalization?
     - test/intl402/Temporal/ZonedDateTime/links.js
-    - test/intl402/Temporal/ZonedDateTime/from/argument-valid.js
-    - test/intl402/Temporal/ZonedDateTime/from/do-not-canonicalize-iana-identifiers.js
+    # Skipping temporarily
     - test/intl402/Temporal/ZonedDateTime/from/dst-skipped-cross-midnight.js
-    - test/intl402/Temporal/ZonedDateTime/from/etc-timezone.js
     - test/intl402/Temporal/ZonedDateTime/from/infinity-throws-rangeerror.js
     - test/intl402/Temporal/ZonedDateTime/from/timezone-case-insensitive.js
     - test/intl402/Temporal/ZonedDateTime/prototype/equals/argument-object.js
