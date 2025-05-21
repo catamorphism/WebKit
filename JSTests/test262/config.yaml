@@ -23,7 +23,6 @@ skip:
     - test/built-ins/Temporal/PlainDate/prototype/withCalendar
     - test/built-ins/Temporal/PlainDateTime/prototype/withCalendar
     - test/intl402/Temporal/PlainDateTime/prototype/withCalendar
-    - test/intl402/Temporal/PlainYearMonth
     - test/intl402/Temporal/ZonedDateTime
     - test/staging/Intl402
     - test/staging/JSON
@@ -60,7 +59,7 @@ skip:
     - test/built-ins/RegExp/regexp-modifiers/add-ignoreCase-affects-slash-lower-p.js
 
     # Depends on Calendar support
-    - test/built-ins/Temporal/Duration/compare/relativeto-argument-propertybag-calendar-invalid-iso-string.js 
+    - test/built-ins/Temporal/Duration/compare/relativeto-argument-propertybag-calendar-invalid-iso-string.js
     - test/built-ins/Temporal/Duration/compare/relativeto-argument-string-calendar-invalid-iso-string.js
     - test/built-ins/Temporal/Duration/prototype/round/relativeto-argument-propertybag-calendar-invalid-iso-string.js
     - test/built-ins/Temporal/Duration/prototype/round/relativeto-argument-string-calendar-invalid-iso-string.js
@@ -311,7 +310,7 @@ skip:
     - test/intl402/Temporal/PlainDate/prototype/monthCode/chinese-calendar-dates.js
     - test/intl402/Temporal/PlainDate/prototype/monthCode/dangi-calendar-dates.js
     - test/intl402/Temporal/PlainDate/prototype/monthsInYear/chinese-calendar-leap-days.js
-    - test/intl402/Temporal/PlainDate/prototype/monthsInYear/dangi-calendar-leap-days.js 
+    - test/intl402/Temporal/PlainDate/prototype/monthsInYear/dangi-calendar-leap-days.js
     - test/intl402/Temporal/PlainDate/prototype/since/calendar-mismatch.js
     - test/intl402/Temporal/PlainDate/prototype/since/canonicalize-calendar.js
     - test/intl402/Temporal/PlainDate/prototype/since/chinese-calendar-dates.js
@@ -399,7 +398,7 @@ skip:
     - test/intl402/Temporal/PlainMonthDay/from/calendar-not-supporting-eras.js
     - test/intl402/Temporal/PlainMonthDay/from/chinese-calendar-dates.js
     - test/intl402/Temporal/PlainMonthDay/from/constrain-to-leap-day.js
-    - test/intl402/Temporal/PlainMonthDay/from/dangi-30-day-leap-months.js 
+    - test/intl402/Temporal/PlainMonthDay/from/dangi-30-day-leap-months.js
     - test/intl402/Temporal/PlainMonthDay/from/dangi-calendar-dates.js
     - test/intl402/Temporal/PlainMonthDay/from/fields-missing-properties.js
     - test/intl402/Temporal/PlainMonthDay/from/fields-object.js
@@ -424,6 +423,60 @@ skip:
     - test/intl402/Temporal/PlainMonthDay/prototype/toString/year-format.js
     - test/intl402/Temporal/PlainMonthDay/prototype/with/fields-missing-properties.js
     - test/intl402/Temporal/PlainMonthDay/prototype/with/non-iso-calendar-fields.js
+    - test/intl402/Temporal/PlainYearMonth/canonicalize-calendar.js
+    - test/intl402/Temporal/PlainYearMonth/compare/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/PlainYearMonth/from/argument-object.js
+    - test/intl402/Temporal/PlainYearMonth/from/calendar-not-supporting-eras.js
+    - test/intl402/Temporal/PlainYearMonth/from/canonicalize-calendar.js
+    - test/intl402/Temporal/PlainYearMonth/from/canonicalize-era-codes.js
+    - test/intl402/Temporal/PlainYearMonth/from/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/PlainYearMonth/from/one-of-era-erayear-undefined.js
+    - test/intl402/Temporal/PlainYearMonth/from/reference-day-chinese.js
+    - test/intl402/Temporal/PlainYearMonth/from/reference-day-gregory.js
+    - test/intl402/Temporal/PlainYearMonth/from/reference-day-hebrew.js
+    - test/intl402/Temporal/PlainYearMonth/from/reference-day-japanese.js
+    - test/intl402/Temporal/PlainYearMonth/from/remapping-era.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/add/options-undefined.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/equals/canonicalize-calendar.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/equals/compare-calendar.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/equals/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/inLeapYear/chinese-calendar-dates.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/inLeapYear/dangi-calendar-dates.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/monthCode/chinese-calendar-dates.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/monthCode/dangi-calendar-dates.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/monthsInYear/chinese-calendar-leap-days.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/monthsInYear/dangi-calendar-leap-days.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/since/calendar-mismatch.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/since/canonicalize-calendar.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/since/chinese-calendar-dates.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/since/dangi-calendar-dates.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/since/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/since/mixed-calendar-invalid.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/subtract/options-undefined.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/basic.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/calendar-mismatch.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/dateStyle.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/era.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toString/calendarname-always.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toString/calendarname-auto.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toString/calendarname-critical.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toString/calendarname-never.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toString/calendarname-undefined.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toString/calendarname-wrong-type.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toString/options-undefined.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/until/calendar-mismatch.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/until/canonicalize-calendar.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/until/chinese-calendar-dates.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/until/dangi-calendar-dates.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/until/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/until/mixed-calendar-invalid.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/with/chinese-calendar.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/with/chinese-calendar-dates.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/with/chinese-calendar-leap-dates.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/with/dangi-calendar-dates.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/with/dangi-calendar-leap-dates.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/with/minimum-valid-year-month.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/with/non-iso-calendar-fields.js
     - test/intl402/Temporal/ZonedDateTime/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/compare/infinity-throws-rangeerror.js
     - test/intl402/Temporal/ZonedDateTime/construct-non-utc-non-iso.js
@@ -540,3 +593,14 @@ skip:
     - test/intl402/Temporal/Duration/compare/relativeto-sub-minute-offset.js
     - test/intl402/Temporal/Duration/prototype/round/relativeto-sub-minute-offset.js
     - test/intl402/Temporal/Duration/prototype/total/relativeto-sub-minute-offset.js
+
+# Skipping temporarily
+
+    - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/datestyle-and-timestyle.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/dateStyle-undefined.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/locales-undefined.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/lone-options-accepted.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/options-conflict.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/options-undefined.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/resolved-time-zone.js
+
