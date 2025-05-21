@@ -301,7 +301,8 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainYearMonthPrototypeFuncToLocaleString, (JSG
     if (!yearMonth)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainYearMonth.prototype.toLocaleString called on value that's not a PlainYearMonth"_s);
 
-    return JSValue::encode(jsString(vm, yearMonth->toString()));
+    RELEASE_AND_RETURN(scope, JSValue::encode(callIntlDateTimeFormat(globalObject, yearMonth,
+        callFrame->argument(0), callFrame->argument(1))));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainyearmonth.prototype.valueof
