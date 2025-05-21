@@ -21,7 +21,6 @@ skip:
     - test/built-ins/Temporal/PlainDate/prototype/withCalendar
     - test/built-ins/Temporal/PlainDateTime/prototype/withCalendar
     - test/intl402/Temporal/PlainDateTime/prototype/withCalendar
-    - test/intl402/Temporal/ZonedDateTime
     - test/staging/Intl402
     - test/staging/JSON
     - test/staging/Temporal
@@ -411,6 +410,9 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/compare/infinity-throws-rangeerror.js
     - test/intl402/Temporal/ZonedDateTime/construct-non-utc-non-iso.js
+    - test/intl402/Temporal/ZonedDateTime/from/calendar-not-supporting-eras.js
+    - test/intl402/Temporal/ZonedDateTime/from/canonicalize-calendar.js
+    - test/intl402/Temporal/ZonedDateTime/from/canonicalize-era-codes.js
     - test/intl402/Temporal/ZonedDateTime/prototype/era/branding.js
     - test/intl402/Temporal/ZonedDateTime/prototype/era/prop-desc.js
     - test/intl402/Temporal/ZonedDateTime/prototype/eraYear/branding.js
@@ -497,3 +499,25 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/argument-string-calendar-annotation.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/argument-string-unknown-annotation.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-unknown-annotation.js
+ # Skipping temporarily
+    # ?? - Asia/Ulan_Bator canonicalization
+    - test/intl402/Temporal/ZonedDateTime/from/argument-valid.js
+    - test/intl402/Temporal/ZonedDateTime/from/do-not-canonicalize-iana-identifiers.js
+    - test/intl402/Temporal/ZonedDateTime/from/dst-skipped-cross-midnight.js
+    - test/intl402/Temporal/ZonedDateTime/from/etc-timezone.js
+    - test/intl402/Temporal/ZonedDateTime/from/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/ZonedDateTime/from/timezone-case-insensitive.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/argument-object.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonicalize-calendar.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonical-not-equal.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/different-calendar-not-equal.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/timezone-case-insensitive.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/rule-change-without-offset-transition.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/subtract-second-and-nanosecond-from-last-transition.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/offsetNanoseconds/nanoseconds-subtracted-or-added-at-dst-transition.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/calendar-mismatch.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/canonicalize-calendar.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/with/non-iso-calendar-fields.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/withTimeZone/preserves-calendar.js
