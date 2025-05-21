@@ -70,10 +70,6 @@ public:
     static std::optional<ISO8601::ExactTime> getNamedTimeZonePreviousTransition(JSGlobalObject*,
         TimeZoneID, Int128);
 
-    static std::optional<ISO8601::TimeZone> getAvailableNamedTimeZoneIdentifier(JSGlobalObject*, TimeZoneID);
-    static std::optional<ISO8601::TimeZone> getAvailableNamedTimeZoneIdentifier(JSGlobalObject*,
-        const Vector<LChar>&);
-
     static std::optional<TimeZone> parseTemporalTimeZoneString(JSGlobalObject*, StringView);
     static ISO8601::TimeZone toTemporalTimeZoneIdentifier(JSGlobalObject*, JSValue);
     static String formatDateTimeUTCOffsetRounded(Int128);
