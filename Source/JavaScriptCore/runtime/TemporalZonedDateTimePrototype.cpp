@@ -520,7 +520,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterTimeZoneId, (JSGlob
     if (!zdt)
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.timeZoneId called on value that's not a ZonedDateTime"_s);
 
-    return JSValue::encode(jsString(vm, ISO8601::formatTimeZone(zdt->timeZone())));
+    return JSValue::encode(jsString(vm, ISO8601::formatTimeZone(zdt->timeZone(), false)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-get-temporal.zoneddatetime.prototype.year
@@ -866,7 +866,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterOffset, (JSGlobalOb
         zonedDateTime->timeZone(), zonedDateTime->exactTime().epochNanoseconds());
     RETURN_IF_EXCEPTION(scope, { });
 
-    return JSValue::encode(jsString(vm, ISO8601::formatUTCOffsetNanoseconds((int64_t) offsetNanoseconds)));
+    return JSValue::encode(jsString(vm, ISO8601::formatUTCOffsetNanoseconds((int64_t) offsetNanoseconds, false)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-get-temporal.zoneddatetime.prototype.offsetnanoseconds

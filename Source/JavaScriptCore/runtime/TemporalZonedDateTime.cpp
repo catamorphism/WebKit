@@ -613,7 +613,7 @@ String TemporalZonedDateTime::temporalZonedDateTimeToString(JSGlobalObject* glob
         String flag;
         if (showTimeZone == TemporalShowTimeZone::Critical)
             flag = "!"_s;
-        timeZoneString = makeString('[', flag, formatTimeZone(timeZone), ']');
+        timeZoneString = makeString('[', flag, formatTimeZone(timeZone, false), ']');
     }
     auto calendarString = TemporalCalendar::formatCalendarAnnotation(showCalendar);
     return makeString(dateTimeString, offsetString, timeZoneString, calendarString);

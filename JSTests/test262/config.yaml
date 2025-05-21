@@ -23,7 +23,6 @@ skip:
     - test/built-ins/Temporal/PlainDate/prototype/withCalendar
     - test/built-ins/Temporal/PlainDateTime/prototype/withCalendar
     - test/intl402/Temporal/PlainDateTime/prototype/withCalendar
-    - test/intl402/Temporal/ZonedDateTime
     - test/staging/Intl402
     - test/staging/JSON
     - test/staging/Temporal
@@ -480,13 +479,26 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/compare/infinity-throws-rangeerror.js
     - test/intl402/Temporal/ZonedDateTime/construct-non-utc-non-iso.js
+    - test/intl402/Temporal/ZonedDateTime/from/calendar-invalid-era.js
+    - test/intl402/Temporal/ZonedDateTime/from/calendar-not-supporting-eras.js
+    - test/intl402/Temporal/ZonedDateTime/from/canonicalize-calendar.js
+    - test/intl402/Temporal/ZonedDateTime/from/canonicalize-era-codes.js
     - test/intl402/Temporal/ZonedDateTime/prototype/era/branding.js
     - test/intl402/Temporal/ZonedDateTime/prototype/era/prop-desc.js
     - test/intl402/Temporal/ZonedDateTime/prototype/eraYear/branding.js
     - test/intl402/Temporal/ZonedDateTime/prototype/eraYear/prop-desc.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/inLeapYear/chinese-calendar-dates.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/inLeapYear/dangi-calendar-dates.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/monthCode/chinese-calendar-dates.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/monthCode/dangi-calendar-dates.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/monthsInYear/chinese-calendar-leap-days.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/monthsInYear/dangi-calendar-leap-days.js
     - test/intl402/Temporal/ZonedDateTime/prototype/since/calendar-mismatch.js
     - test/intl402/Temporal/ZonedDateTime/prototype/since/canonicalize-calendar.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/since/chinese-calendar-dates.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/since/dangi-calendar-dates.js
     - test/intl402/Temporal/ZonedDateTime/prototype/since/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/since/leap-year-since.js
     - test/intl402/Temporal/ZonedDateTime/prototype/toLocaleString/calendar-mismatch.js
     - test/intl402/Temporal/ZonedDateTime/prototype/toLocaleString/dateStyle.js
     - test/intl402/Temporal/ZonedDateTime/prototype/toPlainDate/preserves-calendar.js
@@ -495,11 +507,22 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/prototype/toString/calendarname-critical.js
     - test/intl402/Temporal/ZonedDateTime/prototype/toString/calendarname-undefined.js
     - test/intl402/Temporal/ZonedDateTime/prototype/toString/calendarname-wrong-type.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/toString/options-combinations.js
     - test/intl402/Temporal/ZonedDateTime/prototype/toString/options-undefined.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/chinese-calendar-dates.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/chinese-calendar-leap-dates.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/dangi-calendar-dates.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/dangi-calendar-leap-dates.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/leap-year-until.js
     - test/intl402/Temporal/ZonedDateTime/prototype/weekOfYear/gregory-iso-weekofyear.js
     - test/intl402/Temporal/ZonedDateTime/prototype/weekOfYear/non-iso-week-of-year.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/with/chinese-calendar-dates.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/with/chinese-calendar-leap-dates.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/with/dangi-calendar-dates.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/with/dangi-calendar-leap-dates.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/basic.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/calendar-case-insensitive.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/calendar-time-string.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/yearOfWeek/non-iso-week-of-year.js
 
@@ -590,6 +613,35 @@ skip:
     - test/built-ins/DataView/prototype/setUint8/immutable-buffer.js
 
     # Bug
+    - test/intl402/Temporal/ZonedDateTime/compare/sub-minute-offset.js
+    - test/intl402/Temporal/ZonedDateTime/from/zoneddatetime-sub-minute-offset.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/sub-minute-offset.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/since/sub-minute-offset.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/sub-minute-offset.js
     - test/intl402/Temporal/Duration/compare/relativeto-sub-minute-offset.js
     - test/intl402/Temporal/Duration/prototype/round/relativeto-sub-minute-offset.js
     - test/intl402/Temporal/Duration/prototype/total/relativeto-sub-minute-offset.js
+
+    # Skipping temporarily
+    # ?? - Asia/Ulan_Bator canonicalization
+    - test/intl402/Temporal/ZonedDateTime/links.js
+    - test/intl402/Temporal/ZonedDateTime/from/argument-valid.js
+    - test/intl402/Temporal/ZonedDateTime/from/do-not-canonicalize-iana-identifiers.js
+    - test/intl402/Temporal/ZonedDateTime/from/dst-skipped-cross-midnight.js
+    - test/intl402/Temporal/ZonedDateTime/from/etc-timezone.js
+    - test/intl402/Temporal/ZonedDateTime/from/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/ZonedDateTime/from/timezone-case-insensitive.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/argument-object.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonicalize-calendar.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonical-not-equal.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/different-calendar-not-equal.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/timezone-case-insensitive.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/rule-change-without-offset-transition.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/subtract-second-and-nanosecond-from-last-transition.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/offsetNanoseconds/nanoseconds-subtracted-or-added-at-dst-transition.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/calendar-mismatch.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/canonicalize-calendar.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/with/non-iso-calendar-fields.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/withTimeZone/preserves-calendar.js

@@ -1768,16 +1768,19 @@ uint8_t daysInMonth(uint8_t month)
     return daysInMonths[isLeapYear][month - 1];
 }
 
-String formatTimeZone(TimeZone tz)
+String formatTimeZone(TimeZone tz, bool intlDateTimeFormat)
 {
     auto displayName = tz.getDisplayName();
     if (displayName)
         return displayName.value();
 
-    if (tz.isUTC())
+    if (tz.isUTC()) {
+        if (intlDateTimeFormat && tz.isOffset())
+            return "GMT"_s;
         return "UTC"_s;
+    }
     if (tz.isOffset())
-        return formatUTCOffsetNanoseconds(tz.offsetNanoseconds());
+        return formatUTCOffsetNanoseconds(tz.offsetNanoseconds(), intlDateTimeFormat);
     auto timeZoneName = getTimeZoneNameFromId(tz.asID());
     ASSERT(timeZoneName);
     return timeZoneName.value();
@@ -1830,12 +1833,14 @@ String formatTimeString(char sign, int64_t hour, int64_t minute, int64_t second,
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-formatutcoffsetnanoseconds
-String formatUTCOffsetNanoseconds(int64_t offsetNanoseconds)
+String formatUTCOffsetNanoseconds(int64_t offsetNanoseconds, bool isIntlDateTimeFormat)
 {
     auto sign = offsetNanoseconds >= 0 ? '+' : '-';
     int64_t absoluteNanoseconds = std::abs(offsetNanoseconds);
     Int128 divisor = 3600 * 1000000000ll;
     auto hour = absoluteNanoseconds / divisor;
+    if (isIntlDateTimeFormat)
+        return makeString("GMT"_s, sign, static_cast<int64_t>(hour)); 
     divisor = 60 * 1000000000ll;
     auto minute = (absoluteNanoseconds / divisor) % 60;
     divisor = 1000000000ll;

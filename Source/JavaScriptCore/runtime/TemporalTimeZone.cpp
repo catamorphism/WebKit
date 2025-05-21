@@ -143,11 +143,11 @@ static Vector<Int128> getNamedTimeZoneEpochNanoseconds(JSGlobalObject* globalObj
 
     Int128 nsEarlier = ns - ISO8601::ExactTime::nsPerDay;
     if (nsEarlier < ISO8601::ExactTime::minValue)
-        nsEarlier = ns;
+        nsEarlier = ISO8601::ExactTime::minValue;
 
     Int128 nsLater = ns + ISO8601::ExactTime::nsPerDay;
     if (nsLater > ISO8601::ExactTime::maxValue)
-        nsLater = ns;
+        nsLater = ISO8601::ExactTime::maxValue;
 
     auto earlierOffsetNs = ISO8601::getNamedTimeZoneOffsetNanoseconds(globalObject, timeZoneIdentifier, ISO8601::ExactTime(nsEarlier));
     RETURN_IF_EXCEPTION(scope, { });
@@ -209,7 +209,10 @@ static Vector<Int128> getNamedTimeZoneEpochNanoseconds(JSGlobalObject* globalObj
         int32_t minute = ucal_get(calendar, UCAL_MINUTE, &status);
         int32_t second = ucal_get(calendar, UCAL_SECOND, &status);
         int32_t millisecond = ucal_get(calendar, UCAL_MILLISECOND, &status);
+        int32_t era = ucal_get(calendar, UCAL_ERA, &status);
         ASSERT_UNUSED(status, U_SUCCESS(status));
+        if (!era) // BC = 0
+            year = (-year) + 1;
 
         int32_t expectedYear = static_cast<int32_t>(isoDateTime.date().year());
         int32_t expectedMonth = toICUMonth(static_cast<int32_t>(isoDateTime.date().month()));
@@ -255,10 +258,7 @@ Vector<Int128> TemporalTimeZone::getPossibleEpochNanoseconds(JSGlobalObject* glo
         Int128 epochNanoseconds = ISO8601::getUTCEpochNanoseconds(balanced);
         possibleEpochNanoseconds = Vector<Int128> { epochNanoseconds };
     } else {
-        ISO8601::checkISODaysRange(globalObject, isoDate);
-        RETURN_IF_EXCEPTION(scope, { });
-        possibleEpochNanoseconds = getNamedTimeZoneEpochNanoseconds(globalObject,
-            timeZone.asID(), isoDateTime);
+        possibleEpochNanoseconds = getNamedTimeZoneEpochNanoseconds(globalObject, timeZone.asID(), isoDateTime);
         RETURN_IF_EXCEPTION(scope, { });
     }
     for (auto epochNanoseconds : possibleEpochNanoseconds) {
@@ -313,8 +313,7 @@ ISO8601::ExactTime TemporalTimeZone::disambiguatePossibleEpochNanoseconds(JSGlob
 
     if (disambiguation == TemporalDisambiguation::Earlier) {
         auto earlierTime = TemporalPlainTime::addTime(isoDateTime.time(), -nanoseconds);
-        auto earlierDate = TemporalCalendar::balanceISODate(globalObject, isoDate.year(), isoDate.month(), isoDate.day() + earlierTime.days());
-        RETURN_IF_EXCEPTION(scope, { });
+        auto earlierDate = TemporalCalendar::addDaysToISODate(isoDate, earlierTime.days());
         auto earlierDateTime = TemporalPlainDateTime::combineISODateAndTimeRecord(earlierDate, ISO8601::PlainTime(earlierTime.hours(), earlierTime.minutes(), earlierTime.seconds(), earlierTime.milliseconds(), earlierTime.microseconds(), earlierTime.nanoseconds()));
         possibleEpochNs = getPossibleEpochNanoseconds(globalObject, timeZone, earlierDateTime);
         RETURN_IF_EXCEPTION(scope, { });
@@ -322,7 +321,7 @@ ISO8601::ExactTime TemporalTimeZone::disambiguatePossibleEpochNanoseconds(JSGlob
         return ISO8601::ExactTime(possibleEpochNs[0]);
     }
     auto laterTime = TemporalPlainTime::addTime(isoDateTime.time(), nanoseconds);
-    auto laterDate = TemporalCalendar::balanceISODate(globalObject, isoDate.year(), isoDate.month(), isoDate.day() - laterTime.days());
+    auto laterDate = TemporalCalendar::addDaysToISODate(isoDate, laterTime.days());
     RETURN_IF_EXCEPTION(scope, { });
     auto laterDateTime = TemporalPlainDateTime::combineISODateAndTimeRecord(laterDate, ISO8601::PlainTime(laterTime.hours(), laterTime.minutes(), laterTime.seconds(), laterTime.milliseconds(), laterTime.microseconds(), laterTime.nanoseconds()));
     possibleEpochNs = getPossibleEpochNanoseconds(globalObject, timeZone, laterDateTime);
@@ -331,41 +330,6 @@ ISO8601::ExactTime TemporalTimeZone::disambiguatePossibleEpochNanoseconds(JSGlob
     ASSERT(n);
     return ISO8601::ExactTime(possibleEpochNs[n - 1]);
 }
-
-/*
-static Int128 beforeFirstDST()
-{
-    return ISO8601::getUTCEpochNanoseconds(ISO8601::PlainDateTime(ISO8601::PlainDate(1847, 0, 1),
-        ISO8601::PlainTime()));
-}
-
-static Int128 epochNsToMs(Int128 epochNanoseconds)
-{
-    auto quotient = epochNanoseconds / 1000000;
-    auto remainder = epochNanoseconds % 1000000;
-    auto epochMilliseconds = +quotient;
-    if (+remainder < 0)
-        epochMilliseconds -= 1;
-    return epochMilliseconds;
-}
-
-static Int128 bisect(std::function<Int128(Int128)> const& getState, Int128 left, Int128 right, Int128 lstate, Int128 rstate)
-{
-    while (right - left > 1) {
-        auto middle = (left + right) / 2;
-        auto mstate = getState(middle);
-        if (mstate == lstate) {
-            left = middle;
-            lstate = mstate;
-        } else if (mstate == rstate) {
-            right = middle;
-            rstate = mstate;
-        } else
-            RELEASE_ASSERT_NOT_REACHED();
-    }
-    return right;
-}
-*/
 
 // https://tc39.es/proposal-temporal/#sec-temporal-getnamedtimezoneprevioustransition
 std::optional<ISO8601::ExactTime> TemporalTimeZone::getNamedTimeZonePreviousTransition(JSGlobalObject* globalObject,

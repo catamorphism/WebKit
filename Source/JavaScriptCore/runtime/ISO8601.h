@@ -510,8 +510,8 @@ uint8_t weekOfYear(PlainDate);
 uint8_t daysInMonth(int32_t year, uint8_t month);
 uint8_t daysInMonth(uint8_t month);
 String formatTimeString(char, int64_t, int64_t, int64_t, int64_t, std::optional<TemporalFractionalSecondDigits>, std::optional<bool>);
-String formatTimeZone(TimeZone);
-String formatUTCOffsetNanoseconds(int64_t);
+String formatTimeZone(TimeZone, bool);
+String formatUTCOffsetNanoseconds(int64_t, bool);
 String temporalTimeToString(PlainTime, std::tuple<Precision, unsigned>);
 String temporalDateToString(PlainDate);
 String temporalDateTimeToString(PlainDate, PlainTime, std::tuple<Precision, unsigned>);
@@ -624,8 +624,6 @@ Int128 roundTimeDurationToIncrement(JSGlobalObject*, Int128, Int128, RoundingMod
 int32_t compareTimeRecord(const PlainTime&, const PlainTime&);
 
 Int128 roundTemporalInstant(Int128, unsigned, TemporalUnit, RoundingMode);
-
-PlainDate addDaysToISODate(const PlainDate&, int32_t);
 
 } // namespace ISO8601
 
