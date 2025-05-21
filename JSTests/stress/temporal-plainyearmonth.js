@@ -41,8 +41,8 @@ const yearMonth = new Temporal.PlainYearMonth(2025, 4);
 {
     shouldBe(yearMonth.toString(), '2025-04');
     shouldBe(yearMonth.toJSON(), yearMonth.toString());
-    shouldBe(yearMonth.toLocaleString(), yearMonth.toString());
 
+    shouldBe(yearMonth.toLocaleString("en"), "4/2025");
     shouldThrow(() => yearMonth.toString({ calendarName: "bogus" }), RangeError);
 }
 
