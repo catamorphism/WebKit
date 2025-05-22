@@ -1752,7 +1752,7 @@ static Int128 roundTimeDuration(JSGlobalObject* globalObject, Int128 timeDuratio
     auto divisor = lengthInNanoseconds(unit);
 
     return roundTimeDurationToIncrement(globalObject, timeDuration,
-          (divisor * increment), roundingMode);
+        (divisor * increment), roundingMode);
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-datedurationsign
