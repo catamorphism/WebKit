@@ -1749,12 +1749,10 @@ static Int128 roundTimeDurationToIncrement(JSGlobalObject* globalObject, Int128 
 static Int128 roundTimeDuration(JSGlobalObject* globalObject, Int128 timeDuration, unsigned increment,
     TemporalUnit unit, RoundingMode roundingMode)
 {
-    VM& vm = globalObject->vm();
-    auto scope = DECLARE_THROW_SCOPE(vm);
-
     auto divisor = lengthInNanoseconds(unit);
-    RELEASE_AND_RETURN(scope, roundTimeDurationToIncrement(globalObject, timeDuration,
-        (divisor * increment), roundingMode));
+
+    return roundTimeDurationToIncrement(globalObject, timeDuration,
+          (divisor * increment), roundingMode);
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-datedurationsign
@@ -1802,12 +1800,8 @@ InternalDuration InternalDuration::combineDateAndTimeDuration(Duration dateDurat
 // https://tc39.es/proposal-temporal/#sec-temporal-differenceinstant
 InternalDuration ExactTime::difference(JSGlobalObject* globalObject, ExactTime other, unsigned roundingIncrement, TemporalUnit smallestUnit, RoundingMode roundingMode) const
 {
-    VM& vm = globalObject->vm();
-    auto scope = DECLARE_THROW_SCOPE(vm);
-
     Int128 timeDuration = other.m_epochNanoseconds - m_epochNanoseconds;
     timeDuration = roundTimeDuration(globalObject, timeDuration, roundingIncrement, smallestUnit, roundingMode);
-    RETURN_IF_EXCEPTION(scope, { });
     return InternalDuration::combineDateAndTimeDuration(ISO8601::Duration(), timeDuration);
 }
 
