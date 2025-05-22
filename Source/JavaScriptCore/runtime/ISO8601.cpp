@@ -2249,7 +2249,7 @@ InternalDuration InternalDuration::combineDateAndTimeDuration(Duration dateDurat
 {
     int32_t dateSign = dateDurationSign(dateDuration);
     int32_t timeSign = timeDuration < 0 ? -1 : timeDuration > 0 ? 1 : 0;
-    bool signsDiffer = dateSign && timeSign && dateSign != timeSign;
+    bool signsDiffer = dateSign && timeSign && (dateSign != timeSign);
     ASSERT_UNUSED(signsDiffer, !signsDiffer);
     return InternalDuration { WTF::move(dateDuration), timeDuration };
 }

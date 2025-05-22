@@ -158,7 +158,7 @@ JSValue TemporalZonedDateTime::getTimeZoneTransition(JSGlobalObject* globalObjec
 
 // https://tc39.es/proposal-temporal/#sec-temporal-interpretisodatetimeoffset
 ISO8601::ExactTime TemporalZonedDateTime::interpretISODateTimeOffset(JSGlobalObject* globalObject,
-    ISO8601::PlainDate isoDate, ISO8601::PlainTime time,
+    ISO8601::PlainDate isoDate, std::optional<ISO8601::PlainTime> timeOptional,
     TemporalOffsetBehavior offsetBehavior, int64_t offsetNanoseconds, ISO8601::TimeZone timeZone,
     TemporalDisambiguation disambiguation, TemporalOffset offsetOption,
     TemporalMatchBehavior matchBehavior)
@@ -166,6 +166,13 @@ ISO8601::ExactTime TemporalZonedDateTime::interpretISODateTimeOffset(JSGlobalObj
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
+    if (!timeOptional) {
+        // If time is START-OF-DAY...
+        ASSERT(offsetBehavior == TemporalOffsetBehavior::Wall);
+        ASSERT(offsetNanoseconds == 0);
+        RELEASE_AND_RETURN(scope, TemporalTimeZone::getStartOfDay(globalObject, timeZone, isoDate));
+    }
+    ISO8601::PlainTime time = timeOptional.value();
     auto isoDateTime = TemporalPlainDateTime::combineISODateAndTimeRecord(isoDate, time);
 
     if (offsetBehavior == TemporalOffsetBehavior::Wall
@@ -683,7 +690,7 @@ TemporalZonedDateTime* TemporalZonedDateTime::from(JSGlobalObject* globalObject,
     TimeZone timeZone;
 
     ISO8601::PlainDate isoDate;
-    ISO8601::PlainTime time;
+    std::optional<ISO8601::PlainTime> time;
 
     if (itemValue.isObject()) {
         std::optional<JSObject*> options = std::nullopt;
@@ -781,7 +788,7 @@ TemporalZonedDateTime* TemporalZonedDateTime::from(JSGlobalObject* globalObject,
             RETURN_IF_EXCEPTION(scope, { });
         }
         isoDate = plainDate;
-        time = plainTimeOptional.value_or(ISO8601::PlainTime());
+        time = plainTimeOptional;
     }
     int64_t offsetNanoseconds = 0;
     if (offsetBehavior == TemporalOffsetBehavior::Option) {

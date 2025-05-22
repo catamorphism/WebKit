@@ -69,7 +69,7 @@ public:
         unsigned, TemporalUnit, RoundingMode);
 
     static ISO8601::ExactTime interpretISODateTimeOffset(JSGlobalObject*, ISO8601::PlainDate,
-        ISO8601::PlainTime, TemporalOffsetBehavior, int64_t, ISO8601::TimeZone,
+        std::optional<ISO8601::PlainTime>, TemporalOffsetBehavior, int64_t, ISO8601::TimeZone,
         TemporalDisambiguation, TemporalOffset, TemporalMatchBehavior);
     static ISO8601::ExactTime addZonedDateTime(JSGlobalObject*, ISO8601::ExactTime,
         ISO8601::TimeZone, TemporalCalendar*, ISO8601::InternalDuration,

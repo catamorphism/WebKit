@@ -625,7 +625,6 @@ skip:
     # Wrong time zone canonicalization?
     - test/intl402/Temporal/ZonedDateTime/links.js
     # Skipping temporarily
-    - test/intl402/Temporal/ZonedDateTime/from/dst-skipped-cross-midnight.js
     - test/intl402/Temporal/ZonedDateTime/from/infinity-throws-rangeerror.js
     - test/intl402/Temporal/ZonedDateTime/from/timezone-case-insensitive.js
     - test/intl402/Temporal/ZonedDateTime/prototype/equals/argument-object.js
