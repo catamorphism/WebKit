@@ -500,7 +500,6 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/argument-string-unknown-annotation.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-unknown-annotation.js
  # Skipping temporarily
-    - test/intl402/Temporal/ZonedDateTime/from/dst-skipped-cross-midnight.js
     - test/intl402/Temporal/ZonedDateTime/from/infinity-throws-rangeerror.js
     - test/intl402/Temporal/ZonedDateTime/from/timezone-case-insensitive.js
     - test/intl402/Temporal/ZonedDateTime/prototype/equals/argument-object.js
