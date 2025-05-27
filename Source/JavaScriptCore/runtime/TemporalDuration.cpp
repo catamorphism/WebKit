@@ -1496,16 +1496,20 @@ String TemporalDuration::toString(JSGlobalObject* globalObject, JSValue optionsV
     if (!options)
         RELEASE_AND_RETURN(scope, toString(globalObject));
 
-    PrecisionData data = secondsStringPrecision(globalObject, options);
+    auto precision = temporalFractionalSecondDigits(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
+
+    auto roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::Trunc);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    auto smallestUnit = temporalSmallestUnit(globalObject, options, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day, TemporalUnit::Hour });
+    RETURN_IF_EXCEPTION(scope, { });
+
+    PrecisionData data = secondsStringPrecision(smallestUnit, precision);
     if (data.unit < TemporalUnit::Second) {
         throwRangeError(globalObject, scope, "smallestUnit must not be \"minute\""_s);
         return { };
     }
-    auto smallestUnit = data.unit;
-
-    auto roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::Trunc);
-    RETURN_IF_EXCEPTION(scope, { });
 
     // No need to make a new object if we were given explicit defaults.
     if (std::get<0>(data.precision) == Precision::Auto && roundingMode == RoundingMode::Trunc)
@@ -1513,7 +1517,7 @@ String TemporalDuration::toString(JSGlobalObject* globalObject, JSValue optionsV
 
     auto internalDuration = toInternalDuration(m_duration);
     auto timeDuration = ISO8601::roundTimeDuration(globalObject, internalDuration.time(),
-        data.increment, smallestUnit, roundingMode);
+        data.increment, data.unit, roundingMode);
     RETURN_IF_EXCEPTION(scope, { });
     internalDuration = ISO8601::InternalDuration::combineDateAndTimeDuration(internalDuration.dateDuration(),
         timeDuration);
