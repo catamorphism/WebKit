@@ -433,11 +433,16 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/prototype/toString/calendarname-undefined.js
     - test/intl402/Temporal/ZonedDateTime/prototype/toString/calendarname-wrong-type.js
     - test/intl402/Temporal/ZonedDateTime/prototype/toString/options-undefined.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/calendar-mismatch.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/canonicalize-calendar.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/infinity-throws-rangeerror.js
     - test/intl402/Temporal/ZonedDateTime/prototype/weekOfYear/gregory-iso-weekofyear.js
     - test/intl402/Temporal/ZonedDateTime/prototype/weekOfYear/non-iso-week-of-year.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/with/non-iso-calendar-fields.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/basic.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/calendar-case-insensitive.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/canonicalize-calendar.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/withTimeZone/preserves-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/yearOfWeek/non-iso-week-of-year.js
 
     # Depends on annotations in datetime strings
@@ -503,9 +508,4 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/argument-string-calendar-annotation.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/argument-string-unknown-annotation.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-unknown-annotation.js
- # Skipping temporarily
-    - test/intl402/Temporal/ZonedDateTime/prototype/until/calendar-mismatch.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/until/canonicalize-calendar.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/until/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/with/non-iso-calendar-fields.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/withTimeZone/preserves-calendar.js
+
