@@ -95,7 +95,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalTimeZonePrototypeFuncToString, (JSGlobalObject*
 
     auto tz = timeZone->timeZone();
     auto string = tz.isOffset() ? ISO8601::formatUTCOffsetNanoseconds(tz.offsetNanoseconds(), false)
-        : intlAvailableTimeZones()[tz.asID()];
+        : intlAvailableTimeZones(TimeZoneKind::All)[tz.asID()];
     return JSValue::encode(jsString(vm, WTF::move(string)));
 }
 

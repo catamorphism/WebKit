@@ -1913,15 +1913,16 @@ static std::optional<String> canonicalizeTimeZoneNameFromICUTimeZone(String&& ti
     return std::make_optional(WTF::move(timeZoneName));
 }
 
-// https://tc39.es/ecma402/#sup-availablenamedtimezoneidentifiers
-const Vector<String>& intlAvailableTimeZones()
+// https://tc39.es/proposal-intl-enumeration/#sec-availabletimezones
+const Vector<String>& intlAvailableTimeZones(TimeZoneKind timeZoneKind)
 {
     static LazyNeverDestroyed<Vector<String>> availableTimeZones;
     static std::once_flag initializeOnce;
     std::call_once(initializeOnce, [&] {
         Vector<String> temporary;
         UErrorCode status = U_ZERO_ERROR;
-        auto enumeration = std::unique_ptr<UEnumeration, ICUDeleter<uenum_close>>(ucal_openTimeZoneIDEnumeration(UCAL_ZONE_TYPE_ANY, nullptr, nullptr, &status));
+        USystemTimeZoneType kind = timeZoneKind == TimeZoneKind::Canonical ? UCAL_ZONE_TYPE_CANONICAL : UCAL_ZONE_TYPE_ANY;
+        auto enumeration = std::unique_ptr<UEnumeration, ICUDeleter<uenum_close>>(ucal_openTimeZoneIDEnumeration(kind, nullptr, nullptr, &status));
         ASSERT(U_SUCCESS(status));
 
         int32_t count = uenum_count(enumeration.get(), &status);
@@ -1961,7 +1962,7 @@ TimeZoneID utcTimeZoneIDSlow()
 {
     static std::once_flag initializeOnce;
     std::call_once(initializeOnce, [&] {
-        auto& timeZones = intlAvailableTimeZones();
+        auto& timeZones = intlAvailableTimeZones(TimeZoneKind::Canonical);
         auto index = timeZones.find("UTC"_s);
         RELEASE_ASSERT(index != WTF::notFound);
         utcTimeZoneIDStorage = index;
@@ -1972,7 +1973,7 @@ TimeZoneID utcTimeZoneIDSlow()
 // https://tc39.es/ecma402/#sec-availableprimarytimezoneidentifiers
 static JSArray* availablePrimaryTimeZoneIdentifiers(JSGlobalObject* globalObject)
 {
-    return createArrayFromStringVector(globalObject, intlAvailableTimeZones());
+    return createArrayFromStringVector(globalObject, intlAvailableTimeZones(TimeZoneKind::Canonical));
 }
 
 // https://tc39.es/proposal-intl-enumeration/#sec-availableunits
