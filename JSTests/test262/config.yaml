@@ -513,10 +513,13 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/prototype/toString/calendarname-wrong-type.js
     - test/intl402/Temporal/ZonedDateTime/prototype/toString/options-combinations.js
     - test/intl402/Temporal/ZonedDateTime/prototype/toString/options-undefined.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/calendar-mismatch.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/chinese-calendar-dates.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/chinese-calendar-leap-dates.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/dangi-calendar-dates.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/dangi-calendar-leap-dates.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/infinity-throws-rangeerror.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/leap-year-until.js
     - test/intl402/Temporal/ZonedDateTime/prototype/weekOfYear/gregory-iso-weekofyear.js
     - test/intl402/Temporal/ZonedDateTime/prototype/weekOfYear/non-iso-week-of-year.js
@@ -524,10 +527,12 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/prototype/with/chinese-calendar-leap-dates.js
     - test/intl402/Temporal/ZonedDateTime/prototype/with/dangi-calendar-dates.js
     - test/intl402/Temporal/ZonedDateTime/prototype/with/dangi-calendar-leap-dates.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/with/non-iso-calendar-fields.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/basic.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/calendar-case-insensitive.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/calendar-time-string.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/canonicalize-calendar.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/withTimeZone/preserves-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/yearOfWeek/non-iso-week-of-year.js
 
     # Depends on annotations in datetime strings
@@ -628,10 +633,3 @@ skip:
 
     # Wrong time zone canonicalization?
     - test/intl402/Temporal/ZonedDateTime/links.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonical-not-equal.js
-    # Skipping temporarily
-    - test/intl402/Temporal/ZonedDateTime/prototype/until/calendar-mismatch.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/until/canonicalize-calendar.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/until/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/with/non-iso-calendar-fields.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/withTimeZone/preserves-calendar.js
