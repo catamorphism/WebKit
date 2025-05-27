@@ -807,6 +807,22 @@ static bool canBeTimeZoneAnnotation(const StringParsingBuffer<CharacterType>& bu
 }
 
 template<typename CharacterType>
+static bool isTZChar(CharacterType character) {
+        // TZLeadingChar :
+        //     Alpha
+        //     .
+        //     _
+        //
+        // TZChar :
+        //     TZLeadingChar
+        //     DecimalDigit
+        //     -
+        //     +
+        //
+    return isASCIIAlpha(character) || isASCIIDigit(character) || character == '.' || character == '_' || character == '+' || character == '-';
+}
+
+template<typename CharacterType>
 static std::optional<TimeZoneAnnotation> parseTimeZoneAnnotation(StringParsingBuffer<CharacterType>& buffer)
 {
     // https://tc39.es/proposal-temporal/#prod-TimeZoneAnnotation
@@ -860,14 +876,24 @@ static std::optional<TimeZoneAnnotation> parseTimeZoneAnnotation(StringParsingBu
                         if (isASCIIDigit(secondHourCharacter)) {
                             hour = (secondHourCharacter - '0') + 10 * (firstHourCharacter - '0');
                             if (hour < 24 && buffer[10] == ']') {
-                                Vector<Latin1Character> asString = buffer.consume(11);
+                                Vector<Latin1Character> asString = buffer.consume(10).subspan(0, 10);
+                                buffer.advance(); // consume ']'
                                 return TimeZoneAnnotation { asString, nsPerHour * hour * factor };
                             }
-                        }
-                    }
+                        } else
+                            return std::nullopt;
+                    } else
+                        return std::nullopt;
                 }
             }
         }
+/*
+        if (buffer.lengthRemaining() >= 9) {
+            if (buffer[0] == 'E' && buffer[1] == 't' && buffer[2] == 'c' && buffer[3] == '/' && buffer[4] == 'G' && buffer[5] == 'M' && buffer[6] == 'T' && ((buffer[7] != '+' && buffer[7] != '-') || ((buffer[8] == '0') && buffer.lengthRemaining() > 10))) {
+                return std::nullopt;
+            }
+        }
+*/
         [[fallthrough]];
     }
     default: {
@@ -877,10 +903,10 @@ static std::optional<TimeZoneAnnotation> parseTimeZoneAnnotation(StringParsingBu
         //     _
         //
         // TZChar :
-        //     Alpha
-        //     .
+        //     TZLeadingChar
+        //     DecimalDigit
         //     -
-        //     _
+        //     +
         //
         // TimeZoneIANANameComponent :
         //     TZLeadingChar TZChar[opt] TZChar[opt] TZChar[opt] TZChar[opt] TZChar[opt] TZChar[opt] TZChar[opt] TZChar[opt] TZChar[opt] TZChar[opt] TZChar[opt] TZChar[opt] TZChar[opt] but not one of . or ..
@@ -896,7 +922,7 @@ static std::optional<TimeZoneAnnotation> parseTimeZoneAnnotation(StringParsingBu
                 auto character = buffer[index];
                 if (character == ']')
                     break;
-                if (!isASCIIAlpha(character) && character != '.' && character != '_' && character != '-' && character != '/')
+                if (!(isTZChar(character) || character == '/'))
                     return std::nullopt;
             }
             if (!index)
@@ -908,8 +934,12 @@ static std::optional<TimeZoneAnnotation> parseTimeZoneAnnotation(StringParsingBu
             unsigned componentLength = end - start;
             if (!componentLength)
                 return false;
+// TODO: ???
+// Check fails for Canada/East-Saskatchewan
+/*
             if (componentLength > 14)
                 return false;
+*/
             if (componentLength == 1 && buffer[start] == '.')
                 return false;
             if (componentLength == 2 && buffer[start] == '.' && buffer[start + 1] == '.')
@@ -937,7 +967,7 @@ static std::optional<TimeZoneAnnotation> parseTimeZoneAnnotation(StringParsingBu
                 continue;
             }
 
-            if (!(isASCIIAlpha(character) || character == '.' || character == '_' || character == '-'))
+            if (!isTZChar(character))
                 return std::nullopt;
         }
         if (isLeadingCharacterInNameComponent)

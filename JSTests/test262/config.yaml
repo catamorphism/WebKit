@@ -483,6 +483,7 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/from/calendar-not-supporting-eras.js
     - test/intl402/Temporal/ZonedDateTime/from/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/from/canonicalize-era-codes.js
+    - test/intl402/Temporal/ZonedDateTime/from/infinity-throws-rangeerror.js
     - test/intl402/Temporal/ZonedDateTime/prototype/era/branding.js
     - test/intl402/Temporal/ZonedDateTime/prototype/era/prop-desc.js
     - test/intl402/Temporal/ZonedDateTime/prototype/eraYear/branding.js
@@ -625,8 +626,6 @@ skip:
     # Wrong time zone canonicalization?
     - test/intl402/Temporal/ZonedDateTime/links.js
     # Skipping temporarily
-    - test/intl402/Temporal/ZonedDateTime/from/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/ZonedDateTime/from/timezone-case-insensitive.js
     - test/intl402/Temporal/ZonedDateTime/prototype/equals/argument-object.js
     - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonical-not-equal.js
