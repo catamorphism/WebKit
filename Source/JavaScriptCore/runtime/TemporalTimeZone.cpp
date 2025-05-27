@@ -197,9 +197,7 @@ static Vector<Int128> getNamedTimeZoneEpochNanoseconds(JSGlobalObject* globalObj
 
         // https://tc39.es/proposal-temporal/#sec-get-temporal.zoneddatetime.prototype.epochmilliseconds
         // Let ms be floor(ℝ(ns) / 10**6).
-        Int128 offsetMillis = offsetNanoseconds / 1'000'000;
-        if (offsetNanoseconds < 0 && offsetNanoseconds % 1'000'000)
-            offsetMillis--;
+        Int128 offsetMillis = ISO8601::ExactTime(offsetNanoseconds).floorEpochMilliseconds();
 
         ucal_setMillis(calendar, static_cast<double>(offsetMillis), &status);
         int32_t year = ucal_get(calendar, UCAL_YEAR, &status);
@@ -364,9 +362,31 @@ std::optional<ISO8601::ExactTime> TemporalTimeZone::getNamedTimeZonePreviousTran
     bool isValid = ucal_getTimeZoneTransitionDate(calendar, UCAL_TZ_TRANSITION_PREVIOUS,
         &transitionDate, &status);
     ASSERT_UNUSED(status, U_SUCCESS(status));
+
     ucal_close(calendar);
 
+    if (!isValid)
+        return std::nullopt;
+
+    // Also check the offset on and before the transition date, so we don't return
+    // transitions that don't change the offset
     Int128 transitionNs = static_cast<Int128>(std::trunc(transitionDate)) * 1'000'000;
+    Int128 transitionOffset = ISO8601::getNamedTimeZoneOffsetNanoseconds(globalObject, timeZoneIdentifier,
+        ISO8601::ExactTime(transitionNs));
+    RETURN_IF_EXCEPTION(scope, { });
+
+    Int128 beforeTransitionNs = static_cast<Int128>(std::trunc(transitionDate) - 1) * 1'000'000;
+    Int128 beforeTransitionOffset = ISO8601::getNamedTimeZoneOffsetNanoseconds(globalObject, timeZoneIdentifier,
+        ISO8601::ExactTime(beforeTransitionNs));
+    RETURN_IF_EXCEPTION(scope, { });
+
+    if (transitionOffset == beforeTransitionOffset) {
+        // This transition didn't change the offset, so return the transition
+        // before this one
+        ASSERT(beforeTransitionNs < epochNanoseconds);
+        RELEASE_AND_RETURN(scope, getNamedTimeZonePreviousTransition(globalObject,
+            timeZoneIdentifier, beforeTransitionNs));
+    }
 
     if (isValid && transitionNs >= ISO8601::ExactTime::minValue)
         return ISO8601::ExactTime(transitionNs);  
@@ -395,7 +415,7 @@ std::optional<ISO8601::ExactTime> TemporalTimeZone::getNamedTimeZoneNextTransiti
     }
     UCalendar* calendar = ucal_open(timeZoneName->span().data(), -1, "", UCAL_DEFAULT, &status);
     ASSERT_UNUSED(status, U_SUCCESS(status));
-    double millis = ISO8601::ExactTime(epochNanoseconds).epochMilliseconds();
+    double millis = ISO8601::ExactTime(epochNanoseconds).floorEpochMilliseconds();
     ucal_setMillis(calendar, millis, &status);
     ASSERT_UNUSED(status, U_SUCCESS(status));
 
@@ -405,7 +425,28 @@ std::optional<ISO8601::ExactTime> TemporalTimeZone::getNamedTimeZoneNextTransiti
     ASSERT_UNUSED(status, U_SUCCESS(status));
     ucal_close(calendar);
 
+    if (!isValid)
+        return std::nullopt;
+
+    // Also check the offset before and on the transition date, so we don't return
+    // transitions that don't change the offset
+    Int128 beforeTransitionNs = static_cast<Int128>(std::trunc(transitionDate) - 1) * 1'000'000;
+    Int128 beforeTransitionOffset = ISO8601::getNamedTimeZoneOffsetNanoseconds(globalObject, timeZoneIdentifier,
+        ISO8601::ExactTime(beforeTransitionNs));
+    RETURN_IF_EXCEPTION(scope, { });
+
     Int128 transitionNs = static_cast<Int128>(std::trunc(transitionDate)) * 1'000'000;
+    Int128 transitionOffset = ISO8601::getNamedTimeZoneOffsetNanoseconds(globalObject, timeZoneIdentifier,
+        ISO8601::ExactTime(transitionNs));
+    RETURN_IF_EXCEPTION(scope, { });
+
+    if (beforeTransitionOffset == transitionOffset) {
+        // This transition didn't change the offset, so return the transition
+        // after this one
+        ASSERT(transitionNs > epochNanoseconds);
+        RELEASE_AND_RETURN(scope, getNamedTimeZoneNextTransition(globalObject,
+            timeZoneIdentifier, transitionNs));
+    }
 
     if (isValid && transitionNs <= ISO8601::ExactTime::maxValue)
         return ISO8601::ExactTime(transitionNs);

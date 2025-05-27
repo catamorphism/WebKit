@@ -630,9 +630,6 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/links.js
     - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonical-not-equal.js
     # Skipping temporarily
-    - test/intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/rule-change-without-offset-transition.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/subtract-second-and-nanosecond-from-last-transition.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/offsetNanoseconds/nanoseconds-subtracted-or-added-at-dst-transition.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/calendar-mismatch.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/infinity-throws-rangeerror.js

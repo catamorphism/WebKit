@@ -2346,7 +2346,9 @@ Int128 getNamedTimeZoneOffsetNanoseconds(JSGlobalObject* globalObject,
     }
     UCalendar* calendar = ucal_open(timeZoneName->span().data(), -1, "", UCAL_DEFAULT, &status);
     ASSERT_UNUSED(status, U_SUCCESS(status));
-    ucal_setMillis(calendar, epochNanoseconds.epochMilliseconds(), &status);
+    // https://tc39.es/proposal-temporal/#sec-get-temporal.zoneddatetime.prototype.epochmilliseconds
+    // Let ms be floor(ℝ(ns) / 10**6).
+    ucal_setMillis(calendar, epochNanoseconds.floorEpochMilliseconds(), &status);
     ASSERT_UNUSED(status, U_SUCCESS(status));
 
     int32_t rawOffset = 0;

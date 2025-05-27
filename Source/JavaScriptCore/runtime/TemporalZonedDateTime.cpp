@@ -407,7 +407,7 @@ ISO8601::ExactTime TemporalZonedDateTime::addZonedDateTime(JSGlobalObject* globa
     // FIXME: support non-ISO8601 calendars
     (void) calendar;
 
-    if (!dateDurationSign(duration.dateDuration())) {
+    if (!ISO8601::dateDurationSign(duration.dateDuration())) {
         RELEASE_AND_RETURN(scope, TemporalInstant::addInstant(globalObject,
             epochNanoseconds, duration.time()));
     }
