@@ -489,7 +489,8 @@ ISO8601::Duration TemporalPlainDate::differenceTemporalPlainDate(JSGlobalObject*
         TemporalDuration::roundRelativeDuration(globalObject, duration, originEpochNs, destEpochNs, isoDateTime, std::nullopt, largestUnit, increment, smallestUnit, roundingMode);
         RETURN_IF_EXCEPTION(scope, { });
     }
-    auto result = TemporalDuration::temporalDurationFromInternal(duration, TemporalUnit::Day);
+    auto result = TemporalDuration::temporalDurationFromInternal(globalObject, duration, TemporalUnit::Day);
+    RETURN_IF_EXCEPTION(scope, { });
     if (op == DifferenceOperation::Since)
         result = -result;
     return result;

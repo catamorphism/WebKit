@@ -668,7 +668,7 @@ ISO8601::Duration TemporalDuration::add(JSGlobalObject* globalObject, JSValue ot
 
     auto result = ISO8601::InternalDuration::combineDateAndTimeDuration(ISO8601::Duration(),
         timeResult);
-    return temporalDurationFromInternal(result, largestUnit);
+    RELEASE_AND_RETURN(scope, temporalDurationFromInternal(globalObject, result, largestUnit));
 }
 
 ISO8601::InternalDuration TemporalDuration::toInternalDuration(ISO8601::Duration d)
@@ -678,9 +678,12 @@ ISO8601::InternalDuration TemporalDuration::toInternalDuration(ISO8601::Duration
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-temporaldurationfrominternal
-ISO8601::Duration TemporalDuration::temporalDurationFromInternal(ISO8601::InternalDuration internalDuration,
-    TemporalUnit largestUnit)
+ISO8601::Duration TemporalDuration::temporalDurationFromInternal(JSGlobalObject* globalObject,
+    ISO8601::InternalDuration internalDuration, TemporalUnit largestUnit)
 {
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
     double days = 0;
     double hours = 0;
     double minutes = 0;
@@ -755,11 +758,17 @@ ISO8601::Duration TemporalDuration::temporalDurationFromInternal(ISO8601::Intern
         microseconds *= sign;
     if (nanoseconds)
         nanoseconds *= sign;
-    return ISO8601::Duration { internalDuration.dateDuration().years(),
+    auto result = ISO8601::Duration { internalDuration.dateDuration().years(),
         internalDuration.dateDuration().months(), internalDuration.dateDuration().weeks(),
         internalDuration.dateDuration().days() + days * sign, hours, minutes,
         static_cast<double>(seconds), static_cast<double>(milliseconds),
         static_cast<double>(microseconds), static_cast<double>(nanoseconds) };
+    if (!ISO8601::isValidDuration(result)) {
+        throwRangeError(globalObject, scope,
+            "total of duration time units cannot exceed 9007199254740991.999999999 s"_s);
+        return { };
+    }
+    return result;
 }
 
 ISO8601::Duration TemporalDuration::subtract(JSGlobalObject* globalObject, JSValue otherValue) const
@@ -1383,7 +1392,7 @@ ISO8601::Duration TemporalDuration::round(JSGlobalObject* globalObject, JSValue 
         RETURN_IF_EXCEPTION(scope, { });
         if (largestUnit <= TemporalUnit::Day)
             largestUnit = TemporalUnit::Hour;
-        return temporalDurationFromInternal(internalDuration, largestUnit);
+        RELEASE_AND_RETURN(scope, temporalDurationFromInternal(globalObject, internalDuration, largestUnit));
     }
 
     if (relativeToRecord) {
@@ -1403,7 +1412,7 @@ ISO8601::Duration TemporalDuration::round(JSGlobalObject* globalObject, JSValue 
         internalDuration = TemporalPlainDateTime::differencePlainDateTimeWithRounding(globalObject,
             isoDateTime, targetDateTime, largestUnit, increment, smallestUnit, roundingMode);
         RETURN_IF_EXCEPTION(scope, { });
-        return temporalDurationFromInternal(internalDuration, largestUnit);
+        RELEASE_AND_RETURN(scope, temporalDurationFromInternal(globalObject, internalDuration, largestUnit));
     }
 
     if (existingLargestUnit < TemporalUnit::Day || largestUnit < TemporalUnit::Day) {
@@ -1417,7 +1426,7 @@ ISO8601::Duration TemporalDuration::round(JSGlobalObject* globalObject, JSValue 
     RETURN_IF_EXCEPTION(scope, { });
     auto result = round(globalObject, internalDuration, increment, smallestUnit, roundingMode);
     RETURN_IF_EXCEPTION(scope, { });
-    return temporalDurationFromInternal(result, largestUnit);
+    RELEASE_AND_RETURN(scope, temporalDurationFromInternal(globalObject, result, largestUnit));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-totalrelativeduration
@@ -1562,7 +1571,8 @@ String TemporalDuration::toString(JSGlobalObject* globalObject, JSValue optionsV
     internalDuration = ISO8601::InternalDuration::combineDateAndTimeDuration(internalDuration.dateDuration(),
         timeDuration);
     auto roundedLargestUnit = std::min(largestSubduration(m_duration), TemporalUnit::Second);
-    auto roundedDuration = temporalDurationFromInternal(internalDuration, roundedLargestUnit);
+    auto roundedDuration = temporalDurationFromInternal(globalObject, internalDuration, roundedLargestUnit);
+    RETURN_IF_EXCEPTION(scope, { });
     RELEASE_AND_RETURN(scope, toString(globalObject, roundedDuration, data.precision));
 }
 

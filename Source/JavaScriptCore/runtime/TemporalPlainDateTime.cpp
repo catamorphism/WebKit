@@ -567,7 +567,8 @@ ISO8601::Duration TemporalPlainDateTime::differenceTemporalPlainDateTime(JSGloba
         plainDateTimeOther, largestUnit, increment, smallestUnit, roundingMode);
     RETURN_IF_EXCEPTION(scope, { });
 
-    auto result = TemporalDuration::temporalDurationFromInternal(internalDuration, largestUnit);
+    auto result = TemporalDuration::temporalDurationFromInternal(globalObject, internalDuration, largestUnit);
+    RETURN_IF_EXCEPTION(scope, { });
     if (op == DifferenceOperation::Since)
         result = -result;
     return result;

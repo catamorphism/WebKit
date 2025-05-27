@@ -561,7 +561,9 @@ ISO8601::Duration TemporalZonedDateTime::differenceTemporalZonedDateTime(Differe
             roundingMode = negateTemporalRoundingMode(roundingMode);
         auto internalDuration = exactTime().difference(globalObject, other->exactTime(), increment, smallestUnit, roundingMode);
         RETURN_IF_EXCEPTION(scope, { });
-        auto result = TemporalDuration::temporalDurationFromInternal(internalDuration, largestUnit);
+
+        auto result = TemporalDuration::temporalDurationFromInternal(globalObject, internalDuration, largestUnit);
+        RETURN_IF_EXCEPTION(scope, { });
         if (op == DifferenceOperation::Since)
             result = -result;
         return result;
@@ -576,7 +578,8 @@ ISO8601::Duration TemporalZonedDateTime::differenceTemporalZonedDateTime(Differe
         roundingMode = negateTemporalRoundingMode(roundingMode);
     auto internalDuration = differenceZonedDateTimeWithRounding(globalObject, exactTime(), other->exactTime(), timeZone(), calendar(), largestUnit, increment, smallestUnit, roundingMode);
     RETURN_IF_EXCEPTION(scope, { });
-    auto result = TemporalDuration::temporalDurationFromInternal(internalDuration, TemporalUnit::Hour);
+    auto result = TemporalDuration::temporalDurationFromInternal(globalObject, internalDuration, TemporalUnit::Hour);
+    RETURN_IF_EXCEPTION(scope, { });
     if (op == DifferenceOperation::Since)
         result = -result;
     return result;

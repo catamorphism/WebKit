@@ -608,7 +608,7 @@ ISO8601::Duration TemporalPlainTime::differenceTemporalPlainTime(DifferenceOpera
     auto d = ISO8601::roundTimeDuration(globalObject, timeDuration, increment, smallestUnit, roundingMode);
     RETURN_IF_EXCEPTION(scope, { });
     auto duration = ISO8601::InternalDuration::combineDateAndTimeDuration(ISO8601::Duration(), d);
-    return TemporalDuration::temporalDurationFromInternal(duration, largestUnit);
+    RELEASE_AND_RETURN(scope, TemporalDuration::temporalDurationFromInternal(globalObject, duration, largestUnit));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaintime.prototype.until

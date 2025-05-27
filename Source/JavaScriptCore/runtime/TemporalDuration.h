@@ -104,7 +104,7 @@ public:
     static ISO8601::InternalDuration toInternalDuration(ISO8601::Duration);
     static ISO8601::InternalDuration toInternalDurationRecordWith24HourDays(JSGlobalObject*, ISO8601::Duration);
     ISO8601::Duration addDurations(JSGlobalObject*, AddOrSubtract, ISO8601::Duration, TemporalUnit) const;
-    static ISO8601::Duration temporalDurationFromInternal(ISO8601::InternalDuration, TemporalUnit);
+    static ISO8601::Duration temporalDurationFromInternal(JSGlobalObject*, ISO8601::InternalDuration, TemporalUnit);
     static Int128 timeDurationFromComponents(double, double, double, double, double, double);
     static double totalRelativeDuration(JSGlobalObject*, const ISO8601::InternalDuration&,
         Int128, Int128, const ISO8601::PlainDateTime&, std::optional<ISO8601::TimeZone>,
