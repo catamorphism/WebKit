@@ -414,16 +414,9 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/from/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/from/canonicalize-era-codes.js
     - test/intl402/Temporal/ZonedDateTime/from/infinity-throws-rangeerror.js
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
     - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/equals/different-calendar-not-equal.js
     - test/intl402/Temporal/ZonedDateTime/prototype/equals/infinity-throws-rangeerror.js
->>>>>>> d93bc801b76a (Squash with 'case-normalize')
-=======
-    - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonicalize-calendar.js
->>>>>>> 3eb75d47ba3a (Fix intlAvailableTimeZones() to not always return non-canonical time zones)
     - test/intl402/Temporal/ZonedDateTime/prototype/era/branding.js
     - test/intl402/Temporal/ZonedDateTime/prototype/era/prop-desc.js
     - test/intl402/Temporal/ZonedDateTime/prototype/eraYear/branding.js
@@ -511,10 +504,6 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/until/argument-string-unknown-annotation.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/withPlainTime/argument-string-unknown-annotation.js
  # Skipping temporarily
-
-    - test/intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/rule-change-without-offset-transition.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/subtract-second-and-nanosecond-from-last-transition.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/offsetNanoseconds/nanoseconds-subtracted-or-added-at-dst-transition.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/calendar-mismatch.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/infinity-throws-rangeerror.js
