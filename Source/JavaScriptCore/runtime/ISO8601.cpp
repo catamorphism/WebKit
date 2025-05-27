@@ -128,8 +128,10 @@ parseTimeZoneName(JSGlobalObject* globalObject, StringView string)
 
     // TODO: cache this and refactor with getNamedTimeZoneEpochNanoseconds()
     UErrorCode status = U_ZERO_ERROR;
-    String str = string.toStringWithoutCopying();
-    auto timeZoneName = str.charactersWithNullTermination();
+    // ucal_getCanonicalTimeZoneID() is case-sensitive, so we have to case-normalize
+    // the string first.
+    String caseNormalized = caseNormalize(string);
+    auto timeZoneName = caseNormalized.charactersWithNullTermination();
     if (!timeZoneName) {
         throwRangeError(globalObject, scope, "internal error getting time zone data"_s);
         return { };
@@ -142,17 +144,17 @@ parseTimeZoneName(JSGlobalObject* globalObject, StringView string)
     ASSERT_UNUSED(status, U_SUCCESS(status) || status == U_ILLEGAL_ARGUMENT_ERROR);
 
     StringView canonical(buffer);
-    if (string != canonical && isSystemID) {
+    if (caseNormalized != canonical && isSystemID) {
         std::optional<TimeZone> result = parseTimeZoneName(globalObject, canonical);
         RETURN_IF_EXCEPTION(scope, { });
         if (result)
-            return result->withOriginal(caseNormalize(string));
+            return result->withOriginal(caseNormalized);
     }
 
     const auto& timeZones = intlAvailableTimeZones();
     for (unsigned index = 0; index < timeZones.size(); ++index) {
         if (equalIgnoringASCIICase(timeZones[index], string))
-            return TimeZone::named(index, caseNormalize(string));
+            return TimeZone::named(index, caseNormalized);
     }
 
     // Some special cases. Etc/GMT doesn't canonicalize to UTC or GMT for some reason.

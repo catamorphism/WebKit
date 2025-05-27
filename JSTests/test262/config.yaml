@@ -484,6 +484,9 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/from/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/from/canonicalize-era-codes.js
     - test/intl402/Temporal/ZonedDateTime/from/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonicalize-calendar.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/different-calendar-not-equal.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/infinity-throws-rangeerror.js
     - test/intl402/Temporal/ZonedDateTime/prototype/era/branding.js
     - test/intl402/Temporal/ZonedDateTime/prototype/era/prop-desc.js
     - test/intl402/Temporal/ZonedDateTime/prototype/eraYear/branding.js
@@ -625,13 +628,8 @@ skip:
 
     # Wrong time zone canonicalization?
     - test/intl402/Temporal/ZonedDateTime/links.js
-    # Skipping temporarily
-    - test/intl402/Temporal/ZonedDateTime/prototype/equals/argument-object.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonical-not-equal.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/equals/different-calendar-not-equal.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/equals/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/equals/timezone-case-insensitive.js
+    # Skipping temporarily
     - test/intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/rule-change-without-offset-transition.js
     - test/intl402/Temporal/ZonedDateTime/prototype/getTimeZoneTransition/subtract-second-and-nanosecond-from-last-transition.js
     - test/intl402/Temporal/ZonedDateTime/prototype/offsetNanoseconds/nanoseconds-subtracted-or-added-at-dst-transition.js
