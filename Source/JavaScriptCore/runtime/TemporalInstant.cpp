@@ -277,7 +277,8 @@ ISO8601::Duration TemporalInstant::difference(JSGlobalObject* globalObject, Temp
 
     ISO8601::InternalDuration internalDuration = exactTime().difference(globalObject, other->exactTime(), increment, smallestUnit, roundingMode);
     RETURN_IF_EXCEPTION(scope, { });
-    return TemporalDuration::temporalDurationFromInternal(internalDuration, largestUnit);
+    RELEASE_AND_RETURN(scope, TemporalDuration::temporalDurationFromInternal(globalObject,
+        internalDuration, largestUnit));
 }
 
 static double maximumIncrement(TemporalUnit smallestUnit)

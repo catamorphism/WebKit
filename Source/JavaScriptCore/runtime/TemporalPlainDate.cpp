@@ -368,7 +368,8 @@ ISO8601::Duration TemporalPlainDate::differenceTemporalPlainDate(JSGlobalObject*
             increment, smallestUnit, roundingMode);
         RETURN_IF_EXCEPTION(scope, { });
     }
-    auto result = TemporalDuration::temporalDurationFromInternal(duration, TemporalUnit::Day);
+    auto result = TemporalDuration::temporalDurationFromInternal(globalObject, duration, TemporalUnit::Day);
+    RETURN_IF_EXCEPTION(scope, { });
     if (isSince)
         result = -result;
     return result;
