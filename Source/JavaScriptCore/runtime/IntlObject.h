@@ -116,7 +116,11 @@ inline CalendarID iso8601CalendarID()
 }
 
 using TimeZoneID = unsigned;
-const Vector<String>& intlAvailableTimeZones();
+enum class TimeZoneKind : bool {
+    Canonical,
+    All,
+};
+const Vector<String>& intlAvailableTimeZones(TimeZoneKind);
 
 extern TimeZoneID utcTimeZoneIDStorage;
 TimeZoneID utcTimeZoneIDSlow();

@@ -154,7 +154,7 @@ parseTimeZoneName(JSGlobalObject* globalObject, StringView string)
             return result->withOriginal(caseNormalized);
     }
 
-    const auto& timeZones = intlAvailableTimeZones();
+    const auto& timeZones = intlAvailableTimeZones(TimeZoneKind::All);
     for (unsigned index = 0; index < timeZones.size(); ++index) {
         if (equalIgnoringASCIICase(timeZones[index], string))
             return TimeZone::named(index, caseNormalized);
@@ -225,7 +225,7 @@ parseTimeZoneName(JSGlobalObject* globalObject, StringView string)
 
 std::optional<String> getTimeZoneNameFromId(TimeZoneID id)
 {
-    const auto& timeZones = intlAvailableTimeZones();
+    const auto& timeZones = intlAvailableTimeZones(TimeZoneKind::All);
     if (id >= timeZones.size())
         return std::nullopt;
     return timeZones[id];
