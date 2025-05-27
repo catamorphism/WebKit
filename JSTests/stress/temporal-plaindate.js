@@ -66,6 +66,9 @@ shouldBe(String(Temporal.PlainDate.from('2007-01-09T03:24:30+01:00[_../_..]')), 
 shouldBe(String(Temporal.PlainDate.from('2007-01-09T03:24:30+01:00[_./_.]')), `2007-01-09`); // TimeZone error should be ignored.
 shouldBe(String(Temporal.PlainDate.from('2007-01-09T03:24:30+01:00[Etc/GMT+20]')), `2007-01-09`); // TimeZone error should be ignored.
 shouldBe(String(Temporal.PlainDate.from('2007-01-09T03:24:30+01:00[Etc/GMT-20]')), `2007-01-09`); // TimeZone error should be ignored.
+shouldBe(String(Temporal.PlainDate.from("2007-01-09T03:24:30+01:00[Etc/GMT+0]")), `2007-01-09`);
+shouldBe(String(Temporal.PlainDate.from("2007-01-09T03:24:30+01:00[Etc/GMT0]")), `2007-01-09`);
+shouldBe(String(Temporal.PlainDate.from("2007-01-09T03:24:30+01:00[CocoaCappuccinoMatcha]")), `2007-01-09`); // TimeZone error should be ignored.
 shouldBe(String(Temporal.PlainDate.from('2007-01-09 03:24:30+01:00[+01]')), `2007-01-09`);
 shouldBe(String(Temporal.PlainDate.from('2007-01-09 03:24:30+01:00[+01:00]')), `2007-01-09`);
 shouldBe(String(Temporal.PlainDate.from('2007-01-09 03:24:30+01:00[-01:00]')), `2007-01-09`);
@@ -147,10 +150,7 @@ let failures = [
     "2007-01-09T03:24:30+01:00[-]",
     "2007-01-09T03:24:30+01:00[-/_]",
     "2007-01-09T03:24:30+01:00[_/-]",
-    "2007-01-09T03:24:30+01:00[CocoaCappuccinoMatcha]",
     "2007-01-09T03:24:30+01:00[Etc/GMT+50]",
-    "2007-01-09T03:24:30+01:00[Etc/GMT+0]",
-    "2007-01-09T03:24:30+01:00[Etc/GMT0]",
     "2007-01-09T03:24:30+10:20:30.0123456789",
     "2007-01-09 03:24:30+01:00[Etc/GMT\u221201]",
     "2007-01-09 03:24:30+01:00[+02:00:00.0123456789]",
@@ -175,6 +175,7 @@ let failures = [
 for (let text of failures) {
     shouldThrow(() => {
         print(String(Temporal.PlainDate.from(text)));
+        print(text);
     }, RangeError);
 }
 

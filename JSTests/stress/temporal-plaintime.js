@@ -132,6 +132,9 @@ shouldBe(String(Temporal.PlainTime.from('1995-12-07T03:24:30+01:00[_../_..]')), 
 shouldBe(String(Temporal.PlainTime.from('1995-12-07T03:24:30+01:00[_./_.]')), `03:24:30`); // TimeZone error should be ignored.
 shouldBe(String(Temporal.PlainTime.from('1995-12-07T03:24:30+01:00[Etc/GMT+20]')), `03:24:30`); // TimeZone error should be ignored.
 shouldBe(String(Temporal.PlainTime.from('1995-12-07T03:24:30+01:00[Etc/GMT-20]')), `03:24:30`); // TimeZone error should be ignored.
+shouldBe(String(Temporal.PlainTime.from('1995-12-07T03:24:30+01:00[Etc/GMT+0]')), `03:24:30`);
+shouldBe(String(Temporal.PlainTime.from('1995-12-07T03:24:30+01:00[Etc/GMT0]')), `03:24:30`);
+shouldBe(String(Temporal.PlainTime.from('1995-12-07T03:24:30+01:00[CocoaCappuccinoMatcha]')), `03:24:30`);
 shouldBe(String(Temporal.PlainTime.from('1995-12-07 03:24:30+01:00[+01]')), `03:24:30`);
 shouldBe(String(Temporal.PlainTime.from('1995-12-07 03:24:30+01:00[+01:00]')), `03:24:30`);
 shouldBe(String(Temporal.PlainTime.from('1995-12-07 03:24:30+01:00[-01:00]')), `03:24:30`);
@@ -241,10 +244,7 @@ let failures = [
     "1995-12-07T03:24:30+01:00[-]",
     "1995-12-07T03:24:30+01:00[-/_]",
     "1995-12-07T03:24:30+01:00[_/-]",
-    "1995-12-07T03:24:30+01:00[CocoaCappuccinoMatcha]",
     "1995-12-07T03:24:30+01:00[Etc/GMT+50]",
-    "1995-12-07T03:24:30+01:00[Etc/GMT+0]",
-    "1995-12-07T03:24:30+01:00[Etc/GMT0]",
     "1995-12-07T03:24:30+10:20:30.0123456789",
     "1995-12-07 03:24:30+01:00[Etc/GMT\u221201]",
     "1995-12-07 03:24:30+01:00[+02:00:00.0123456789]",
