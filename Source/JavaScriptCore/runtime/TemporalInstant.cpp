@@ -415,8 +415,12 @@ String TemporalInstant::toString(JSGlobalObject* globalObject, JSValue optionsVa
         RETURN_IF_EXCEPTION(scope, { });
     }
 
-    std::optional<TemporalUnit> smallestUnit = validateSmallestUnit(globalObject, smallestUnitString, { });
+    std::optional<TemporalUnit> smallestUnit = validateSmallestUnit(globalObject, smallestUnitString,  { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day });
     RETURN_IF_EXCEPTION(scope, { });
+    if (smallestUnit == TemporalUnit::Hour) {
+        throwRangeError(globalObject, scope, "smallestUnit cannot be hour in Temporal.Instant.toString"_s);
+        return { };
+    }
 
     PrecisionData data = secondsStringPrecision(globalObject, smallestUnit, digits);
     RETURN_IF_EXCEPTION(scope, { });
@@ -427,19 +431,6 @@ String TemporalInstant::toString(JSGlobalObject* globalObject, JSValue optionsVa
 
     auto newExactTime = exactTime().round(globalObject, data.increment, data.unit, roundingMode);
     RETURN_IF_EXCEPTION(scope, { });
-
-    // FIXME: Missing, relies on TimeZone:
-    // 1. Let roundedInstant be ! CreateTemporalInstant(roundedNs).
-    // ...
-    // 1. If _outputTimeZone_ is *undefined*, then
-    //   1. Set _outputTimeZone_ to ! CreateTemporalTimeZone(*"UTC"*).
-    // 1. Let _isoCalendar_ be ! GetISO8601Calendar().
-    // 1. Let _dateTime_ be ? BuiltinTimeZoneGetPlainDateTimeFor(_outputTimeZone_, _instant_, _isoCalendar_).
-    JSObject* outputTimeZone = timeZone;
-    if (outputTimeZone) {
-        throwVMError(globalObject, scope, "FIXME: Temporal.Instant.toString({timeZone}) not implemented yet"_s);
-        return { };
-    }
 
     RELEASE_AND_RETURN(scope, toString(globalObject, newExactTime, timeZone, data));
 }

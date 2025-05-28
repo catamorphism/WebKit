@@ -57,9 +57,6 @@ test/built-ins/Proxy/construct/return-not-object-throws-undefined-realm.js:
 test/built-ins/Proxy/construct/trap-is-not-callable-realm.js:
   default: 'Test262Error: Expected a TypeError but got a different error constructor with the same name'
   strict mode: 'Test262Error: Expected a TypeError but got a different error constructor with the same name'
-test/built-ins/Temporal/Instant/prototype/toString/order-of-operations.js:
-  default: 'Error: FIXME: Temporal.Instant.toString({timeZone}) not implemented yet'
-  strict mode: 'Error: FIXME: Temporal.Instant.toString({timeZone}) not implemented yet'
 test/built-ins/Temporal/Instant/prototype/toString/timezone-string-sub-minute-offset.js:
   default: 'Test262Error: -12:12:59.9 is not a valid time zone string Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: -12:12:59.9 is not a valid time zone string Expected a RangeError to be thrown but no exception was thrown at all'
