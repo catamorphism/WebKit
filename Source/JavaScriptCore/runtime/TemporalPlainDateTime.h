@@ -66,6 +66,9 @@ public:
     JSC_TEMPORAL_PLAIN_TIME_UNITS(JSC_DEFINE_TEMPORAL_PLAIN_TIME_FIELD);
 #undef JSC_DEFINE_TEMPORAL_PLAIN_TIME_FIELD
 
+    std::array<std::optional<double>, numberOfTemporalPlainDateUnits + numberOfTemporalPlainTimeUnits>
+    toPartialDateTime(JSGlobalObject*, JSObject*);
+
     TemporalPlainDateTime* with(JSGlobalObject*, JSObject* temporalDateLike, JSValue options);
     TemporalPlainDateTime* round(JSGlobalObject*, JSValue options);
     static ISO8601::PlainDateTime roundISODateTime(ISO8601::PlainDateTime, unsigned,

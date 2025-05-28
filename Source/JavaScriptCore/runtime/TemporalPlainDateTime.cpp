@@ -334,6 +334,89 @@ TemporalPlainDateTime* TemporalPlainDateTime::addDurationToDateTime(JSGlobalObje
         globalObject->plainDateTimeStructure(), result.date(), result.time()));
 }
 
+std::array<std::optional<double>, numberOfTemporalPlainDateUnits + numberOfTemporalPlainTimeUnits>
+TemporalPlainDateTime::toPartialDateTime(JSGlobalObject* globalObject, JSObject* temporalDateTimeLike)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    // day, hour, microsecond, millisecond, minute, month, monthCode, nanosecond, second, year
+    std::optional<double> day;
+    JSValue dayProperty = temporalDateTimeLike->get(globalObject, vm.propertyNames->day);
+    RETURN_IF_EXCEPTION(scope, { });
+    if (!dayProperty.isUndefined()) {
+        day = dayProperty.toIntegerOrInfinity(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+
+        if (day.value() <= 0 || !std::isfinite(day.value())) {
+            throwRangeError(globalObject, scope, "day property must be positive and finite"_s);
+            return { };
+        }
+    }
+
+    std::optional<double> hour = TemporalPlainTime::getPartialTimeProperty(globalObject, temporalDateTimeLike, TemporalUnit::Hour);
+    RETURN_IF_EXCEPTION(scope, { });
+    std::optional<double> microsecond = TemporalPlainTime::getPartialTimeProperty(globalObject, temporalDateTimeLike, TemporalUnit::Microsecond);
+    RETURN_IF_EXCEPTION(scope, { });
+    std::optional<double> millisecond = TemporalPlainTime::getPartialTimeProperty(globalObject, temporalDateTimeLike, TemporalUnit::Millisecond);
+    RETURN_IF_EXCEPTION(scope, { });
+    std::optional<double> minute = TemporalPlainTime::getPartialTimeProperty(globalObject, temporalDateTimeLike, TemporalUnit::Minute);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    std::optional<double> month;
+    JSValue monthProperty = temporalDateTimeLike->get(globalObject, vm.propertyNames->month);
+    RETURN_IF_EXCEPTION(scope, { });
+    if (!monthProperty.isUndefined()) {
+        month = monthProperty.toIntegerOrInfinity(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+
+        if (month.value() <= 0 || !std::isfinite(month.value())) {
+            throwRangeError(globalObject, scope, "month property must be positive and finite"_s);
+            return { };
+        }
+    }
+
+    JSValue monthCodeProperty = temporalDateTimeLike->get(globalObject, vm.propertyNames->monthCode);
+    RETURN_IF_EXCEPTION(scope, { });
+    if (!monthCodeProperty.isUndefined()) {
+        auto monthCode = monthCodeProperty.toWTFString(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+
+        auto otherMonth = ISO8601::monthFromCode(monthCode);
+        if (!otherMonth) {
+            throwRangeError(globalObject, scope, "Invalid monthCode property"_s);
+            return { };
+        }
+
+        if (!month)
+            month = otherMonth;
+        else if (month.value() != otherMonth) {
+            throwRangeError(globalObject, scope, "month and monthCode properties must match if both are provided"_s);
+            return { };
+        }
+    }
+
+    std::optional<double> nanosecond = TemporalPlainTime::getPartialTimeProperty(globalObject, temporalDateTimeLike, TemporalUnit::Nanosecond);
+    RETURN_IF_EXCEPTION(scope, { });
+    std::optional<double> second = TemporalPlainTime::getPartialTimeProperty(globalObject, temporalDateTimeLike, TemporalUnit::Second);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    std::optional<double> year;
+    JSValue yearProperty = temporalDateTimeLike->get(globalObject, vm.propertyNames->year);
+    RETURN_IF_EXCEPTION(scope, { });
+    if (!yearProperty.isUndefined()) {
+        year = yearProperty.toIntegerOrInfinity(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+
+        if (!std::isfinite(year.value())) {
+            throwRangeError(globalObject, scope, "year property must be finite"_s);
+            return { };
+        }
+    }
+
+    return { year, month, day, hour, minute, second, millisecond, microsecond, nanosecond };
+}
+
 TemporalPlainDateTime* TemporalPlainDateTime::with(JSGlobalObject* globalObject, JSObject* temporalDateTimeLike, JSValue optionsValue)
 {
     VM& vm = globalObject->vm();
@@ -347,7 +430,9 @@ TemporalPlainDateTime* TemporalPlainDateTime::with(JSGlobalObject* globalObject,
         return { };
     }
 
-    auto [optionalYear, optionalMonth, optionalDay] = TemporalPlainDate::toPartialDate(globalObject, temporalDateTimeLike);
+    auto [optionalYear, optionalMonth, optionalDay, optionalHour, optionalMinute,
+        optionalSecond, optionalMillisecond, optionalMicrosecond,
+        optionalNanosecond] = TemporalPlainDateTime::toPartialDateTime(globalObject, temporalDateTimeLike);
     RETURN_IF_EXCEPTION(scope, { });
 
     JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
@@ -357,8 +442,12 @@ TemporalPlainDateTime* TemporalPlainDateTime::with(JSGlobalObject* globalObject,
     RETURN_IF_EXCEPTION(scope, { });
 
     bool requiresTimeProperty = !optionalYear && !optionalMonth && !optionalDay;
-    auto [optionalHour, optionalMinute, optionalSecond, optionalMillisecond, optionalMicrosecond, optionalNanosecond] = TemporalPlainTime::toPartialTime(globalObject, temporalDateTimeLike, !requiresTimeProperty);
-    RETURN_IF_EXCEPTION(scope, { });
+    bool hasTimeProperty = optionalHour || optionalMinute || optionalSecond || optionalMillisecond
+        || optionalMicrosecond || optionalNanosecond;
+    if (requiresTimeProperty && !hasTimeProperty) {
+        throwTypeError(globalObject, scope, "Object must contain at least one Temporal date or time property"_s);
+        return { };
+    }
 
     double y = optionalYear.value_or(year());
     double m = optionalMonth.value_or(month());
