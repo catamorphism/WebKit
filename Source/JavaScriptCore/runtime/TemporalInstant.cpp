@@ -411,7 +411,7 @@ String TemporalInstant::toString(JSGlobalObject* globalObject, JSValue optionsVa
     JSValue timeZoneValue = options->get(globalObject, vm.propertyNames->timeZone);
     RETURN_IF_EXCEPTION(scope, { });
     if (!timeZoneValue.isUndefined()) {
-        timeZone = TemporalTimeZone::from(globalObject, timeZoneValue);
+        timeZone = TemporalTimeZone::from(globalObject, timeZoneValue, false);
         RETURN_IF_EXCEPTION(scope, { });
     }
 

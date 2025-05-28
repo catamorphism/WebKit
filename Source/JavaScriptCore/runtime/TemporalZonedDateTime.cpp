@@ -780,6 +780,11 @@ TemporalZonedDateTime* TemporalZonedDateTime::from(JSGlobalObject* globalObject,
         else if (!offsetString)
             offsetBehavior = TemporalOffsetBehavior::Wall;
         matchBehavior = TemporalMatchBehavior::Minutes;
+        if (offsetString) {
+            std::optional<int64_t> noSubMinutePrecision = ISO8601::parseUTCOffset(offsetString.value(), false);
+            if (!noSubMinutePrecision) // This means the string specifies seconds-level precision
+                matchBehavior = TemporalMatchBehavior::Exactly;
+        }
         if (optionsValue) {
             JSObject* options = intlGetOptionsObject(globalObject, optionsValue.value());
             RETURN_IF_EXCEPTION(scope, { });

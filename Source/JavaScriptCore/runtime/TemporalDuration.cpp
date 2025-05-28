@@ -326,6 +326,11 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
             else if (!offsetString)
                 offsetBehavior = TemporalOffsetBehavior::Wall;
             matchBehavior = TemporalMatchBehavior::Minutes;
+            if (offsetString) {
+                std::optional<int64_t> noSubMinutePrecision = ISO8601::parseUTCOffset(offsetString.value(), false);
+                if (!noSubMinutePrecision) // This means the string specifies seconds-level precision
+                    matchBehavior = TemporalMatchBehavior::Exactly;
+            }
         }
         isoDate = TemporalPlainDate::createISODateRecord(plainDate.year(), plainDate.month(), plainDate.day());
         time = optionalPlainTime;

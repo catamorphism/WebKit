@@ -52,7 +52,7 @@ public:
 
     TimeZone timeZone() const { return m_timeZone; }
 
-    static TemporalTimeZone* from(JSGlobalObject*, JSValue);
+    static TemporalTimeZone* from(JSGlobalObject*, JSValue, bool parseSubMinutePrecision = true);
 
     static ISO8601::ExactTime getEpochNanosecondsFor(JSGlobalObject*, ISO8601::TimeZone, ISO8601::PlainDateTime, TemporalDisambiguation);
     static ISO8601::PlainDateTime getISODateTimeFor(JSGlobalObject*, ISO8601::TimeZone, ISO8601::ExactTime);
