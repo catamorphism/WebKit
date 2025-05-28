@@ -849,8 +849,10 @@ TemporalTimeZone* TemporalTimeZone::from(JSGlobalObject* globalObject, JSValue t
         return TemporalTimeZone::createFromID(vm, globalObject->timeZoneStructure(), utcOffsetFromInstant->asID(), timeZoneString);
     }
 
-
-    throwRangeError(globalObject, scope, "argument needs to be UTC offset string, TimeZone identifier, or temporal Instant string"_s);
+    if (timeZoneLike.isString())
+        throwRangeError(globalObject, scope, "argument needs to be UTC offset string, TimeZone identifier, or temporal Instant string"_s);
+    else
+        throwTypeError(globalObject, scope, "argument needs to be UTC offset string, TimeZone identifier, or temporal Instant string"_s);
     return { };
 }
 

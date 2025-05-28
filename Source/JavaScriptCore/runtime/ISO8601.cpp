@@ -1357,7 +1357,9 @@ static std::optional<PlainDate> parseDate(StringParsingBuffer<CharacterType>& bu
             if (buffer.lengthRemaining() < 4 && format == TemporalDateFormat::Date)
                 return std::nullopt;
         }
-    }
+    } else if (buffer.lengthRemaining() < 4) // If not enough length for month and day, it's a parse error
+        return std::nullopt;
+
     // We ensured that buffer has enough length for month and day. We do not need to check length.
 
     unsigned month = 0;
