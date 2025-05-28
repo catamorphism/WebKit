@@ -318,10 +318,22 @@ String TemporalPlainTime::toString(JSGlobalObject* globalObject, JSValue options
     if (!options)
         return toString();
 
-    PrecisionData data = secondsStringPrecision(globalObject, options);
+    auto precision = temporalFractionalSecondDigits(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
 
     auto roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::Trunc);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    auto smallestUnitString = temporalSmallestUnit(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto smallestUnit = validateSmallestUnit(globalObject, smallestUnitString, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day });
+    RETURN_IF_EXCEPTION(scope, { });
+    if (smallestUnit == TemporalUnit::Hour) {
+        throwRangeError(globalObject, scope, "smallestUnit cannot be hour in Temporal.PlainTime.toString"_s);
+        return { };
+    }
+
+    PrecisionData data = secondsStringPrecision(globalObject, smallestUnit, precision);
     RETURN_IF_EXCEPTION(scope, { });
 
     // No need to make a new object if we were given explicit defaults.

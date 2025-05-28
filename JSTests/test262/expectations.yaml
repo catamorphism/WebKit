@@ -132,12 +132,6 @@ test/built-ins/Temporal/PlainMonthDay/from/argument-string-calendar-case-insensi
 test/built-ins/Temporal/PlainTime/argument-convert.js:
   default: 'Test262Error: hour string Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: hour string Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/PlainTime/prototype/toString/options-read-before-algorithmic-validation.js:
-  default: 'Test262Error: Actual [get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] and expected [get options.fractionalSecondDigits, get options.fractionalSecondDigits.toString, call options.fractionalSecondDigits.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString, get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] should have the same contents. all options should be read first'
-  strict mode: 'Test262Error: Actual [get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] and expected [get options.fractionalSecondDigits, get options.fractionalSecondDigits.toString, call options.fractionalSecondDigits.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString, get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] should have the same contents. all options should be read first'
-test/built-ins/Temporal/PlainTime/prototype/toString/order-of-operations.js:
-  default: 'Test262Error: Actual [get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString] and expected [get options.fractionalSecondDigits, get options.fractionalSecondDigits.toString, call options.fractionalSecondDigits.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString, get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] should have the same contents. order of operations'
-  strict mode: 'Test262Error: Actual [get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString] and expected [get options.fractionalSecondDigits, get options.fractionalSecondDigits.toString, call options.fractionalSecondDigits.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString, get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] should have the same contents. order of operations'
 test/built-ins/Temporal/PlainYearMonth/from/argument-string-calendar-case-insensitive.js:
   default: 'RangeError: YYYY-MM format is only valid with iso8601 calendar'
   strict mode: 'RangeError: YYYY-MM format is only valid with iso8601 calendar'
@@ -168,6 +162,18 @@ test/built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow.js:
 test/built-ins/Temporal/PlainYearMonth/prototype/subtract/subtract-from-last-representable-month.js:
   default: 'RangeError: date time is out of range of ECMAScript representation'
   strict mode: 'RangeError: date time is out of range of ECMAScript representation'
+test/built-ins/TypedArray/prototype/includes/index-compared-against-initial-length-out-of-bounds.js:
+  default: 'Test262Error: Expected SameValue(«true», «false») to be true'
+  strict mode: 'Test262Error: Expected SameValue(«true», «false») to be true'
+test/built-ins/TypedArray/prototype/includes/index-compared-against-initial-length.js:
+  default: 'Test262Error: Expected SameValue(«true», «false») to be true'
+  strict mode: 'Test262Error: Expected SameValue(«true», «false») to be true'
+test/built-ins/TypedArray/prototype/includes/search-undefined-after-shrinking-buffer-index-is-oob.js:
+  default: 'Test262Error: Expected SameValue(«true», «false») to be true (Testing with Float64Array.)'
+  strict mode: 'Test262Error: Expected SameValue(«true», «false») to be true (Testing with Float64Array.)'
+test/built-ins/TypedArray/prototype/set/array-arg-value-conversion-resizes-array-buffer.js:
+  default: 'Test262Error: Actual [shrink, shrink, shrink] and expected [shrink, shrink, shrink, grow, grow] should have the same contents. '
+  strict mode: 'Test262Error: Actual [shrink, shrink, shrink] and expected [shrink, shrink, shrink, grow, grow] should have the same contents. '
 test/built-ins/TypedArray/prototype/slice/speciesctor-return-same-buffer-with-offset.js:
   default: 'Test262Error: Actual [20, 30, 40, 60] and expected [20, 20, 20, 60] should have the same contents.  (Testing with Float64Array and makePassthrough.)'
   strict mode: 'Test262Error: Actual [20, 30, 40, 60] and expected [20, 20, 20, 60] should have the same contents.  (Testing with Float64Array and makePassthrough.)'
