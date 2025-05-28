@@ -193,19 +193,19 @@ TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject,
     auto string = itemValue.toWTFString(globalObject);
     RETURN_IF_EXCEPTION(scope, { });
 
-    if (optionsValue) {
-        toTemporalOverflow(globalObject, optionsValue.value()); // Validate overflow
-        RETURN_IF_EXCEPTION(scope, { });
-    }
-
     // https://tc39.es/proposal-temporal/#sec-temporal-parsetemporaldatetimestring
     // TemporalDateString :
     //     CalendarDateTime
     auto dateTime = ISO8601::parseCalendarDateTime(string, TemporalDateFormat::Date);
     if (dateTime) {
         auto [plainDate, plainTimeOptional, timeZoneOptional, calendarOptional] = WTFMove(dateTime.value());
-        if (!(timeZoneOptional && timeZoneOptional->m_z))
+        if (!(timeZoneOptional && timeZoneOptional->m_z)) {
+            if (optionsValue) {
+                toTemporalOverflow(globalObject, optionsValue.value()); // Validate overflow
+                RETURN_IF_EXCEPTION(scope, { });
+            }
             RELEASE_AND_RETURN(scope, TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), WTFMove(plainDate), plainTimeOptional.value_or(ISO8601::PlainTime())));
+        }
     }
 
     throwRangeError(globalObject, scope, "invalid date string"_s);
