@@ -103,15 +103,6 @@ test/built-ins/Temporal/PlainDate/prototype/eraYear/prop-desc.js:
 test/built-ins/Temporal/PlainDate/prototype/toString/order-of-operations.js:
   default: 'Test262Error: Actual [] and expected [get options.calendarName, get options.calendarName.toString, call options.calendarName.toString] should have the same contents. order of operations'
   strict mode: 'Test262Error: Actual [] and expected [get options.calendarName, get options.calendarName.toString, call options.calendarName.toString] should have the same contents. order of operations'
-test/built-ins/Temporal/PlainDate/prototype/yearOfWeek/basic.js:
-  default: 'Test262Error: 1975-12-29 should be in yearOfWeek 1976 Expected SameValue(«undefined», «1976») to be true'
-  strict mode: 'Test262Error: 1975-12-29 should be in yearOfWeek 1976 Expected SameValue(«undefined», «1976») to be true'
-test/built-ins/Temporal/PlainDate/prototype/yearOfWeek/branding.js:
-  default: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDate.prototype, \"yearOfWeek\").get')"
-  strict mode: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDate.prototype, \"yearOfWeek\").get')"
-test/built-ins/Temporal/PlainDate/prototype/yearOfWeek/prop-desc.js:
-  default: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
-  strict mode: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
 test/built-ins/Temporal/PlainDateTime/calendar-case-insensitive.js:
   default: 'Test262Error: calendar ID is capital dotted I is not lowercased Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: calendar ID is capital dotted I is not lowercased Expected a RangeError to be thrown but no exception was thrown at all'

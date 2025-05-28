@@ -66,6 +66,7 @@ static JSC_DECLARE_CUSTOM_GETTER(temporalPlainDatePrototypeGetterDay);
 static JSC_DECLARE_CUSTOM_GETTER(temporalPlainDatePrototypeGetterDayOfWeek);
 static JSC_DECLARE_CUSTOM_GETTER(temporalPlainDatePrototypeGetterDayOfYear);
 static JSC_DECLARE_CUSTOM_GETTER(temporalPlainDatePrototypeGetterWeekOfYear);
+static JSC_DECLARE_CUSTOM_GETTER(temporalPlainDatePrototypeGetterYearOfWeek);
 static JSC_DECLARE_CUSTOM_GETTER(temporalPlainDatePrototypeGetterDaysInWeek);
 static JSC_DECLARE_CUSTOM_GETTER(temporalPlainDatePrototypeGetterDaysInMonth);
 static JSC_DECLARE_CUSTOM_GETTER(temporalPlainDatePrototypeGetterDaysInYear);
@@ -106,6 +107,7 @@ const ClassInfo TemporalPlainDatePrototype::s_info = { "Temporal.PlainDate"_s, &
   dayOfWeek        temporalPlainDatePrototypeGetterDayOfWeek        DontEnum|ReadOnly|CustomAccessor
   dayOfYear        temporalPlainDatePrototypeGetterDayOfYear        DontEnum|ReadOnly|CustomAccessor
   weekOfYear       temporalPlainDatePrototypeGetterWeekOfYear       DontEnum|ReadOnly|CustomAccessor
+  yearOfWeek       temporalPlainDatePrototypeGetterYearOfWeek       DontEnum|ReadOnly|CustomAccessor
   daysInWeek       temporalPlainDatePrototypeGetterDaysInWeek       DontEnum|ReadOnly|CustomAccessor
   daysInMonth      temporalPlainDatePrototypeGetterDaysInMonth      DontEnum|ReadOnly|CustomAccessor
   daysInYear       temporalPlainDatePrototypeGetterDaysInYear       DontEnum|ReadOnly|CustomAccessor
@@ -535,6 +537,24 @@ JSC_DEFINE_CUSTOM_GETTER(temporalPlainDatePrototypeGetterWeekOfYear, (JSGlobalOb
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDate.prototype.weekOfYear called on value that's not a PlainDate"_s);
 
     return JSValue::encode(jsNumber(plainDate->weekOfYear()));
+}
+
+JSC_DEFINE_CUSTOM_GETTER(temporalPlainDatePrototypeGetterYearOfWeek, (JSGlobalObject* globalObject, EncodedJSValue thisValue, PropertyName))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* plainDate = jsDynamicCast<TemporalPlainDate*>(JSValue::decode(thisValue));
+    if (!plainDate)
+        return throwVMTypeError(globalObject, scope, "Temporal.PlainDate.prototype.yearOfWeek called on value that's not a PlainDate"_s);
+
+    YearWeekRecord yearWeekRecord = TemporalCalendar::calendarDateWeekOfYear(globalObject, plainDate->plainDate());
+    RETURN_IF_EXCEPTION(scope, { });
+
+    if (!yearWeekRecord.year)
+        return JSValue::encode(jsUndefined());
+
+    return JSValue::encode(jsNumber(yearWeekRecord.year.value()));
 }
 
 JSC_DEFINE_CUSTOM_GETTER(temporalPlainDatePrototypeGetterDaysInWeek, (JSGlobalObject* globalObject, EncodedJSValue thisValue, PropertyName))
