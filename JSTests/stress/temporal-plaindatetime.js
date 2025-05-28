@@ -63,8 +63,8 @@ fields.forEach((field, i) => {
 shouldBe(pdt.calendar instanceof Temporal.Calendar, true);
 shouldBe(pdt.calendar.toString(), 'iso8601');
 {
-    const dateGetters = ['monthCode', 'dayOfWeek', 'dayOfYear', 'weekOfYear', 'daysInWeek', 'daysInMonth', 'daysInYear', 'monthsInYear', 'inLeapYear'];
-    const results = ['M02', 6, 34, 5, 7, 28, 365, 12, false];
+    const dateGetters = ['monthCode', 'dayOfWeek', 'dayOfYear', 'weekOfYear', 'yearOfWeek', 'daysInWeek', 'daysInMonth', 'daysInYear', 'monthsInYear', 'inLeapYear'];
+    const results = ['M02', 6, 34, 5, 1, 7, 28, 365, 12, false];
     dateGetters.forEach((property, i) => {
         shouldThrow(() => Temporal.PlainDateTime.prototype[property], TypeError);
         shouldBe(pdt[property], results[i]);

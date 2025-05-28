@@ -390,6 +390,7 @@ skip:
     - test/intl402/Temporal/PlainDateTime/prototype/with/dangi-calendar-dates.js
     - test/intl402/Temporal/PlainDateTime/prototype/with/dangi-calendar-leap-dates.js
     - test/intl402/Temporal/PlainDateTime/prototype/with/non-iso-calendar-fields.js
+    - test/intl402/Temporal/PlainDateTime/prototype/yearOfWeek/non-iso-week-of-year.js
     - test/intl402/Temporal/PlainMonthDay/canonicalize-calendar.js
     - test/intl402/Temporal/PlainMonthDay/from/canonicalize-calendar.js
     - test/intl402/Temporal/PlainMonthDay/prototype/equals/calendars.js

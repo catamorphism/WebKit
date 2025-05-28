@@ -126,15 +126,6 @@ test/built-ins/Temporal/PlainDateTime/prototype/toString/options-read-before-alg
 test/built-ins/Temporal/PlainDateTime/prototype/toString/order-of-operations.js:
   default: 'Test262Error: Actual [get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString] and expected [get options.calendarName, get options.calendarName.toString, call options.calendarName.toString, get options.fractionalSecondDigits, get options.fractionalSecondDigits.toString, call options.fractionalSecondDigits.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString, get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] should have the same contents. order of operations'
   strict mode: 'Test262Error: Actual [get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString] and expected [get options.calendarName, get options.calendarName.toString, call options.calendarName.toString, get options.fractionalSecondDigits, get options.fractionalSecondDigits.toString, call options.fractionalSecondDigits.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString, get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] should have the same contents. order of operations'
-test/built-ins/Temporal/PlainDateTime/prototype/yearOfWeek/basic.js:
-  default: 'Test262Error: check yearOfWeek information Expected SameValue(«undefined», «1976») to be true'
-  strict mode: 'Test262Error: check yearOfWeek information Expected SameValue(«undefined», «1976») to be true'
-test/built-ins/Temporal/PlainDateTime/prototype/yearOfWeek/branding.js:
-  default: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDateTime.prototype, \"yearOfWeek\").get')"
-  strict mode: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDateTime.prototype, \"yearOfWeek\").get')"
-test/built-ins/Temporal/PlainDateTime/prototype/yearOfWeek/prop-desc.js:
-  default: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
-  strict mode: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
 test/built-ins/Temporal/PlainMonthDay/from/argument-string-calendar-case-insensitive.js:
   default: 'RangeError: Temporal.PlainMonthDay.from: invalid date string 11-18[+01:00][u-ca=ISO8601]'
   strict mode: 'RangeError: Temporal.PlainMonthDay.from: invalid date string 11-18[+01:00][u-ca=ISO8601]'
