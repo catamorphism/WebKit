@@ -476,25 +476,33 @@ TemporalPlainTime* TemporalPlainTime::from(JSGlobalObject* globalObject, JSValue
 
     auto string = itemValue.toWTFString(globalObject);
     RETURN_IF_EXCEPTION(scope, { });
-    // Validate overflow -- see step 3(g) of ToTemporalTime
-    if (options) {
-        toTemporalOverflow(globalObject, options.value());
-        RETURN_IF_EXCEPTION(scope, { });
-    }
 
     auto time = ISO8601::parseCalendarTime(string);
     if (time) {
         auto [plainTime, timeZoneOptional, calendarOptional] = WTFMove(time.value());
-        if (!(timeZoneOptional && timeZoneOptional->m_z))
+        if (!(timeZoneOptional && timeZoneOptional->m_z)) {
+            // Validate overflow -- see step 3(g) of ToTemporalTime
+            if (options) {
+                toTemporalOverflow(globalObject, options.value());
+                RETURN_IF_EXCEPTION(scope, { });
+            }
             return TemporalPlainTime::create(vm, globalObject->plainTimeStructure(), WTFMove(plainTime));
+        }
     }
 
     auto dateTime = ISO8601::parseCalendarDateTime(string, TemporalDateFormat::Date);
     if (dateTime) {
         auto [plainDate, plainTimeOptional, timeZoneOptional, calendarOptional] = WTFMove(dateTime.value());
         if (plainTimeOptional) {
-            if (!(timeZoneOptional && timeZoneOptional->m_z))
+            if (!(timeZoneOptional && timeZoneOptional->m_z)) {
+                // Validate overflow -- see step 3(g) of ToTemporalTime
+                if (options) {
+                    toTemporalOverflow(globalObject, options.value());
+                    RETURN_IF_EXCEPTION(scope, { });
+                }
+
                 return TemporalPlainTime::create(vm, globalObject->plainTimeStructure(), WTFMove(plainTimeOptional.value()));
+            }
         }
     }
 
