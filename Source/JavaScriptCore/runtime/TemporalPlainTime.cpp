@@ -432,7 +432,7 @@ ISO8601::PlainTime TemporalPlainTime::regulateTime(JSGlobalObject* globalObject,
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-totemporaltime
-TemporalPlainTime* TemporalPlainTime::from(JSGlobalObject* globalObject, JSValue itemValue, std::optional<JSObject*> options)
+TemporalPlainTime* TemporalPlainTime::from(JSGlobalObject* globalObject, JSValue itemValue, std::optional<JSValue> optionsValue)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -443,8 +443,10 @@ TemporalPlainTime* TemporalPlainTime::from(JSGlobalObject* globalObject, JSValue
 
         if (itemValue.inherits<TemporalPlainDateTime>()) {
             // Validate overflow -- see step 2(a)(ii) of ToTemporalTime
-            if (options) {
-                toTemporalOverflow(globalObject, options.value());
+            if (optionsValue) {
+                JSObject* options = intlGetOptionsObject(globalObject, optionsValue.value());
+                RETURN_IF_EXCEPTION(scope, { });
+                toTemporalOverflow(globalObject, options);
                 RETURN_IF_EXCEPTION(scope, { });
             }
             return TemporalPlainTime::create(vm, globalObject->plainTimeStructure(), jsCast<TemporalPlainDateTime*>(itemValue)->plainTime());
@@ -454,8 +456,10 @@ TemporalPlainTime* TemporalPlainTime::from(JSGlobalObject* globalObject, JSValue
         RETURN_IF_EXCEPTION(scope, { });
 
         TemporalOverflow overflow = TemporalOverflow::Constrain;
-        if (options) {
-            overflow = toTemporalOverflow(globalObject, options.value());
+        if (optionsValue) {
+            JSObject* options = intlGetOptionsObject(globalObject, optionsValue.value());
+            RETURN_IF_EXCEPTION(scope, { });
+            overflow = toTemporalOverflow(globalObject, options);
             RETURN_IF_EXCEPTION(scope, { });
         }
 
@@ -482,8 +486,10 @@ TemporalPlainTime* TemporalPlainTime::from(JSGlobalObject* globalObject, JSValue
         auto [plainTime, timeZoneOptional, calendarOptional] = WTFMove(time.value());
         if (!(timeZoneOptional && timeZoneOptional->m_z)) {
             // Validate overflow -- see step 3(g) of ToTemporalTime
-            if (options) {
-                toTemporalOverflow(globalObject, options.value());
+            if (optionsValue) {
+                JSObject* options = intlGetOptionsObject(globalObject, optionsValue.value());
+                RETURN_IF_EXCEPTION(scope, { });
+                toTemporalOverflow(globalObject, options);
                 RETURN_IF_EXCEPTION(scope, { });
             }
             return TemporalPlainTime::create(vm, globalObject->plainTimeStructure(), WTFMove(plainTime));
@@ -496,8 +502,10 @@ TemporalPlainTime* TemporalPlainTime::from(JSGlobalObject* globalObject, JSValue
         if (plainTimeOptional) {
             if (!(timeZoneOptional && timeZoneOptional->m_z)) {
                 // Validate overflow -- see step 3(g) of ToTemporalTime
-                if (options) {
-                    toTemporalOverflow(globalObject, options.value());
+                if (optionsValue) {
+                    JSObject* options = intlGetOptionsObject(globalObject, optionsValue.value());
+                    RETURN_IF_EXCEPTION(scope, { });
+                    toTemporalOverflow(globalObject, options);
                     RETURN_IF_EXCEPTION(scope, { });
                 }
 
