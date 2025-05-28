@@ -123,7 +123,7 @@ ISO8601::PlainDateTime TemporalPlainDateTime::combineISODateAndTimeRecord(ISO860
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-totemporaldatetime
-TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject, JSValue itemValue, std::optional<JSObject*> optionsValue)
+TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject, JSValue itemValue, std::optional<JSValue> optionsValue)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -201,7 +201,9 @@ TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject,
         auto [plainDate, plainTimeOptional, timeZoneOptional, calendarOptional] = WTFMove(dateTime.value());
         if (!(timeZoneOptional && timeZoneOptional->m_z)) {
             if (optionsValue) {
-                toTemporalOverflow(globalObject, optionsValue.value()); // Validate overflow
+                JSObject* options = intlGetOptionsObject(globalObject, optionsValue.value());
+                RETURN_IF_EXCEPTION(scope, { });
+                toTemporalOverflow(globalObject, options); // Validate overflow
                 RETURN_IF_EXCEPTION(scope, { });
             }
             RELEASE_AND_RETURN(scope, TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), WTFMove(plainDate), plainTimeOptional.value_or(ISO8601::PlainTime())));
