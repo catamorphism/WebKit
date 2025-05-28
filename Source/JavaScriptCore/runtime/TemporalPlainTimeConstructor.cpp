@@ -115,12 +115,11 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainTimeConstructorFuncFrom, (JSGlobalObject* 
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    JSObject* options = intlGetOptionsObject(globalObject, callFrame->argument(1));
-    RETURN_IF_EXCEPTION(scope, { });
-
     JSValue itemValue = callFrame->argument(0);
 
     if (itemValue.inherits<TemporalPlainTime>()) {
+        JSObject* options = intlGetOptionsObject(globalObject, callFrame->argument(1));
+        RETURN_IF_EXCEPTION(scope, { });
         // Validate overflow -- see step 2(a)(ii) of ToTemporalTime
         if (options)
             toTemporalOverflow(globalObject, options);
@@ -129,7 +128,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainTimeConstructorFuncFrom, (JSGlobalObject* 
             jsCast<TemporalPlainTime*>(itemValue)->plainTime()));
     }
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainTime::from(globalObject, itemValue, options)));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainTime::from(globalObject, itemValue, callFrame->argument(1))));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaintime.compare
@@ -138,10 +137,10 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainTimeConstructorFuncCompare, (JSGlobalObjec
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    auto* one = TemporalPlainTime::from(globalObject, callFrame->argument(0), nullptr);
+    auto* one = TemporalPlainTime::from(globalObject, callFrame->argument(0), jsUndefined());
     RETURN_IF_EXCEPTION(scope, { });
 
-    auto* two = TemporalPlainTime::from(globalObject, callFrame->argument(1), nullptr);
+    auto* two = TemporalPlainTime::from(globalObject, callFrame->argument(1), jsUndefined());
     RETURN_IF_EXCEPTION(scope, { });
 
     return JSValue::encode(jsNumber(TemporalPlainTime::compare(one->plainTime(), two->plainTime())));

@@ -238,7 +238,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncWithPlainTime, (JSGlo
         epochNs = TemporalTimeZone::getStartOfDay(globalObject, timeZone, isoDateTime.date());
         RETURN_IF_EXCEPTION(scope, { });
     } else {
-        auto plainTime = TemporalPlainTime::from(globalObject, plainTimeLike, nullptr);
+        auto plainTime = TemporalPlainTime::from(globalObject, plainTimeLike, jsUndefined());
         RETURN_IF_EXCEPTION(scope, { });
         auto resultISODateTime = TemporalPlainDateTime::combineISODateAndTimeRecord(isoDateTime.date(), plainTime->plainTime());
         epochNs = TemporalTimeZone::getEpochNanosecondsFor(globalObject, timeZone, resultISODateTime,

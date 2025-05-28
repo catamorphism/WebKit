@@ -327,7 +327,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDatePrototypeFuncToPlainDateTime, (JSGloba
     if (itemValue.isUndefined())
         RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), { })));
 
-    auto* plainTime = TemporalPlainTime::from(globalObject, itemValue, nullptr);
+    auto* plainTime = TemporalPlainTime::from(globalObject, itemValue, jsUndefined());
     RETURN_IF_EXCEPTION(scope, { });
 
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), plainTime->plainTime())));
@@ -368,7 +368,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDatePrototypeFuncToZonedDateTime, (JSGloba
     if (temporalTime.isUndefined())
         epochNs = TemporalTimeZone::getStartOfDay(globalObject, timeZone, temporalDate->plainDate());
     else {
-        TemporalPlainTime* temporalPlainTime = TemporalPlainTime::from(globalObject, temporalTime, nullptr);
+        TemporalPlainTime* temporalPlainTime = TemporalPlainTime::from(globalObject, temporalTime, jsUndefined());
         RETURN_IF_EXCEPTION(scope, { });
         auto isoDateTime = TemporalPlainDateTime::combineISODateAndTimeRecord(
             temporalDate->plainDate(), temporalPlainTime->plainTime());

@@ -132,12 +132,6 @@ test/built-ins/Temporal/PlainMonthDay/from/argument-string-calendar-case-insensi
 test/built-ins/Temporal/PlainTime/argument-convert.js:
   default: 'Test262Error: hour string Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: hour string Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/PlainTime/from/observable-get-overflow-argument-string-invalid.js:
-  default: 'Test262Error: Actual [get overflow, get overflow.toString, call overflow.toString] and expected [] should have the same contents. options read after ISO string parsing'
-  strict mode: 'Test262Error: Actual [get overflow, get overflow.toString, call overflow.toString] and expected [] should have the same contents. options read after ISO string parsing'
-test/built-ins/Temporal/PlainTime/from/options-wrong-type.js:
-  default: 'Test262Error: Invalid string processed before throwing TypeError Expected a RangeError but got a TypeError'
-  strict mode: 'Test262Error: Invalid string processed before throwing TypeError Expected a RangeError but got a TypeError'
 test/built-ins/Temporal/PlainTime/prototype/toString/options-read-before-algorithmic-validation.js:
   default: 'Test262Error: Actual [get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] and expected [get options.fractionalSecondDigits, get options.fractionalSecondDigits.toString, call options.fractionalSecondDigits.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString, get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] should have the same contents. all options should be read first'
   strict mode: 'Test262Error: Actual [get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] and expected [get options.fractionalSecondDigits, get options.fractionalSecondDigits.toString, call options.fractionalSecondDigits.toString, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString, get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] should have the same contents. all options should be read first'

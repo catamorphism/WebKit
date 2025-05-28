@@ -177,7 +177,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainTimePrototypeFuncUntil, (JSGlobalObject* g
     if (!plainTime)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainTime.prototype.until called on value that's not a PlainTime"_s);
 
-    auto* other = TemporalPlainTime::from(globalObject, callFrame->argument(0), nullptr);
+    auto* other = TemporalPlainTime::from(globalObject, callFrame->argument(0), jsUndefined());
     RETURN_IF_EXCEPTION(scope, { });
 
     auto result = plainTime->until(globalObject, other, callFrame->argument(1));
@@ -196,7 +196,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainTimePrototypeFuncSince, (JSGlobalObject* g
     if (!plainTime)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainTime.prototype.since called on value that's not a PlainTime"_s);
 
-    auto* other = TemporalPlainTime::from(globalObject, callFrame->argument(0), nullptr);
+    auto* other = TemporalPlainTime::from(globalObject, callFrame->argument(0), jsUndefined());
     RETURN_IF_EXCEPTION(scope, { });
 
     auto result = plainTime->since(globalObject, other, callFrame->argument(1));
@@ -235,7 +235,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainTimePrototypeFuncEquals, (JSGlobalObject* 
     if (!plainTime)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainTime.prototype.equals called on value that's not a PlainTime"_s);
 
-    auto* other = TemporalPlainTime::from(globalObject, callFrame->argument(0), nullptr);
+    auto* other = TemporalPlainTime::from(globalObject, callFrame->argument(0), jsUndefined());
     RETURN_IF_EXCEPTION(scope, { });
 
     return JSValue::encode(jsBoolean(plainTime->plainTime() == other->plainTime()));

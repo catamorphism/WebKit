@@ -58,7 +58,7 @@ public:
     static ISO8601::PlainTime addDurationToTime(bool, TemporalPlainTime*, ISO8601::Duration);
     static ISO8601::Duration balanceTime(Int128 hour, Int128 minute, Int128 second, Int128 millisecond, Int128 microsecond, Int128 nanosecond);
 
-    static TemporalPlainTime* from(JSGlobalObject*, JSValue, JSObject*);
+    static TemporalPlainTime* from(JSGlobalObject*, JSValue itemValue, JSValue optionsValue);
     static int32_t compare(const ISO8601::PlainTime&, const ISO8601::PlainTime&);
 
     TemporalCalendar* calendar() LIFETIME_BOUND { return m_calendar.get(this); }

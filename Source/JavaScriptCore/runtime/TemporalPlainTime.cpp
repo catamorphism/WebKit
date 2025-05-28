@@ -444,7 +444,7 @@ ISO8601::PlainTime TemporalPlainTime::regulateTime(JSGlobalObject* globalObject,
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-totemporaltime
-TemporalPlainTime* TemporalPlainTime::from(JSGlobalObject* globalObject, JSValue itemValue, JSObject* options)
+TemporalPlainTime* TemporalPlainTime::from(JSGlobalObject* globalObject, JSValue itemValue, JSValue optionsValue)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -455,20 +455,17 @@ TemporalPlainTime* TemporalPlainTime::from(JSGlobalObject* globalObject, JSValue
 
         if (itemValue.inherits<TemporalPlainDateTime>()) {
             // Validate overflow -- see step 2(a)(ii) of ToTemporalTime
-            if (options) {
-                toTemporalOverflow(globalObject, options);
-                RETURN_IF_EXCEPTION(scope, { });
-            }
+            toTemporalOverflow(globalObject, optionsValue);
+            RETURN_IF_EXCEPTION(scope, { });
+
             return TemporalPlainTime::create(vm, globalObject->plainTimeStructure(), jsCast<TemporalPlainDateTime*>(itemValue)->plainTime());
         }
         auto duration = toTemporalTimeRecord(globalObject, jsCast<JSObject*>(itemValue));
         RETURN_IF_EXCEPTION(scope, { });
 
         TemporalOverflow overflow = TemporalOverflow::Constrain;
-        if (options) {
-            overflow = toTemporalOverflow(globalObject, options);
-            RETURN_IF_EXCEPTION(scope, { });
-        }
+        overflow = toTemporalOverflow(globalObject, optionsValue);
+        RETURN_IF_EXCEPTION(scope, { });
 
         auto plainTime = regulateTime(globalObject, static_cast<Int128>(duration.hours()), static_cast<Int128>(duration.minutes()), static_cast<Int128>(duration.seconds()), static_cast<Int128>(duration.milliseconds()), static_cast<Int128>(duration.microseconds()), static_cast<Int128>(duration.nanoseconds()), overflow);
         RETURN_IF_EXCEPTION(scope, { });
@@ -487,25 +484,28 @@ TemporalPlainTime* TemporalPlainTime::from(JSGlobalObject* globalObject, JSValue
 
     auto string = itemValue.toWTFString(globalObject);
     RETURN_IF_EXCEPTION(scope, { });
-    // Validate overflow -- see step 3(g) of ToTemporalTime
-    if (options) {
-        toTemporalOverflow(globalObject, options);
-        RETURN_IF_EXCEPTION(scope, { });
-    }
 
     auto time = ISO8601::parseCalendarTime(string);
     if (time) {
         auto [plainTime, timeZoneOptional, calendarOptional] = WTF::move(time.value());
-        if (!(timeZoneOptional && timeZoneOptional->m_z))
+        if (!(timeZoneOptional && timeZoneOptional->m_z)) {
+            // Validate overflow -- see step 3(g) of ToTemporalTime
+            toTemporalOverflow(globalObject, optionsValue);
+            RETURN_IF_EXCEPTION(scope, { });
             return TemporalPlainTime::create(vm, globalObject->plainTimeStructure(), WTF::move(plainTime));
+        }
     }
 
     auto dateTime = ISO8601::parseCalendarDateTime(string, TemporalDateFormat::Date);
     if (dateTime) {
         auto [plainDate, plainTimeOptional, timeZoneOptional, calendarOptional] = WTF::move(dateTime.value());
         if (plainTimeOptional) {
-            if (!(timeZoneOptional && timeZoneOptional->m_z))
+            if (!(timeZoneOptional && timeZoneOptional->m_z)) {
+                // Validate overflow -- see step 3(g) of ToTemporalTime
+                toTemporalOverflow(globalObject, optionsValue);
+                RETURN_IF_EXCEPTION(scope, { });
                 return TemporalPlainTime::create(vm, globalObject->plainTimeStructure(), WTF::move(plainTimeOptional.value()));
+            }
         }
     }
 
