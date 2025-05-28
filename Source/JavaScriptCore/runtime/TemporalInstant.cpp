@@ -247,13 +247,20 @@ ISO8601::Duration TemporalInstant::difference(JSGlobalObject* globalObject, Temp
     JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
     RETURN_IF_EXCEPTION(scope, { });
 
+    auto largest = temporalLargestUnit(globalObject, options, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day }, TemporalUnit::Second);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    unsigned roundingIncrement = getRoundingIncrementOption(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    RoundingMode roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::Trunc);
+    RETURN_IF_EXCEPTION(scope, { });
+
     auto smallest = temporalSmallestUnit(globalObject, options, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day });
     RETURN_IF_EXCEPTION(scope, { });
     TemporalUnit smallestUnit = smallest.value_or(TemporalUnit::Nanosecond);
 
     TemporalUnit defaultLargestUnit = std::min(smallestUnit, TemporalUnit::Second);
-    auto largest = temporalLargestUnit(globalObject, options, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day }, defaultLargestUnit);
-    RETURN_IF_EXCEPTION(scope, { });
     TemporalUnit largestUnit = defaultLargestUnit;
     if (largest) {
         ASSERT(std::holds_alternative<TemporalUnit>(largest.value()));
@@ -265,17 +272,15 @@ ISO8601::Duration TemporalInstant::difference(JSGlobalObject* globalObject, Temp
         return { };
     }
 
-    RoundingMode roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::Trunc);
-    RETURN_IF_EXCEPTION(scope, { });
+    auto maximum = maximumRoundingIncrement(smallestUnit);
+    ASSERT(maximum && *maximum <= 1000); // unbounded increments are impossible with Temporal.Instant
+    if (!validateTemporalRoundingIncrement(roundingIncrement, *maximum, false)) {
+        throwRangeError(globalObject, scope, "rounding increment exceeds maximum for smallest unit"_s);
+        return { };
+    }
 
-    std::optional<double> maxIncrement = maximumRoundingIncrement(smallestUnit);
-    ASSERT(maxIncrement && *maxIncrement <= 1000); // unbounded increments are impossible with Temporal.Instant
-    double incrementDouble = doubleNumberOption(globalObject, options, vm.propertyNames->roundingIncrement, 1);
-    RETURN_IF_EXCEPTION(scope, { });
-    unsigned increment = temporalRoundingIncrement(globalObject, incrementDouble, maxIncrement, false);
-    RETURN_IF_EXCEPTION(scope, { });
-
-    ISO8601::InternalDuration internalDuration = exactTime().difference(globalObject, other->exactTime(), increment, smallestUnit, roundingMode);
+    ISO8601::InternalDuration internalDuration = exactTime().difference(globalObject, other->exactTime(),
+        roundingIncrement, smallestUnit, roundingMode);
     RETURN_IF_EXCEPTION(scope, { });
     RELEASE_AND_RETURN(scope, TemporalDuration::temporalDurationFromInternal(globalObject,
         internalDuration, largestUnit));
