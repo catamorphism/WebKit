@@ -277,6 +277,11 @@ String TemporalPlainDateTime::toString(JSGlobalObject* globalObject, JSValue opt
     auto plainDate = TemporalPlainDate::toPlainDate(globalObject, duration);
     RETURN_IF_EXCEPTION(scope, { });
 
+    if (!isoDateTimeWithinLimits(combineISODateAndTimeRecord(plainDate, plainTime))) {
+        throwRangeError(globalObject, scope, "Duration out of range after rounding"_s);
+        return { };
+    }
+
     return ISO8601::temporalDateTimeToString(plainDate, plainTime, data.precision);
 }
 
