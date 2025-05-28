@@ -279,6 +279,19 @@ for (let text of failures) {
 }
 
 {
+    shouldBe(Temporal.PlainDate.from('1975-12-29').yearOfWeek, 1976);
+    shouldBe(Temporal.PlainDate.from('1975-12-30').yearOfWeek, 1976);
+    shouldBe(Temporal.PlainDate.from('1975-12-31').yearOfWeek, 1976);
+    shouldBe(Temporal.PlainDate.from('1976-01-01').yearOfWeek, 1976);
+    shouldBe(Temporal.PlainDate.from('1976-01-02').yearOfWeek, 1976);
+    shouldBe(Temporal.PlainDate.from('1976-01-03').yearOfWeek, 1976);
+    shouldBe(Temporal.PlainDate.from('1976-01-04').yearOfWeek, 1976);
+    shouldBe(Temporal.PlainDate.from('1976-12-31').yearOfWeek, 1976);
+    shouldBe(Temporal.PlainDate.from('1977-01-01').yearOfWeek, 1976);
+    shouldBe(Temporal.PlainDate.from('1977-01-02').yearOfWeek, 1976);
+}
+
+{
     let days = [
         [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ],
         [ 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ],
