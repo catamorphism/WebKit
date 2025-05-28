@@ -217,16 +217,19 @@ ISO8601::PlainDate TemporalPlainMonthDay::with(JSGlobalObject* globalObject, JSO
         return { };
     }
 
-    auto [y, m, d, optionalMonthCode, overflow, any] =
-        TemporalPlainDate::mergeDateFields(globalObject, temporalMonthDayLike, optionsValue,
-            1972, month(), day());
+    auto [y, m, d, optionalMonthCode, overflow, hour, minute, second, millisecond, microsecond, nanosecond, any] = TemporalPlainDate::mergeDateTimeFields(globalObject, temporalMonthDayLike, optionsValue, 1972, month(), day(), UnitGroup::Date);
     RETURN_IF_EXCEPTION(scope, { });
+
+    ASSERT(y);
+    ASSERT(m);
+    ASSERT(d);
+
     if (any == TemporalAnyProperties::None) [[unlikely]] {
         throwTypeError(globalObject, scope, "Object must contain at least one Temporal date property"_s);
         return { };
     }
 
-    RELEASE_AND_RETURN(scope, TemporalCalendar::monthDayFromFields(globalObject, y, m, d, optionalMonthCode, overflow));
+    RELEASE_AND_RETURN(scope, TemporalCalendar::monthDayFromFields(globalObject, y.value(), m.value(), d.value(), optionalMonthCode, overflow));
 }
 
 String TemporalPlainMonthDay::monthCode() const

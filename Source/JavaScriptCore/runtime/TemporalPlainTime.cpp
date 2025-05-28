@@ -370,6 +370,29 @@ ISO8601::Duration TemporalPlainTime::toTemporalTimeRecord(JSGlobalObject* global
     return duration;
 }
 
+std::optional<double> TemporalPlainTime::getPartialTimeProperty(JSGlobalObject* globalObject,
+    JSObject* temporalTimeLike, TemporalUnit unit)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+     auto name = temporalUnitSingularPropertyName(vm, unit);
+     JSValue value = temporalTimeLike->get(globalObject, name);
+     RETURN_IF_EXCEPTION(scope, { });
+
+     if (!value.isUndefined()) {
+         double doubleValue = value.toIntegerOrInfinity(globalObject);
+         RETURN_IF_EXCEPTION(scope, { });
+         if (!std::isfinite(doubleValue)) {
+             throwRangeError(globalObject, scope, "Temporal time properties must be finite"_s);
+             return { };
+         }
+         return doubleValue;
+     }
+
+     return std::nullopt;
+}
+ 
 std::array<std::optional<double>, numberOfTemporalPlainTimeUnits> TemporalPlainTime::toPartialTime(JSGlobalObject* globalObject, JSObject* temporalTimeLike, bool skipRelevantPropertyCheck)
 {
     VM& vm = globalObject->vm();
@@ -380,18 +403,11 @@ std::array<std::optional<double>, numberOfTemporalPlainTimeUnits> TemporalPlainT
     for (TemporalUnit unit : temporalUnitsInTableOrder) {
         if (unit < TemporalUnit::Hour)
             continue;
-        auto name = temporalUnitSingularPropertyName(vm, unit);
-        JSValue value = temporalTimeLike->get(globalObject, name);
+        auto doubleValue = getPartialTimeProperty(globalObject, temporalTimeLike, unit);
         RETURN_IF_EXCEPTION(scope, { });
 
-        if (!value.isUndefined()) {
+        if (doubleValue) {
             hasAnyFields = true;
-            double doubleValue = value.toIntegerOrInfinity(globalObject);
-            RETURN_IF_EXCEPTION(scope, { });
-            if (!std::isfinite(doubleValue)) {
-                throwRangeError(globalObject, scope, "Temporal time properties must be finite"_s);
-                return { };
-            }
             partialTime[static_cast<unsigned>(unit) - static_cast<unsigned>(TemporalUnit::Hour)] = doubleValue;
         }
     }

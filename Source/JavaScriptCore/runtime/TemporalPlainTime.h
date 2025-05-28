@@ -51,6 +51,7 @@ public:
     static ISO8601::PlainTime toPlainTime(JSGlobalObject*, const ISO8601::Duration&);
     static ISO8601::Duration roundTime(ISO8601::PlainTime, double increment, TemporalUnit, RoundingMode, std::optional<double> dayLengthNs);
     static ISO8601::Duration toTemporalTimeRecord(JSGlobalObject*, JSObject*, bool skipRelevantPropertyCheck = false);
+    static std::optional<double> getPartialTimeProperty(JSGlobalObject*, JSObject*, TemporalUnit);
     static std::array<std::optional<double>, numberOfTemporalPlainTimeUnits> toPartialTime(JSGlobalObject*, JSObject*, bool skipRelevantPropertyCheck = false);
     static ISO8601::PlainTime regulateTime(JSGlobalObject*, Int128, Int128, Int128, Int128, Int128, Int128, TemporalOverflow);
     static ISO8601::Duration addTime(const ISO8601::PlainTime&, Int128);

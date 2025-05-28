@@ -50,8 +50,8 @@ public:
     DECLARE_INFO;
 
     static ISO8601::PlainDate toPlainDate(JSGlobalObject*, const ISO8601::Duration&);
-    static std::tuple<int32_t, unsigned, unsigned, std::optional<ParsedMonthCode>, TemporalOverflow, TemporalAnyProperties>
-    mergeDateFields(JSGlobalObject*, JSObject*, JSValue, int32_t, unsigned, unsigned);
+    std::tuple<std::optional<int32_t>, std::optional<unsigned>, std::optional<unsigned>, std::optional<ParsedMonthCode>, TemporalOverflow, std::optional<int32_t>, std::optional<int32_t>, std::optional<int32_t>, std::optional<int32_t>, std::optional<int32_t>, std::optional<int32_t>, TemporalAnyProperties>
+    static mergeDateTimeFields(JSGlobalObject*, JSObject*, JSValue, std::optional<int32_t>, std::optional<unsigned> defaultMonth, std::optional<unsigned> defaultDay, UnitGroup);
     static std::optional<int32_t> toDay(JSGlobalObject*, JSObject*);
     static std::optional<int32_t> toYear(JSGlobalObject*, JSObject*);
     std::tuple<std::optional<int32_t>, std::optional<ParsedMonthCode>, std::optional<int32_t>> static toYearMonth(JSGlobalObject*, JSObject*);

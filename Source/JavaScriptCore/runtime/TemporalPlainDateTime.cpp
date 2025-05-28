@@ -342,14 +342,19 @@ TemporalPlainDateTime* TemporalPlainDateTime::with(JSGlobalObject* globalObject,
         return { };
     }
 
-    auto [y, m, d, optionalMonthCode, overflow, any] = TemporalPlainDate::mergeDateFields(globalObject, temporalDateTimeLike, optionsValue, year(), month(), day());
+    auto [y, m, d, optionalMonthCode, overflow, optionalHour, optionalMinute, optionalSecond, optionalMillisecond, optionalMicrosecond, optionalNanosecond, any] = TemporalPlainDate::mergeDateTimeFields(globalObject, temporalDateTimeLike, optionsValue, year(), month(), day(), UnitGroup::DateTime);
     RETURN_IF_EXCEPTION(scope, { });
 
-    bool requiresTimeProperty = any == TemporalAnyProperties::None;
-    auto [optionalHour, optionalMinute, optionalSecond, optionalMillisecond, optionalMicrosecond, optionalNanosecond] = TemporalPlainTime::toPartialTime(globalObject, temporalDateTimeLike, !requiresTimeProperty);
-    RETURN_IF_EXCEPTION(scope, { });
+    if (any == TemporalAnyProperties::None) {
+        throwTypeError(globalObject, scope, "Object must contain at least one Temporal date or time property"_s);
+        return { };
+    }
 
-    auto plainDate = TemporalCalendar::isoDateFromFields(globalObject, TemporalDateFormat::Date, y, m, d, optionalMonthCode, overflow);
+    ASSERT(y);
+    ASSERT(m);
+    ASSERT(d);
+
+    auto plainDate = TemporalCalendar::isoDateFromFields(globalObject, TemporalDateFormat::Date, y.value(), m.value(), d.value(), optionalMonthCode, overflow);
     RETURN_IF_EXCEPTION(scope, { });
 
     ISO8601::Duration duration { };
