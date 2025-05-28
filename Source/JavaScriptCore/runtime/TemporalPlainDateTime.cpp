@@ -123,7 +123,7 @@ ISO8601::PlainDateTime TemporalPlainDateTime::combineISODateAndTimeRecord(ISO860
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-totemporaldatetime
-TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject, JSValue itemValue, JSObject* options)
+TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject, JSValue itemValue, JSValue optionsValue)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -133,10 +133,9 @@ TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject,
             return jsCast<TemporalPlainDateTime*>(itemValue);
 
         if (itemValue.inherits<TemporalPlainDate>()) {
-            if (options) {
-                toTemporalOverflow(globalObject, options);
-                RETURN_IF_EXCEPTION(scope, { });
-            }
+            toTemporalOverflow(globalObject, optionsValue);
+            RETURN_IF_EXCEPTION(scope, { });
+
             return TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(), jsCast<TemporalPlainDate*>(itemValue)->plainDate(), { });
         }
 
@@ -172,10 +171,8 @@ TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject,
         auto nanosecond = optionalNanosecond.value_or(0);
 
         auto overflow = TemporalOverflow::Constrain;
-        if (options) {
-            overflow = toTemporalOverflow(globalObject, options);
-            RETURN_IF_EXCEPTION(scope, { });
-        }
+        overflow = toTemporalOverflow(globalObject, optionsValue);
+        RETURN_IF_EXCEPTION(scope, { });
 
         auto result = TemporalCalendar::interpretTemporalDateTimeFields(globalObject, calendar->identifier(),
             optionalYear, optionalMonth, optionalMonthCode, optionalDay, hour, minute, second,
@@ -193,19 +190,19 @@ TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject,
     auto string = itemValue.toWTFString(globalObject);
     RETURN_IF_EXCEPTION(scope, { });
 
-    if (options) {
-        toTemporalOverflow(globalObject, options); // Validate overflow
-        RETURN_IF_EXCEPTION(scope, { });
-    }
-
     // https://tc39.es/proposal-temporal/#sec-temporal-parsetemporaldatetimestring
     // TemporalDateString :
     //     CalendarDateTime
     auto dateTime = ISO8601::parseCalendarDateTime(string, TemporalDateFormat::Date);
     if (dateTime) {
         auto [plainDate, plainTimeOptional, timeZoneOptional, calendarOptional] = WTF::move(dateTime.value());
-        if (!(timeZoneOptional && timeZoneOptional->m_z))
+        if (!(timeZoneOptional && timeZoneOptional->m_z)) {
+            JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
+            RETURN_IF_EXCEPTION(scope, { });
+            toTemporalOverflow(globalObject, options); // Validate overflow
+            RETURN_IF_EXCEPTION(scope, { });
             RELEASE_AND_RETURN(scope, TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), WTF::move(plainDate), plainTimeOptional.value_or(ISO8601::PlainTime())));
+        }
     }
 
     throwRangeError(globalObject, scope, "invalid date string"_s);

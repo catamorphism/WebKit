@@ -108,12 +108,6 @@ test/built-ins/Temporal/PlainDateTime/compare/argument-string-calendar-invalid-i
 test/built-ins/Temporal/PlainDateTime/from/argument-string-calendar-invalid-iso-string.js:
   default: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/PlainDateTime/from/observable-get-overflow-argument-string-invalid.js:
-  default: 'Test262Error: Actual [get options.overflow, get options.overflow.toString, call options.overflow.toString] and expected [] should have the same contents. options read after string parsing'
-  strict mode: 'Test262Error: Actual [get options.overflow, get options.overflow.toString, call options.overflow.toString] and expected [] should have the same contents. options read after string parsing'
-test/built-ins/Temporal/PlainDateTime/from/options-wrong-type.js:
-  default: 'Test262Error: Invalid string processed before throwing TypeError Expected a RangeError but got a TypeError'
-  strict mode: 'Test262Error: Invalid string processed before throwing TypeError Expected a RangeError but got a TypeError'
 test/built-ins/Temporal/PlainDateTime/prototype/era/branding.js:
   default: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDateTime.prototype, \"era\").get')"
   strict mode: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDateTime.prototype, \"era\").get')"

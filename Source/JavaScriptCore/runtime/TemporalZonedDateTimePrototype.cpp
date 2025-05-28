@@ -368,7 +368,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToPlainDate, (JSGloba
 
     scope.release();
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
-
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(TemporalPlainDate::create(vm, globalObject->plainDateStructure(), isoDateTime.date()));
 }
 
@@ -384,6 +384,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToPlainTime, (JSGloba
 
     scope.release();
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(TemporalPlainTime::create(vm, globalObject->plainTimeStructure(), isoDateTime.time()));
 }
 
@@ -399,6 +400,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToPlainDateTime, (JSG
 
     scope.release();
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(), isoDateTime.date(), isoDateTime.time()));
 }
 
@@ -534,6 +536,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterYear, (JSGlobalObje
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.year called on value that's not a ZonedDateTime"_s);
 
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(jsNumber(isoDateTime.date().year()));
 }
 
@@ -548,6 +551,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterMonth, (JSGlobalObj
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.month called on value that's not a ZonedDateTime"_s);
 
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(jsNumber(isoDateTime.date().month()));
 }
 
@@ -562,6 +566,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterMonthCode, (JSGloba
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.monthCode called on value that's not a ZonedDateTime"_s);
 
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(jsNontrivialString(vm, ISO8601::monthCode(isoDateTime.date().month())));
 }
 
@@ -576,6 +581,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterDay, (JSGlobalObjec
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.day called on value that's not a ZonedDateTime"_s);
 
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(jsNumber(isoDateTime.date().day()));
 }
 
@@ -590,6 +596,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterHour, (JSGlobalObje
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.hour called on value that's not a ZonedDateTime"_s);
 
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(jsNumber(isoDateTime.time().hour()));
 }
 
@@ -604,6 +611,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterMinute, (JSGlobalOb
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.minute called on value that's not a ZonedDateTime"_s);
 
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(jsNumber(isoDateTime.time().minute()));
 }
 
@@ -618,6 +626,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterSecond, (JSGlobalOb
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.second called on value that's not a ZonedDateTime"_s);
 
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(jsNumber(isoDateTime.time().second()));
 }
 
@@ -632,6 +641,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterMillisecond, (JSGlo
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.millisecond called on value that's not a ZonedDateTime"_s);
 
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(jsNumber(isoDateTime.time().millisecond()));
 }
 
@@ -646,6 +656,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterMicrosecond, (JSGlo
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.microsecond called on value that's not a ZonedDateTime"_s);
 
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(jsNumber(isoDateTime.time().microsecond()));
 }
 
@@ -660,6 +671,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterNanosecond, (JSGlob
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.nanosecond called on value that's not a ZonedDateTime"_s);
 
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(jsNumber(isoDateTime.time().nanosecond()));
 }
 
@@ -703,6 +715,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterDayOfWeek, (JSGloba
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.dayOfWeek called on value that's not a ZonedDateTime"_s);
 
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(jsNumber(ISO8601::dayOfWeek(isoDateTime.date())));
 }
 
@@ -717,6 +730,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterDayOfYear, (JSGloba
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.dayOfYear called on value that's not a ZonedDateTime"_s);
 
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(jsNumber(ISO8601::dayOfYear(isoDateTime.date())));
 }
 
@@ -732,6 +746,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterWeekOfYear, (JSGlob
 
     scope.release();
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, zonedDateTime->timeZone(), zonedDateTime->exactTime());
+    RETURN_IF_EXCEPTION(scope, { });
     return JSValue::encode(jsNumber(ISO8601::weekOfYear(isoDateTime.date())));
 }
 

@@ -49,7 +49,7 @@ public:
 
     DECLARE_INFO;
 
-    static TemporalPlainDateTime* from(JSGlobalObject*, JSValue, JSObject*);
+    static TemporalPlainDateTime* from(JSGlobalObject*, JSValue itemValue, JSValue optionsValue);
     static int32_t compare(TemporalPlainDateTime*, TemporalPlainDateTime*);
 
     TemporalCalendar* calendar() LIFETIME_BOUND { return m_calendar.get(this); }

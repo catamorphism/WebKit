@@ -227,7 +227,7 @@ static EncodedJSValue sinceOrUntil(JSGlobalObject* globalObject, CallFrame* call
         return throwVMTypeError(globalObject, scope, error);
     }
 
-    auto* other = TemporalPlainDateTime::from(globalObject, callFrame->argument(0), nullptr);
+    auto* other = TemporalPlainDateTime::from(globalObject, callFrame->argument(0), jsUndefined());
     RETURN_IF_EXCEPTION(scope, { });
 
     auto [smallestUnit, largestUnit, roundingMode, increment] = extractDifferenceOptions(globalObject,
@@ -320,7 +320,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncEquals, (JSGlobalObje
     if (!plainDateTime)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDateTime.prototype.equals called on value that's not a PlainDateTime"_s);
 
-    auto* other = TemporalPlainDateTime::from(globalObject, callFrame->argument(0), nullptr);
+    auto* other = TemporalPlainDateTime::from(globalObject, callFrame->argument(0), jsUndefined());
     RETURN_IF_EXCEPTION(scope, { });
 
     if (plainDateTime->plainDate() != other->plainDate() || plainDateTime->plainTime() != other->plainTime())
