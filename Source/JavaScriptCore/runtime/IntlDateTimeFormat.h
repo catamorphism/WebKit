@@ -44,6 +44,7 @@ struct UDateIntervalFormatDeleter {
 };
 
 enum class TemporalDateTimeFormat : uint8_t {
+    Instant,
     PlainDate,
     PlainDateTime,
     PlainMonthDay,
@@ -173,6 +174,7 @@ private:
     bool m_userSpecifiedYear = false;
     bool m_userSpecifiedMonth = false;
     bool m_userSpecifiedDay = false;
+    bool m_userSpecifiedDayPeriod = false;
     bool m_userSpecifiedHour = false;
     bool m_userSpecifiedMinute = false;
     bool m_userSpecifiedSecond = false;

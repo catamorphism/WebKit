@@ -260,7 +260,7 @@ IntlDateTimeFormat::handleDateTimeValue(JSGlobalObject* globalObject, JSValue x,
     // https://tc39.es/proposal-temporal/#sec-temporal-handledatetimetemporalinstant
     TemporalInstant* instant = jsDynamicCast<TemporalInstant*>(x);
     if (instant)
-        return std::tuple(instant->exactTime(), std::nullopt, std::nullopt);
+        return std::tuple(instant->exactTime(), TemporalDateTimeFormat::Instant, std::nullopt);
 
     // https://tc39.es/proposal-temporal/#sec-temporal-handledatetimetemporaldate
     TemporalPlainDate* plainDate = jsDynamicCast<TemporalPlainDate*>(x);

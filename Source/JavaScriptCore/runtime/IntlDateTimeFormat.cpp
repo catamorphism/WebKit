@@ -803,6 +803,7 @@ void IntlDateTimeFormat::initializeDateTimeFormat(JSGlobalObject* globalObject, 
 
     DayPeriod dayPeriod = intlOption<DayPeriod>(globalObject, options, vm.propertyNames->dayPeriod, { { "narrow"_s, DayPeriod::Narrow }, { "short"_s, DayPeriod::Short }, { "long"_s, DayPeriod::Long } }, "dayPeriod must be \"narrow\", \"short\", or \"long\""_s, DayPeriod::None);
     RETURN_IF_EXCEPTION(scope, void());
+    m_userSpecifiedDayPeriod = dayPeriod != DayPeriod::None;
 
     Hour hour = intlOption<Hour>(globalObject, options, vm.propertyNames->hour, { { "2-digit"_s, Hour::TwoDigit }, { "numeric"_s, Hour::Numeric } }, "hour must be \"2-digit\" or \"numeric\""_s, Hour::None);
     RETURN_IF_EXCEPTION(scope, void());
@@ -1283,7 +1284,8 @@ String IntlDateTimeFormat::dateTimeStyleToICUDateFormat(TemporalDateTimeFormat f
     String timeString;
     String timeZoneString;
 
-    if (format == TemporalDateTimeFormat::PlainDateTime
+    if (format == TemporalDateTimeFormat::Instant
+     || format == TemporalDateTimeFormat::PlainDateTime
      || format == TemporalDateTimeFormat::ZonedDateTime) {
         switch (m_dateStyle) {
         case DateTimeStyle::None:
@@ -1316,11 +1318,8 @@ String IntlDateTimeFormat::dateTimeStyleToICUDateFormat(TemporalDateTimeFormat f
             timeString = "h:m:s a"_s;
             break;
         }
-        if (dateString.isEmpty())
-            return timeString;
-        if (timeString.isEmpty())
-            return dateString;
-        if (format == TemporalDateTimeFormat::ZonedDateTime) {
+        if (format == TemporalDateTimeFormat::Instant ||
+            format == TemporalDateTimeFormat::ZonedDateTime) {
             switch (m_timeStyle) {
             case DateTimeStyle::Long:
                 timeZoneString = " z"_s;
@@ -1421,7 +1420,7 @@ String IntlDateTimeFormat::dateTimeFormatToICUDateFormat(TemporalDateTimeFormat 
 
     bool needDefaults = !(m_userSpecifiedWeekday || m_userSpecifiedYear || m_userSpecifiedMonth
         || m_userSpecifiedDay || m_userSpecifiedHour || m_userSpecifiedMinute
-        || m_userSpecifiedSecond || m_era != Era::None || m_dayPeriod != DayPeriod::None
+        || m_userSpecifiedSecond || m_era != Era::None || m_userSpecifiedDayPeriod
         || m_fractionalSecondDigits);
 
     switch (format) {
@@ -1436,6 +1435,7 @@ String IntlDateTimeFormat::dateTimeFormatToICUDateFormat(TemporalDateTimeFormat 
             m_hourCycle, hourToUse, m_dayPeriod, minuteToUse, secondToUse, m_fractionalSecondDigits,
             TimeZoneName::None);
     }
+    case TemporalDateTimeFormat::Instant:
     case TemporalDateTimeFormat::ZonedDateTime: {
         auto yearToUse = m_year == Year::None && needDefaults ? Year::Numeric : m_year;
         auto monthToUse = m_month == Month::None && needDefaults ? Month::Numeric : m_month;
@@ -1443,7 +1443,10 @@ String IntlDateTimeFormat::dateTimeFormatToICUDateFormat(TemporalDateTimeFormat 
         auto hourToUse = m_hour == Hour::None && needDefaults ? Hour::Numeric : m_hour;
         auto minuteToUse = m_minute == Minute::None && needDefaults ? Minute::Numeric : m_minute;
         auto secondToUse = m_second == Second::None && needDefaults ? Second::Numeric : m_second;
-        auto timeZoneToUse = m_timeZoneName == TimeZoneName::None && needDefaults ? TimeZoneName::Short : m_timeZoneName;
+        auto timeZoneToUse = m_timeZoneName;
+        // ZonedDateTime includes time zone by default, but Instant does not
+        if (m_timeZoneName == TimeZoneName::None && needDefaults && format == TemporalDateTimeFormat::ZonedDateTime)
+            timeZoneToUse = TimeZoneName::Short;
         return buildSkeleton(m_weekday, m_era, yearToUse, monthToUse, dayToUse, WTF::TriState::Indeterminate,
             m_hourCycle, hourToUse, m_dayPeriod, minuteToUse, secondToUse, m_fractionalSecondDigits,
             timeZoneToUse);
