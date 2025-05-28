@@ -304,11 +304,20 @@ String TemporalPlainTime::toString(JSGlobalObject* globalObject, JSValue options
     if (!options)
         return toString();
 
-    PrecisionData data = secondsStringPrecision(globalObject, options);
+    auto precision = temporalFractionalSecondDigits(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
 
     auto roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::Trunc);
     RETURN_IF_EXCEPTION(scope, { });
+
+    auto smallestUnit = temporalSmallestUnit(globalObject, options, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day });
+    RETURN_IF_EXCEPTION(scope, { });
+    if (smallestUnit == TemporalUnit::Hour) {
+        throwRangeError(globalObject, scope, "smallestUnit cannot be hour in Temporal.PlainTime.toString"_s);
+        return { };
+    }
+
+    PrecisionData data = secondsStringPrecision(smallestUnit, precision);
 
     // No need to make a new object if we were given explicit defaults.
     if (std::get<0>(data.precision) == Precision::Auto && roundingMode == RoundingMode::Trunc)
