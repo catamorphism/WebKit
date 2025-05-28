@@ -66,6 +66,9 @@ test/built-ins/Temporal/Instant/prototype/toString/timezone-string-sub-minute-of
 test/built-ins/Temporal/Instant/prototype/toString/timezone-wrong-type.js:
   default: 'Test262Error: null does not convert to a valid ISO string Expected a TypeError but got a RangeError'
   strict mode: 'Test262Error: null does not convert to a valid ISO string Expected a TypeError but got a RangeError'
+test/built-ins/Temporal/PlainDate/calendar-case-insensitive.js:
+  default: 'Test262Error: Calendar is case-insensitive Expected SameValue(«undefined», «"iso8601"») to be true'
+  strict mode: 'Test262Error: Calendar is case-insensitive Expected SameValue(«undefined», «"iso8601"») to be true'
 test/built-ins/Temporal/PlainDate/compare/argument-string-calendar-invalid-iso-string.js:
   default: 'Test262Error: Unknown calendar is not a valid calendar ID (first argument) Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID (first argument) Expected a RangeError to be thrown but no exception was thrown at all'

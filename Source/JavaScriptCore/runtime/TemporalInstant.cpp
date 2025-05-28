@@ -248,6 +248,7 @@ ISO8601::Duration TemporalInstant::difference(JSGlobalObject* globalObject, Temp
     JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
     RETURN_IF_EXCEPTION(scope, { });
 
+
     std::optional<String> largestAsString = temporalLargestUnit(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
 
