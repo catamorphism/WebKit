@@ -1470,10 +1470,11 @@ static std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::option
         return std::tuple { WTFMove(plainDate.value()), WTFMove(plainTime), WTFMove(timeZone) };
     }
 
-    if (canBeTimeZone(buffer, *buffer))
-        return std::nullopt;
+    std::optional<TimeZoneRecord> timeZoneOptional = std::nullopt;
+    if (canBeTimeZoneAnnotation(buffer, *buffer))
+        timeZoneOptional = parseTimeZone(buffer);
 
-    return std::tuple { WTFMove(plainDate.value()), std::nullopt, std::nullopt };
+    return std::tuple { WTFMove(plainDate.value()), std::nullopt, timeZoneOptional };
 }
 
 template<typename CharacterType>

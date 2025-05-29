@@ -75,6 +75,7 @@ shouldBe(String(Temporal.PlainDate.from('2007-01-09 03:24:30+01:00[-01:00]')), `
 shouldBe(String(Temporal.PlainDate.from('2007-01-09 03:24:30+01:00[u-ca=japanese]')), `2007-01-09`);
 shouldBe(String(Temporal.PlainDate.from('2007-01-09 03:24:30+01:00[Europe/Brussels][u-ca=japanese]')), `2007-01-09`);
 shouldBe(String(Temporal.PlainDate.from('2007-01-09[u-ca=japanese]')), `2007-01-09`);
+shouldBe(String(Temporal.PlainDate.from('2007-01-09[UTC][u-ca=iso8601]')), `2007-01-09`);
 {
     let date = Temporal.PlainDate.from('2007-01-09T03:24:30+01:00[Europe/Brussels]');
     shouldBe(date === Temporal.PlainDate.from(date), false);

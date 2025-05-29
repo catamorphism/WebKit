@@ -62,10 +62,6 @@ skip:
     - test/built-ins/RegExp/regexp-modifiers/add-ignoreCase-affects-slash-lower-p.js
 
      # Depends on Calendar support
-    - test/built-ins/Temporal/PlainDate/compare/argument-string-calendar-annotation.js
-    - test/built-ins/Temporal/PlainDate/from/argument-string-calendar-annotation.js
-    - test/built-ins/Temporal/PlainDate/prototype/equals/argument-string-calendar-annotation.js
-    - test/built-ins/Temporal/PlainDate/prototype/since/argument-string-calendar-annotation.js
     - test/built-ins/Temporal/PlainDate/prototype/toPlainDateTime/argument-object.js
     - test/built-ins/Temporal/PlainDate/prototype/toPlainDateTime/basic.js
     - test/built-ins/Temporal/PlainDate/prototype/toString/calendarname-always.js
