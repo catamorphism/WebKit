@@ -140,28 +140,15 @@ TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject,
             return TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(), jsCast<TemporalPlainDate*>(itemValue)->plainDate(), { });
         }
 
-        JSObject* calendarObject = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, itemValue);
-        RETURN_IF_EXCEPTION(scope, { });
-
-        // FIXME: Implement after fleshing out Temporal.Calendar.
-        TemporalCalendar* calendar;
-        if (!calendarObject->inherits<TemporalCalendar>()) {
-            throwRangeError(globalObject, scope, "bad calendar object in Temporal.PlainDateTime.from"_s);
-            return { };
-        }
-        calendar = jsCast<TemporalCalendar*>(calendarObject);
-        if (!calendar->isISO8601()) {
-            throwRangeError(globalObject, scope, "unimplemented: from non-ISO8601 calendar"_s);
-            return { };
-        }
-
+        CalendarID calendar = TemporalCalendar::getTemporalCalendarIdentifierWithISODefault(globalObject, itemValue);
+     
         auto fields =  Vector { FieldName::Day, FieldName::Hour, FieldName::Microsecond, FieldName::Millisecond,
             FieldName::Minute, FieldName::Month, FieldName::MonthCode, FieldName::Nanosecond, FieldName::Second,
             FieldName::Year };
         auto [optionalYear, optionalMonth, optionalMonthCode, optionalDay, optionalHour, optionalMinute,
             optionalSecond, optionalMillisecond, optionalMicrosecond, optionalNanosecond, optionalOffset,
             timeZoneOptional] = TemporalCalendar::prepareCalendarFields(globalObject,
-                calendar->identifier(), asObject(itemValue), fields, std::nullopt);
+                calendar, asObject(itemValue), fields, std::nullopt);
         RETURN_IF_EXCEPTION(scope, { });
 
         auto hour = optionalHour.value_or(0);
@@ -177,7 +164,7 @@ TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject,
             RETURN_IF_EXCEPTION(scope, { });
         }
 
-        auto result = TemporalCalendar::interpretTemporalDateTimeFields(globalObject, calendar->identifier(),
+        auto result = TemporalCalendar::interpretTemporalDateTimeFields(globalObject, calendar,
             optionalYear, optionalMonth, optionalMonthCode, optionalDay, hour, minute, second,
             millisecond, microsecond, nanosecond, overflow);
         RETURN_IF_EXCEPTION(scope, { });

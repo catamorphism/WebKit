@@ -38,7 +38,7 @@ public:
     template<typename CellType, SubspaceAccess mode>
     static GCClient::IsoSubspace* subspaceFor(VM& vm)
     {
-        return vm.temporalPlainDateSpace<mode>();
+        return vm.temporalPlainYearMonthSpace<mode>();
     }
 
     static TemporalPlainYearMonth* create(VM&, Structure*, ISO8601::PlainYearMonth&&);

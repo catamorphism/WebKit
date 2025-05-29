@@ -282,7 +282,9 @@ class Heap;
     v(temporalInstantSpace, cellHeapCellType, TemporalInstant) \
     v(temporalPlainDateSpace, cellHeapCellType, TemporalPlainDate) \
     v(temporalPlainDateTimeSpace, cellHeapCellType, TemporalPlainDateTime) \
+    v(temporalPlainMonthDaySpace, cellHeapCellType, TemporalPlainMonthDay) \
     v(temporalPlainTimeSpace, cellHeapCellType, TemporalPlainTime) \
+    v(temporalPlainYearMonthSpace, cellHeapCellType, TemporalPlainYearMonth) \
     v(temporalTimeZoneSpace, cellHeapCellType, TemporalTimeZone) \
     v(temporalZonedDateTimeSpace, cellHeapCellType, TemporalZonedDateTime) \
     v(uint8ArraySpace, cellHeapCellType, JSUint8Array) \

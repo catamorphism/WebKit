@@ -116,7 +116,19 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainDate, (JSGlobalObject* globalObje
         RETURN_IF_EXCEPTION(scope, { });
     }
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject, structure, WTFMove(duration))));
+    auto calendar = iso8601CalendarID();
+    if (argumentCount > 3) {
+       auto value = callFrame->uncheckedArgument(3);
+       if (!value.isUndefined()) {
+           if (!value.isString())
+               return throwVMTypeError(globalObject, scope, "Temporal.PlainDate calendar property must be a string"_s);
+           String calendarString = value.toWTFString(globalObject);
+           RETURN_IF_EXCEPTION(scope, { });
+           calendar = TemporalCalendar::canonicalizeCalendar(globalObject, calendarString);
+       }
+    }
+
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject, structure, WTFMove(duration), calendar)));
 }
 
 JSC_DEFINE_HOST_FUNCTION(callTemporalPlainDate, (JSGlobalObject* globalObject, CallFrame*))
@@ -139,7 +151,9 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateConstructorFuncFrom, (JSGlobalObject* 
         // Validate overflow
         toTemporalOverflow(globalObject, callFrame->argument(1));
         RETURN_IF_EXCEPTION(scope, { });
-        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::create(vm, globalObject->plainDateStructure(), jsCast<TemporalPlainDate*>(itemValue)->plainDate())));
+        auto plainDate = jsCast<TemporalPlainDate*>(itemValue);
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::create(vm, globalObject->plainDateStructure(),
+            plainDate->plainDate(), plainDate->calendar()->identifier())));
     }
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::from(globalObject, itemValue, callFrame->argument(1))));
 }

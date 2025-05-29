@@ -42,9 +42,9 @@ namespace JSC {
 
 const ClassInfo TemporalPlainDate::s_info = { "Object"_s, &Base::s_info, nullptr, nullptr, CREATE_METHOD_TABLE(TemporalPlainDate) };
 
-TemporalPlainDate* TemporalPlainDate::create(VM& vm, Structure* structure, ISO8601::PlainDate&& plainDate)
+TemporalPlainDate* TemporalPlainDate::create(VM& vm, Structure* structure, ISO8601::PlainDate&& plainDate, CalendarID calendarID)
 {
-    auto* object = new (NotNull, allocateCell<TemporalPlainDate>(vm)) TemporalPlainDate(vm, structure, WTFMove(plainDate));
+    auto* object = new (NotNull, allocateCell<TemporalPlainDate>(vm)) TemporalPlainDate(vm, structure, WTFMove(plainDate), calendarID);
     object->finishCreation(vm);
     return object;
 }
@@ -54,9 +54,10 @@ Structure* TemporalPlainDate::createStructure(VM& vm, JSGlobalObject* globalObje
     return Structure::create(vm, globalObject, prototype, TypeInfo(ObjectType, StructureFlags), info());
 }
 
-TemporalPlainDate::TemporalPlainDate(VM& vm, Structure* structure, ISO8601::PlainDate&& plainDate)
+TemporalPlainDate::TemporalPlainDate(VM& vm, Structure* structure, ISO8601::PlainDate&& plainDate, CalendarID calendarID)
     : Base(vm, structure)
     , m_plainDate(WTFMove(plainDate))
+    , m_calendarID(calendarID)
 {
 }
 
@@ -122,7 +123,7 @@ ISO8601::PlainDate TemporalPlainDate::toPlainDate(JSGlobalObject* globalObject, 
 
 // CreateTemporalDate ( years, months, days )
 // https://tc39.es/proposal-temporal/#sec-temporal-createtemporaldate
-TemporalPlainDate* TemporalPlainDate::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::PlainDate&& plainDate)
+TemporalPlainDate* TemporalPlainDate::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::PlainDate&& plainDate, CalendarID calendarId)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -132,10 +133,10 @@ TemporalPlainDate* TemporalPlainDate::tryCreateIfValid(JSGlobalObject* globalObj
         return { };
     }
 
-    return TemporalPlainDate::create(vm, structure, WTFMove(plainDate));
+    return TemporalPlainDate::create(vm, structure, WTFMove(plainDate), calendarId);
 }
 
-TemporalPlainDate* TemporalPlainDate::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::Duration&& duration)
+TemporalPlainDate* TemporalPlainDate::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::Duration&& duration, CalendarID calendarId)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -143,7 +144,7 @@ TemporalPlainDate* TemporalPlainDate::tryCreateIfValid(JSGlobalObject* globalObj
     auto plainDate = toPlainDate(globalObject, duration);
     RETURN_IF_EXCEPTION(scope, { });
 
-    RELEASE_AND_RETURN(scope, TemporalPlainDate::tryCreateIfValid(globalObject, structure,  WTFMove(plainDate)));
+    RELEASE_AND_RETURN(scope, TemporalPlainDate::tryCreateIfValid(globalObject, structure,  WTFMove(plainDate), calendarId));
 }
 
 String TemporalPlainDate::toString(JSGlobalObject* globalObject, JSValue optionsValue) const
@@ -185,7 +186,8 @@ TemporalPlainDate* TemporalPlainDate::from(JSGlobalObject* globalObject, JSValue
                 toTemporalOverflow(globalObject, optionsValue.value());
                 RETURN_IF_EXCEPTION(scope, { });
             }
-            return TemporalPlainDate::create(vm, globalObject->plainDateStructure(), isoDateTime.date());
+            return TemporalPlainDate::create(vm, globalObject->plainDateStructure(), isoDateTime.date(),
+                zdt->calendar()->identifier());
         }
 
         if (itemValue.inherits<TemporalPlainDateTime>()) {
@@ -193,17 +195,13 @@ TemporalPlainDate* TemporalPlainDate::from(JSGlobalObject* globalObject, JSValue
                 toTemporalOverflow(globalObject, optionsValue.value());
                 RETURN_IF_EXCEPTION(scope, { });
             }
-            return TemporalPlainDate::create(vm, globalObject->plainDateStructure(), jsCast<TemporalPlainDateTime*>(itemValue)->plainDate());
+            auto pdt = jsCast<TemporalPlainDateTime*>(itemValue);
+            return TemporalPlainDate::create(vm, globalObject->plainDateStructure(), pdt->plainDate(),
+                pdt->calendar()->identifier());
         }
 
-        JSObject* calendar = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, itemValue);
+        CalendarID calendar = TemporalCalendar::getTemporalCalendarIdentifierWithISODefault(globalObject, itemValue);
         RETURN_IF_EXCEPTION(scope, { });
-
-        // FIXME: Implement after fleshing out Temporal.Calendar.
-        if (!calendar->inherits<TemporalCalendar>() || !jsCast<TemporalCalendar*>(calendar)->isISO8601()) {
-            throwRangeError(globalObject, scope, "unimplemented: from non-ISO8601 calendar"_s);
-            return { };
-        }
 
         std::variant<JSObject*, TemporalOverflow> optionsOrOverflow = TemporalOverflow::Constrain;
         if (optionsValue) {
@@ -213,7 +211,8 @@ TemporalPlainDate* TemporalPlainDate::from(JSGlobalObject* globalObject, JSValue
         auto overflow = TemporalOverflow::Constrain;
         auto plainDate = TemporalCalendar::isoDateFromFields(globalObject, asObject(itemValue), TemporalDateFormat::Date, optionsOrOverflow, overflow);
         RETURN_IF_EXCEPTION(scope, { });
-        return TemporalPlainDate::create(vm, globalObject->plainDateStructure(), WTFMove(plainDate));
+        return TemporalPlainDate::create(vm, globalObject->plainDateStructure(), WTFMove(plainDate),
+            calendar);
     }
 
     if (!itemValue.isString()) {
@@ -234,8 +233,14 @@ TemporalPlainDate* TemporalPlainDate::from(JSGlobalObject* globalObject, JSValue
             RETURN_IF_EXCEPTION(scope, { });
         }
         auto [plainDate, plainTimeOptional, timeZoneOptional, calendarOptional] = WTFMove(dateTime.value());
+        auto calendarId = iso8601CalendarID();
+        if (calendarOptional) {
+            calendarId = TemporalCalendar::canonicalizeCalendar(globalObject, StringView(calendarOptional.value()));
+            RETURN_IF_EXCEPTION(scope, { });
+        }
         if (!(timeZoneOptional && timeZoneOptional->m_z))
-            RELEASE_AND_RETURN(scope, TemporalPlainDate::tryCreateIfValid(globalObject, globalObject->plainDateStructure(), WTFMove(plainDate)));
+            RELEASE_AND_RETURN(scope, TemporalPlainDate::tryCreateIfValid(globalObject,
+                globalObject->plainDateStructure(), WTFMove(plainDate), calendarId));
     }
 
     throwRangeError(globalObject, scope, "invalid date string"_s);

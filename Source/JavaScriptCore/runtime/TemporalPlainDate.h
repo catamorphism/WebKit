@@ -42,9 +42,9 @@ public:
         return vm.temporalPlainDateSpace<mode>();
     }
 
-    static TemporalPlainDate* create(VM&, Structure*, ISO8601::PlainDate&&);
-    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&);
-    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::Duration&&);
+    static TemporalPlainDate* create(VM&, Structure*, ISO8601::PlainDate&&, CalendarID);
+    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, CalendarID);
+    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::Duration&&, CalendarID);
     static Structure* createStructure(VM&, JSGlobalObject*, JSValue);
 
     DECLARE_INFO;
@@ -86,7 +86,7 @@ public:
     DECLARE_VISIT_CHILDREN;
 
 private:
-    TemporalPlainDate(VM&, Structure*, ISO8601::PlainDate&&);
+    TemporalPlainDate(VM&, Structure*, ISO8601::PlainDate&&, CalendarID);
     void finishCreation(VM&);
 
     template<typename CharacterType>
@@ -96,6 +96,7 @@ private:
     ISO8601::Duration differenceTemporalPlainDate(JSGlobalObject*, bool, TemporalPlainDate*, TemporalUnit, TemporalUnit, RoundingMode, double);
 
     ISO8601::PlainDate m_plainDate;
+    CalendarID m_calendarID;
     LazyProperty<TemporalPlainDate, TemporalCalendar> m_calendar;
 };
 

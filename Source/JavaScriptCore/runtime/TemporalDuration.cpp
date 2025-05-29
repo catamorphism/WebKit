@@ -256,7 +256,7 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
     ISO8601::PlainDate isoDate;
     std::optional<ISO8601::PlainTime> time;
     std::optional<ISO8601::TimeZone> timeZone;
-    std::optional<ISO8601::CalendarID> calendar;
+    CalendarID calendar;
     std::optional<String> offsetString;
     if (value.isObject()) {
         JSObject* obj = asObject(value);
@@ -266,7 +266,7 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
             return jsCast<TemporalPlainDate*>(obj);
         if (obj->inherits<TemporalPlainDateTime>())
             RELEASE_AND_RETURN(scope, TemporalPlainDate::from(globalObject, value, std::nullopt));
-        auto calendar = TemporalCalendar::getTemporalCalendarIdentifierWithISODefault(globalObject, obj);
+        calendar = TemporalCalendar::getTemporalCalendarIdentifierWithISODefault(globalObject, obj);
         RETURN_IF_EXCEPTION(scope, { });
         auto fields =  Vector { FieldName::Day, FieldName::Hour, FieldName::Microsecond,
             FieldName::Millisecond, FieldName::Minute, FieldName::Month, FieldName::MonthCode,
@@ -327,12 +327,19 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
                 offsetBehavior = TemporalOffsetBehavior::Wall;
             matchBehavior = TemporalMatchBehavior::Minutes;
         }
+        if (!optionalCalendarRecord)
+            calendar = iso8601CalendarID();
+        else {
+            calendar = TemporalCalendar::canonicalizeCalendar(globalObject,
+                StringView(optionalCalendarRecord.value()));
+            RETURN_IF_EXCEPTION(scope, { });
+        }
         isoDate = TemporalPlainDate::createISODateRecord(plainDate.year(), plainDate.month(), plainDate.day());
         time = optionalPlainTime;
     }
     if (!timeZone || !time) {
         RELEASE_AND_RETURN(scope, TemporalPlainDate::tryCreateIfValid(globalObject,
-            globalObject->plainDateStructure(), WTFMove(isoDate)));
+            globalObject->plainDateStructure(), WTFMove(isoDate), calendar));
     }
     int64_t offsetNs = 0;
     if (offsetBehavior == TemporalOffsetBehavior::Option) {

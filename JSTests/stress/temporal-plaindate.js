@@ -128,6 +128,8 @@ shouldThrow(() => { new Temporal.PlainDate(-0x80000000, 1, 1); }, RangeError);
 shouldThrow(() => { new Temporal.PlainDate(0x7fffffff, 1, 1); }, RangeError);
 shouldThrow(() => { new Temporal.PlainDate(-0x7fffffff, 1, 1); }, RangeError);
 
+shouldBe(String(new Temporal.PlainDate(2000, 5, 2, "iSo8601").calendarId), "iso8601");
+
 let failures = [
     "",
     "23:59:61.999999999",

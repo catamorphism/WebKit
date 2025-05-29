@@ -64,7 +64,8 @@ TemporalCalendar::TemporalCalendar(VM& vm, Structure* structure, CalendarID iden
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-parsetemporalcalendarstring
-static std::optional<CalendarID> parseTemporalCalendarString(JSGlobalObject* globalObject, StringView string)
+std::optional<CalendarID> TemporalCalendar::parseTemporalCalendarString(JSGlobalObject* globalObject,
+    StringView string)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -150,8 +151,9 @@ CalendarID TemporalCalendar::toTemporalCalendarIdentifier(JSGlobalObject* global
     return calendarId.value();
 }
 
+/*
 // https://tc39.es/proposal-temporal/#sec-temporal-gettemporalcalendarslotvaluewithisodefault
-JSObject* TemporalCalendar::getTemporalCalendarWithISODefault(JSGlobalObject* globalObject, JSValue itemValue)
+TemporalCalendar* TemporalCalendar::getTemporalCalendarWithISODefault(JSGlobalObject* globalObject, JSValue itemValue)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -169,6 +171,7 @@ JSObject* TemporalCalendar::getTemporalCalendarWithISODefault(JSGlobalObject* gl
     RETURN_IF_EXCEPTION(scope, { });
     RELEASE_AND_RETURN(scope, toTemporalCalendarWithISODefault(globalObject, calendar));
 }
+*/
 
 // https://tc39.es/proposal-temporal/#sec-temporal-gettemporalcalendarslotvaluewithisodefault
 CalendarID TemporalCalendar::getTemporalCalendarIdentifierWithISODefault(JSGlobalObject* globalObject, JSValue itemValue)
@@ -210,6 +213,22 @@ std::optional<CalendarID> TemporalCalendar::isBuiltinCalendar(StringView string)
     }
     return std::nullopt;
 }
+
+CalendarID TemporalCalendar::canonicalizeCalendar(JSGlobalObject* globalObject, StringView id)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    const auto& calendars = intlAvailableCalendars();
+    auto lowered = id.convertToASCIILowercase();
+    for (unsigned index = 0; index < calendars.size(); ++index) {
+        if (calendars[index] == lowered)
+            return index; // TODO: canonicalizeUValue
+    }
+    throwRangeError(globalObject, scope, makeString("unsupported calendar"_s, id));
+    return { };
+}
+
 
 // https://tc39.es/ecma262/#sec-hourfromtime
 static double hourFromTime(double t)
