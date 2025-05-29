@@ -201,7 +201,6 @@ enum class FieldName : uint8_t {
     Millisecond,
     Microsecond,
     Nanosecond,
-    Calendar,
     Offset,
     TimeZone,
 };

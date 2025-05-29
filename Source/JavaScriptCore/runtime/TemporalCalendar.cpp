@@ -536,8 +536,6 @@ static PropertyName propertyName(VM& vm, FieldName property)
         return vm.propertyNames->microsecond;
     case FieldName::Nanosecond:
         return vm.propertyNames->nanosecond;
-    case FieldName::Calendar:
-        return vm.propertyNames->calendar;
     case FieldName::Offset:
         return vm.propertyNames->offset;
     case FieldName::TimeZone:
@@ -648,14 +646,13 @@ static String toOffsetString(JSGlobalObject* globalObject, JSValue argument)
 std::tuple<std::optional<double>, std::optional<double>, std::optional<String>, std::optional<double>,
 std::optional<double>, std::optional<double>, std::optional<double>, std::optional<double>,
 std::optional<double>, std::optional<double>, std::optional<String>, std::optional<ISO8601::TimeZone>>
-TemporalCalendar::prepareCalendarFields(JSGlobalObject* globalObject, CalendarID calendar, JSObject* fields,
+TemporalCalendar::prepareCalendarFields(JSGlobalObject* globalObject, CalendarID, JSObject* fields,
     Vector<FieldName> fieldNames, std::optional<Vector<FieldName>> requiredFieldNames)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
     // TODO: non-iso8601 calendars
-    (void) calendar;
     // auto extraFieldNames = calendarExtraFields(calendar, calendarFieldNames);
     // fieldNames.append(extraFieldNames);
 
@@ -751,12 +748,6 @@ TemporalCalendar::prepareCalendarFields(JSGlobalObject* globalObject, CalendarID
                 ISO8601::TimeZone val = TemporalTimeZone::toTemporalTimeZoneIdentifier(globalObject, value);
                 RETURN_IF_EXCEPTION(scope, { });
                 timeZoneOptional = val;
-                break;
-            }
-            case FieldName::Calendar: {
-                String val = value.toWTFString(globalObject);
-                // TODO: implement non-ISO8601 calendars (currently string is ignored)
-                RETURN_IF_EXCEPTION(scope, { });
                 break;
             }
             }

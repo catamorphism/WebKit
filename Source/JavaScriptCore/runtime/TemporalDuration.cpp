@@ -256,8 +256,7 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
     ISO8601::PlainDate isoDate;
     std::optional<ISO8601::PlainTime> time;
     std::optional<ISO8601::TimeZone> timeZone;
-    // FIXME: non-iso8601 calendars
-    auto calendar = iso8601CalendarID();
+    std::optional<ISO8601::CalendarID> calendar;
     std::optional<String> offsetString;
     if (value.isObject()) {
         JSObject* obj = asObject(value);
@@ -267,14 +266,16 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
             return jsCast<TemporalPlainDate*>(obj);
         if (obj->inherits<TemporalPlainDateTime>())
             RELEASE_AND_RETURN(scope, TemporalPlainDate::from(globalObject, value, std::nullopt));
-        auto fields =  Vector { FieldName::Calendar, FieldName::Day, FieldName::Hour, FieldName::Microsecond,
+        auto calendar = TemporalCalendar::getTemporalCalendarIdentifierWithISODefault(globalObject, obj);
+        RETURN_IF_EXCEPTION(scope, { });
+        auto fields =  Vector { FieldName::Day, FieldName::Hour, FieldName::Microsecond,
             FieldName::Millisecond, FieldName::Minute, FieldName::Month, FieldName::MonthCode,
             FieldName::Nanosecond, FieldName::Offset, FieldName::Second, FieldName::TimeZone,
             FieldName::Year };
         auto [optionalYear, optionalMonth, optionalMonthCode, optionalDay, optionalHour, optionalMinute,
             optionalSecond, optionalMillisecond, optionalMicrosecond, optionalNanosecond, offsetString1,
-            optionalTimeZone] = TemporalCalendar::prepareCalendarFields(globalObject, calendar,
-                obj, fields, std::nullopt);
+            optionalTimeZone] = TemporalCalendar::prepareCalendarFields(globalObject,
+                calendar, obj, fields, std::nullopt);
         RETURN_IF_EXCEPTION(scope, { });
         timeZone = optionalTimeZone;
         offsetString = offsetString1;

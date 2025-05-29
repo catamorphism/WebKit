@@ -341,7 +341,6 @@ TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject,
 
     auto epochNs = exactTime();
     auto thisTimeZone = timeZone();
-    auto thisCalendar = calendar();
     auto offsetNanoseconds = TemporalTimeZone::getOffsetNanosecondsFor(globalObject,
         thisTimeZone, epochNs.epochNanoseconds());
     RETURN_IF_EXCEPTION(scope, { });
@@ -359,6 +358,7 @@ TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject,
     auto millisecond = isoTime.millisecond();
     auto microsecond = isoTime.microsecond();
     auto nanosecond = isoTime.nanosecond();
+    CalendarID thisCalendar = calendar()->identifier();
 
     auto fields =  Vector { FieldName::Day, FieldName::Hour, FieldName::Microsecond, FieldName::Millisecond,
         FieldName::Minute, FieldName::Month, FieldName::MonthCode, FieldName::Nanosecond, FieldName::Offset,
@@ -366,8 +366,7 @@ TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject,
     auto [optionalYear, optionalMonth, optionalMonthCode, optionalDay, optionalHour, optionalMinute,
         optionalSecond, optionalMillisecond, optionalMicrosecond, optionalNanosecond, optionalOffset,
         timeZoneOptional] = TemporalCalendar::prepareCalendarFields(globalObject,
-            thisCalendar->identifier(), temporalZonedDateTimeLike,
-            fields, std::nullopt);
+            thisCalendar, temporalZonedDateTimeLike, fields, std::nullopt);
     RETURN_IF_EXCEPTION(scope, { });
     year = optionalYear.value_or(year);
     month = optionalMonth.value_or(month);
@@ -396,7 +395,7 @@ TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject,
     auto overflow = toTemporalOverflow(globalObject, resolvedOptions);
     RETURN_IF_EXCEPTION(scope, { });
     auto dateTimeResult = TemporalCalendar::interpretTemporalDateTimeFields(globalObject,
-        thisCalendar->identifier(), year, month, monthCode, day, hour, minute, second, millisecond,
+        thisCalendar, year, month, monthCode, day, hour, minute, second, millisecond,
         microsecond, nanosecond, overflow);
     RETURN_IF_EXCEPTION(scope, { });
     auto epochNanoseconds = interpretISODateTimeOffset(globalObject, dateTimeResult.date(),

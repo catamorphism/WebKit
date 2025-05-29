@@ -160,8 +160,8 @@ TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject,
             FieldName::Year };
         auto [optionalYear, optionalMonth, optionalMonthCode, optionalDay, optionalHour, optionalMinute,
             optionalSecond, optionalMillisecond, optionalMicrosecond, optionalNanosecond, optionalOffset,
-            timeZoneOptional] = TemporalCalendar::prepareCalendarFields(globalObject, calendar->identifier(),
-                asObject(itemValue), fields, std::nullopt);
+            timeZoneOptional] = TemporalCalendar::prepareCalendarFields(globalObject,
+                calendar->identifier(), asObject(itemValue), fields, std::nullopt);
         RETURN_IF_EXCEPTION(scope, { });
 
         auto hour = optionalHour.value_or(0);
