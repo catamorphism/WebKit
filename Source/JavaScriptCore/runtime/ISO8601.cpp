@@ -1055,6 +1055,81 @@ std::optional<TimeZoneRecord> parseTimeZone(StringView string)
 }
 
 template<typename CharacterType>
+static std::optional<CalendarID> parseCalendarName(StringParsingBuffer<CharacterType>& buffer)
+{
+    if (buffer.lengthRemaining() <= 1)
+        return std::nullopt;
+  
+    auto isValidComponent = [&](unsigned start, unsigned end) {
+        unsigned componentLength = end - start;
+        if (componentLength < minCalendarLength)
+            return false;
+        if (componentLength > maxCalendarLength)
+            return false;
+        return true;
+    };
+
+    unsigned nameLength = 0;
+    {
+        unsigned index = 0;
+        for (; index < buffer.lengthRemaining(); ++index) {
+            auto character = buffer[index];
+            if (character == ']')
+                break;
+            if (!isASCIIAlpha(character) && !isASCIIDigit(character) && character != '-')
+                return std::nullopt;
+        }
+        if (!index)
+            return std::nullopt;
+        nameLength = index;
+    }
+
+    unsigned currentNameComponentStartIndex = 0;
+    bool isLeadingCharacterInNameComponent = true;
+    for (unsigned index = 0; index < nameLength; ++index) {
+        auto character = buffer[index];
+        if (isLeadingCharacterInNameComponent) {
+            if (!(isASCIIAlpha(character) || isASCIIDigit(character)))
+                return std::nullopt;
+
+            currentNameComponentStartIndex = index;
+            isLeadingCharacterInNameComponent = false;
+            continue;
+        }
+
+        if (character == '-') {
+            if (!isValidComponent(currentNameComponentStartIndex, index))
+                return std::nullopt;
+            isLeadingCharacterInNameComponent = true;
+            continue;
+        }
+
+        if (!(isASCIIAlpha(character) || isASCIIDigit(character)))
+            return std::nullopt;
+    }
+    if (isLeadingCharacterInNameComponent)
+        return std::nullopt;
+    if (!isValidComponent(currentNameComponentStartIndex, nameLength))
+        return std::nullopt;
+
+    Vector<LChar, maxCalendarLength> result(buffer.consume(nameLength).subspan(0, nameLength));
+
+    return result;
+}
+
+std::optional<CalendarID> parseCalendarName(StringView string)
+{
+    return readCharactersForParsing(string, [](auto buffer) -> std::optional<CalendarID> {
+        auto result = parseCalendarName(buffer);
+        if (!buffer.atEnd())
+            return std::nullopt;
+        if (result)
+            return result;
+        return std::nullopt;
+    });
+}
+
+template<typename CharacterType>
 static std::optional<RFC9557Annotation> parseOneRFC9557Annotation(StringParsingBuffer<CharacterType>& buffer)
 {
     // For BNF, see comment in canBeRFC9557Annotation()
@@ -1111,51 +1186,15 @@ static std::optional<RFC9557Annotation> parseOneRFC9557Annotation(StringParsingB
         return RFC9557Annotation { flag, RFC9557Key::Other, { } };
     }
 
-    auto isValidComponent = [&](unsigned start, unsigned end) {
-        unsigned componentLength = end - start;
-        if (componentLength < minCalendarLength)
-            return false;
-        if (componentLength > maxCalendarLength)
-            return false;
-        return true;
-    };
-
-    unsigned currentNameComponentStartIndex = 0;
-    bool isLeadingCharacterInNameComponent = true;
-    for (unsigned index = 0; index < nameLength; ++index) {
-        auto character = buffer[index];
-        if (isLeadingCharacterInNameComponent) {
-            if (!(isASCIIAlpha(character) || isASCIIDigit(character)))
-                return std::nullopt;
-
-            currentNameComponentStartIndex = index;
-            isLeadingCharacterInNameComponent = false;
-            continue;
-        }
-
-        if (character == '-') {
-            if (!isValidComponent(currentNameComponentStartIndex, index))
-                return std::nullopt;
-            isLeadingCharacterInNameComponent = true;
-            continue;
-        }
-
-        if (!(isASCIIAlpha(character) || isASCIIDigit(character)))
-            return std::nullopt;
-    }
-    if (isLeadingCharacterInNameComponent)
+    auto result = parseCalendarName(buffer);
+    if (!result)
         return std::nullopt;
-    if (!isValidComponent(currentNameComponentStartIndex, nameLength))
-        return std::nullopt;
-
-    Vector<LChar, maxCalendarLength> result(buffer.consume(nameLength).subspan(0, nameLength));
-
     if (buffer.atEnd())
         return std::nullopt;
     if (*buffer != ']')
         return std::nullopt;
     buffer.advance();
-    return RFC9557Annotation { flag, RFC9557Key::Calendar, WTFMove(result) };
+    return RFC9557Annotation { flag, RFC9557Key::Calendar, WTFMove(result.value()) };
 }
 
 template<typename CharacterType>

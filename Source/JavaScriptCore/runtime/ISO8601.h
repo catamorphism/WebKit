@@ -478,6 +478,7 @@ std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::optional<Time
 std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::optional<TimeZoneRecord>, std::optional<CalendarID>>> parseTemporalDateTimeString(StringView);
 std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::optional<TimeZoneRecord>, std::optional<CalendarID>>> parseCalendarDateTime(StringView, TemporalDateFormat);
 std::optional<CalendarID> parseCalendar(StringView);
+std::optional<CalendarID> parseCalendarName(StringView);
 uint8_t dayOfWeek(PlainDate);
 uint16_t dayOfYear(PlainDate);
 uint8_t weeksInYear(int32_t year);

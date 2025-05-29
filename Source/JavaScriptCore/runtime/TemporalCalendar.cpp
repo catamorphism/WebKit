@@ -83,7 +83,7 @@ std::optional<CalendarID> TemporalCalendar::parseTemporalCalendarString(JSGlobal
             if (parseResult)
                 calendarParseResult = std::get<3>(parseResult.value());
             else {
-                calendarParseResult = ISO8601::parseCalendar(string);
+                calendarParseResult = ISO8601::parseCalendarName(string);
                 if (!calendarParseResult) {
                     throwRangeError(globalObject, scope, "invalid calendar ID"_s);
                     return std::nullopt;
