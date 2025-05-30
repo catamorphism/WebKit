@@ -63,20 +63,20 @@ public:
     DECLARE_INFO;
 
     static JSObject* toTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
-    // static TemporalCalendar* getTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
+    static JSObject* getTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
     static std::optional<CalendarID> parseTemporalCalendarString(JSGlobalObject*, StringView);
-    static CalendarID toTemporalCalendarIdentifier(JSGlobalObject*, JSValue);
-    static CalendarID getTemporalCalendarIdentifierWithISODefault(JSGlobalObject*, JSValue);
+    static JSObject* toTemporalCalendarIdentifier(JSGlobalObject*, JSValue);
+    // static CalendarID getTemporalCalendarIdentifierWithISODefault(JSGlobalObject*, JSValue);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, JSObject*, TemporalDateFormat, std::variant<JSObject*, TemporalOverflow>, TemporalOverflow&);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, TemporalDateFormat, double year, double month, double day, TemporalOverflow);
     static ISO8601::PlainDate monthDayFromFields(JSGlobalObject*, std::optional<double>, double, double, TemporalOverflow);
     static std::tuple<std::optional<double>, std::optional<double>, std::optional<String>, std::optional<double>,
         std::optional<double>, std::optional<double>, std::optional<double>, std::optional<double>,
         std::optional<double>, std::optional<double>, std::optional<String>, std::optional<ISO8601::TimeZone>>
-        prepareCalendarFields(JSGlobalObject*, CalendarID, JSObject*, Vector<FieldName>,
+        prepareCalendarFields(JSGlobalObject*, JSObject*, JSObject*, Vector<FieldName>,
             std::optional<Vector<FieldName>>);
     static ISO8601::PlainDateTime interpretTemporalDateTimeFields(JSGlobalObject*,
-        CalendarID, std::optional<double>, std::optional<double>, std::optional<String>, std::optional<double>,
+        JSObject*, std::optional<double>, std::optional<double>, std::optional<String>, std::optional<double>,
         double, double, double, double, double, double, TemporalOverflow);
     static ISO8601::Duration differenceTemporalPlainYearMonth(JSGlobalObject*,
         bool, const ISO8601::PlainYearMonth&, const ISO8601::PlainYearMonth&,
@@ -94,14 +94,18 @@ public:
     static YearWeekRecord calendarDateWeekOfYear(JSGlobalObject*, const ISO8601::PlainDate&);
 
     CalendarID identifier() const { return m_identifier; }
-    bool isISO8601() const { return m_identifier == iso8601CalendarID(); }
+    static bool isISO8601(JSObject* cal) {
+        if (cal->inherits<TemporalCalendar>())
+            return jsCast<TemporalCalendar*>(cal)->identifier() == iso8601CalendarID();
+        return false;
+    }
 
     static std::optional<CalendarID> isBuiltinCalendar(StringView);
-    static CalendarID canonicalizeCalendar(JSGlobalObject*, StringView);
+    static TemporalCalendar* canonicalizeCalendar(JSGlobalObject*, StringView);
 
     static JSObject* from(JSGlobalObject*, JSValue);
 
-    bool equals(JSGlobalObject*, TemporalCalendar*);
+    static bool equals(JSGlobalObject*, JSObject*, JSObject*);
 
 
     static inline int epochTimeToEpochYear(double t)

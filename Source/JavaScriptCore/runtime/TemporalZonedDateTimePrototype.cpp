@@ -246,7 +246,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncWithPlainTime, (JSGlo
         RETURN_IF_EXCEPTION(scope, { });
     }
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), WTFMove(epochNs), WTFMove(timeZone))));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), WTFMove(epochNs), WTFMove(timeZone), zonedDateTime->calendar())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.withtimezone
@@ -262,7 +262,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncWithTimeZone, (JSGlob
     auto timeZone = TemporalTimeZone::toTemporalTimeZoneIdentifier(globalObject, callFrame->argument(0));
     RETURN_IF_EXCEPTION(scope, { });
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), zonedDateTime->exactTime(), WTFMove(timeZone))));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), zonedDateTime->exactTime(), WTFMove(timeZone), zonedDateTime->calendar())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.withcalendar
@@ -275,11 +275,10 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncWithCalendar, (JSGlob
     if (!zonedDateTime)
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.withCalendar called on value that's not a ZonedDateTime"_s);
 
-    TemporalCalendar::toTemporalCalendarIdentifier(globalObject, callFrame->argument(0));
+    JSObject* calendar = TemporalCalendar::toTemporalCalendarIdentifier(globalObject, callFrame->argument(0));
     RETURN_IF_EXCEPTION(scope, { });
 
-    // TODO: calendars
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), zonedDateTime->exactTime(), zonedDateTime->timeZone())));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), zonedDateTime->exactTime(), zonedDateTime->timeZone(), calendar)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.until
@@ -353,7 +352,8 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncEquals, (JSGlobalObje
     if (zonedDateTime->exactTime() != other->exactTime() || zonedDateTime->timeZone() != other->timeZone())
         return JSValue::encode(jsBoolean(false));
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(jsBoolean(zonedDateTime->calendar()->equals(globalObject, other->calendar()))));
+    RELEASE_AND_RETURN(scope, JSValue::encode(jsBoolean(TemporalCalendar::equals(globalObject,
+        zonedDateTime->calendar(), other->calendar()))));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.toplaindate
@@ -371,7 +371,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToPlainDate, (JSGloba
     RETURN_IF_EXCEPTION(scope, { });
 
     return JSValue::encode(TemporalPlainDate::create(vm, globalObject->plainDateStructure(),
-        isoDateTime.date(), zonedDateTime->calendar()->identifier()));
+        isoDateTime.date(), zonedDateTime->calendar()));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.toplaintime
@@ -405,7 +405,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToPlainDateTime, (JSG
         zonedDateTime->timeZone(), zonedDateTime->exactTime());
     RETURN_IF_EXCEPTION(scope, { });
 
-    return JSValue::encode(TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(), isoDateTime.date(), isoDateTime.time()));
+    return JSValue::encode(TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(), isoDateTime.date(), isoDateTime.time(), zonedDateTime->calendar()));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.tostring
@@ -473,7 +473,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncStartOfDay, (JSGlobal
     auto epochNanoseconds = TemporalTimeZone::getStartOfDay(globalObject, timeZone, isoDateTime.date());
     RETURN_IF_EXCEPTION(scope, { });
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), WTFMove(epochNanoseconds), WTFMove(timeZone))));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), WTFMove(epochNanoseconds), WTFMove(timeZone), zonedDateTime->calendar())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.gettimezonetransition

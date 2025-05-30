@@ -116,7 +116,7 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainDate, (JSGlobalObject* globalObje
         RETURN_IF_EXCEPTION(scope, { });
     }
 
-    auto calendar = iso8601CalendarID();
+    std::optional<JSObject*> calendar = std::nullopt;
     if (argumentCount > 3) {
        auto value = callFrame->uncheckedArgument(3);
        if (!value.isUndefined()) {
@@ -128,7 +128,9 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainDate, (JSGlobalObject* globalObje
        }
     }
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject, structure, WTFMove(duration), calendar)));
+    if (calendar)
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject, structure, WTFMove(duration), calendar.value())));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject, structure, WTFMove(duration), iso8601CalendarID())));
 }
 
 JSC_DEFINE_HOST_FUNCTION(callTemporalPlainDate, (JSGlobalObject* globalObject, CallFrame*))
@@ -153,7 +155,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateConstructorFuncFrom, (JSGlobalObject* 
         RETURN_IF_EXCEPTION(scope, { });
         auto plainDate = jsCast<TemporalPlainDate*>(itemValue);
         RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::create(vm, globalObject->plainDateStructure(),
-            plainDate->plainDate(), plainDate->calendar()->identifier())));
+            plainDate->plainDate(), plainDate->calendar())));
     }
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::from(globalObject, itemValue, callFrame->argument(1))));
 }

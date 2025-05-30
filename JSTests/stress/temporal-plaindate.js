@@ -443,6 +443,10 @@ shouldBe(Temporal.PlainDate.prototype.until.length, 1);
 
 {
     shouldBe(new Temporal.PlainDate(2000, 5, 2, "iso8601").calendarId, "iso8601");
+    const calendar = { toString() { return "iso8601" } };
+    const plainDate = new Temporal.PlainDate(2000, 5, 2);
+    const withOverflow = plainDate.toPlainDateTime({ hour: 25, minute: 70, second: 23 });
+    shouldBe(withOverflow.calendar, plainDate.calendar);
 }
 
 shouldBe(Temporal.PlainDate.prototype.toPlainMonthDay.length, 0);

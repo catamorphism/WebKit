@@ -141,7 +141,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalNowFuncPlainDateTimeISO, (JSGlobalObject* globa
 
     auto isoDateTime = systemDateTime(globalObject, callFrame->argument(0));
     RETURN_IF_EXCEPTION(scope, { });
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), isoDateTime.date(), isoDateTime.time())));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), isoDateTime.date(), isoDateTime.time(), iso8601CalendarID())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.now.zoneddatetimeiso
@@ -161,7 +161,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalNowFuncZonedDateTimeISO, (JSGlobalObject* globa
     }
     RETURN_IF_EXCEPTION(scope, { });
     auto ns = ISO8601::ExactTime::now();
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), WTFMove(ns), WTFMove(timeZone))));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), WTFMove(ns), WTFMove(timeZone), iso8601CalendarID())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.now.timezoneid

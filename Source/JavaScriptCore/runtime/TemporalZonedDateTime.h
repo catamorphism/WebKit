@@ -43,8 +43,10 @@ public:
         return vm.temporalZonedDateTimeSpace<mode>();
     }
 
-    static TemporalZonedDateTime* create(VM&, Structure*, ExactTime&&, TimeZone&&);
-    static TemporalZonedDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ExactTime&&, TimeZone&&);
+    static TemporalZonedDateTime* create(VM&, Structure*, ExactTime&&, TimeZone&&, CalendarID);
+    static TemporalZonedDateTime* create(VM&, Structure*, ExactTime&&, TimeZone&&, JSObject*);
+    static TemporalZonedDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ExactTime&&, TimeZone&&, CalendarID);
+    static TemporalZonedDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ExactTime&&, TimeZone&&, JSObject*);
     static Structure* createStructure(VM&, JSGlobalObject*, JSValue);
 
     DECLARE_INFO;
@@ -52,7 +54,12 @@ public:
     static TemporalZonedDateTime* from(JSGlobalObject*, JSValue, std::optional<JSValue>);
     static int32_t compare(const TemporalZonedDateTime*, const TemporalZonedDateTime*);
 
-    TemporalCalendar* calendar() { return m_calendar.get(this); }
+    JSObject* calendar() {
+        ASSERT(m_builtInCalendarId || m_customCalendar);
+        if (m_builtInCalendarId)
+            return m_builtInCalendar.get(this);
+        return m_customCalendar.value();
+    }
 
     TemporalZonedDateTime* addDurationToZonedDateTime(JSGlobalObject*, bool, ISO8601::Duration, JSObject*);
     TemporalZonedDateTime* with(JSGlobalObject*, JSObject* temporalDateLike, JSValue options);
@@ -81,7 +88,7 @@ public:
         TemporalOverflow);
     static ISO8601::InternalDuration differenceZonedDateTimeWithRounding(
         JSGlobalObject*, ISO8601::ExactTime, ISO8601::ExactTime, ISO8601::TimeZone,
-        TemporalCalendar*, TemporalUnit, double, TemporalUnit, RoundingMode);
+        JSObject*, TemporalUnit, double, TemporalUnit, RoundingMode);
     static double differenceZonedDateTimeWithTotal(
         JSGlobalObject*, ISO8601::ExactTime, ISO8601::ExactTime, ISO8601::TimeZone,
         TemporalUnit);
@@ -98,7 +105,8 @@ public:
     DECLARE_VISIT_CHILDREN;
 
 private:
-    TemporalZonedDateTime(VM&, Structure*, ExactTime&&, TimeZone&&);
+    TemporalZonedDateTime(VM&, Structure*, ExactTime&&, TimeZone&&, CalendarID);
+    TemporalZonedDateTime(VM&, Structure*, ExactTime&&, TimeZone&&, JSObject*);
     void finishCreation(VM&);
 
     ISO8601::Duration differenceTemporalZonedDateTime(bool, JSGlobalObject*, JSValue,
@@ -106,7 +114,10 @@ private:
 
     Packed<ExactTime> m_exactTime;
     TimeZone m_timeZone;
-    LazyProperty<TemporalZonedDateTime, TemporalCalendar> m_calendar;
+    std::optional<CalendarID> m_builtInCalendarId;
+    std::optional<JSObject*> m_customCalendar;
+    // Should not be accessed if !m_builtInCalendarId
+    LazyProperty<TemporalZonedDateTime, TemporalCalendar> m_builtInCalendar;
 };
 
 } // namespace JSC

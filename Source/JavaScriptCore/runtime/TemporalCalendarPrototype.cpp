@@ -108,7 +108,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalCalendarPrototypeFuncDateFromFields, (JSGlobalO
         return throwVMTypeError(globalObject, scope, "Temporal.Calendar.prototype.dateFromFields called on value that's not a Calendar"_s);
 
     // FIXME: Implement after fleshing out the rest of Temporal.Calendar.
-    if (!calendar->isISO8601())
+    if (!TemporalCalendar::isISO8601(calendar))
         return throwVMRangeError(globalObject, scope, "unimplemented: non-ISO8601 calendar"_s);
 
     JSValue value = callFrame->argument(0);
@@ -137,7 +137,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalCalendarPrototypeFuncDateAdd, (JSGlobalObject* 
         return throwVMTypeError(globalObject, scope, "Temporal.Calendar.prototype.dateAdd called on value that's not a Calendar"_s);
 
     // FIXME: Implement after fleshing out the rest of Temporal.Calendar.
-    if (!calendar->isISO8601())
+    if (!TemporalCalendar::isISO8601(calendar))
         return throwVMRangeError(globalObject, scope, "unimplemented: non-ISO8601 calendar"_s);
 
     auto* date = TemporalPlainDate::from(globalObject, callFrame->argument(0), std::nullopt);
@@ -167,7 +167,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalCalendarPrototypeFuncDateUntil, (JSGlobalObject
         return throwVMTypeError(globalObject, scope, "Temporal.Calendar.prototype.dateUntil called on value that's not a Calendar"_s);
 
     // FIXME: Implement after fleshing out the rest of Temporal.Calendar.
-    if (!calendar->isISO8601())
+    if (!TemporalCalendar::isISO8601(calendar))
         return throwVMRangeError(globalObject, scope, "unimplemented: non-ISO8601 calendar"_s);
 
     auto* date1 = TemporalPlainDate::from(globalObject, callFrame->argument(0), std::nullopt);
@@ -203,7 +203,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalCalendarPrototypeFuncFields, (JSGlobalObject* g
     if (!calendar)
         return throwVMTypeError(globalObject, scope, "Temporal.Calendar.prototype.fields called on value that's not a Calendar"_s);
 
-    bool isISO8601 = calendar->isISO8601();
+    bool isISO8601 = TemporalCalendar::isISO8601(calendar);
     bool shouldAddEraAndEraYear = false;
     MarkedArgumentBuffer fieldNames;
     forEachInIterable(globalObject, callFrame->argument(0), [isISO8601, &shouldAddEraAndEraYear, &fieldNames](VM& vm, JSGlobalObject* globalObject, JSValue value) {
@@ -319,7 +319,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalCalendarPrototypeFuncMergeFields, (JSGlobalObje
     auto* additionalFields = callFrame->argument(1).toObject(globalObject);
     RETURN_IF_EXCEPTION(scope, { });
 
-    if (calendar->isISO8601())
+    if (TemporalCalendar::isISO8601(calendar))
         RELEASE_AND_RETURN(scope, JSValue::encode(defaultMergeFields(globalObject, fields, additionalFields)));
 
     auto copyObject = [](JSGlobalObject* globalObject, JSObject* object) -> JSObject* {

@@ -163,7 +163,7 @@ TemporalPlainYearMonth* TemporalPlainYearMonth::from(JSGlobalObject* globalObjec
         if (itemValue.inherits<TemporalPlainYearMonth>())
             return TemporalPlainYearMonth::create(vm, globalObject->plainYearMonthStructure(), jsCast<TemporalPlainYearMonth*>(itemValue)->plainYearMonth());
 
-        CalendarID calendar = TemporalCalendar::getTemporalCalendarIdentifierWithISODefault(globalObject, itemValue); 
+        JSObject* calendar = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, itemValue); 
         (void) calendar; // TODO: implement calendarID for PlainYearMonth
 
         std::variant<JSObject*, TemporalOverflow> optionsOrOverflow = TemporalOverflow::Constrain;
@@ -214,7 +214,7 @@ ISO8601::PlainDate TemporalPlainYearMonth::with(JSGlobalObject* globalObject, JS
     rejectObjectWithCalendarOrTimeZone(globalObject, temporalYearMonthLike);
     RETURN_IF_EXCEPTION(scope, { });
 
-    if (!calendar()->isISO8601()) {
+    if (!TemporalCalendar::isISO8601(calendar())) {
         throwRangeError(globalObject, scope, "unimplemented: with non-ISO8601 calendar"_s);
         return { };
     }
@@ -240,14 +240,14 @@ ISO8601::Duration TemporalPlainYearMonth::until(JSGlobalObject* globalObject, Te
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    bool calendarsMatch = calendar()->equals(globalObject, other->calendar());
+    bool calendarsMatch = TemporalCalendar::equals(globalObject, calendar(), other->calendar());
     RETURN_IF_EXCEPTION(scope, { });
     if (!calendarsMatch) {
         throwRangeError(globalObject, scope, "calendars must match"_s);
         return { };
     }
 
-    if (!calendar()->isISO8601()) {
+    if (!TemporalCalendar::isISO8601(calendar())) {
         throwRangeError(globalObject, scope, "unimplemented: with non-ISO8601 calendar"_s);
         return { };
     }
@@ -267,14 +267,14 @@ ISO8601::Duration TemporalPlainYearMonth::since(JSGlobalObject* globalObject, Te
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    bool calendarsMatch = calendar()->equals(globalObject, other->calendar());
+    bool calendarsMatch = TemporalCalendar::equals(globalObject, calendar(), other->calendar());
     RETURN_IF_EXCEPTION(scope, { });
     if (!calendarsMatch) {
         throwRangeError(globalObject, scope, "calendars must match"_s);
         return { };
     }
 
-    if (!calendar()->isISO8601()) {
+    if (!TemporalCalendar::isISO8601(calendar())) {
         throwRangeError(globalObject, scope, "unimplemented: with non-ISO8601 calendar"_s);
         return { };
     }

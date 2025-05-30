@@ -291,7 +291,9 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncWithPlainTime, (JSGlo
         RETURN_IF_EXCEPTION(scope, { });
     }
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDateTime->plainDate(), plainTime ? plainTime->plainTime() : ISO8601::PlainTime())));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject,
+        globalObject->plainDateTimeStructure(), plainDateTime->plainDate(),
+        plainTime ? plainTime->plainTime() : ISO8601::PlainTime(), plainDateTime->calendar())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindatetime.prototype.round
@@ -327,7 +329,8 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncEquals, (JSGlobalObje
     if (plainDateTime->plainDate() != other->plainDate() || plainDateTime->plainTime() != other->plainTime())
         return JSValue::encode(jsBoolean(false));
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(jsBoolean(plainDateTime->calendar()->equals(globalObject, other->calendar()))));
+    RELEASE_AND_RETURN(scope, JSValue::encode(jsBoolean(TemporalCalendar::equals(globalObject,
+        plainDateTime->calendar(), other->calendar()))));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindatetime.prototype.toplaindate
@@ -341,7 +344,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncToPlainDate, (JSGloba
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDateTime.prototype.toPlainDate called on value that's not a PlainDateTime"_s);
 
     return JSValue::encode(TemporalPlainDate::create(vm, globalObject->plainDateStructure(),
-        plainDateTime->plainDate(), plainDateTime->calendar()->identifier()));
+        plainDateTime->plainDate(), plainDateTime->calendar()));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindatetime.prototype.toplaintime
@@ -379,7 +382,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncToZonedDateTime, (JSG
         timeZone, ISO8601::PlainDateTime(plainDateTime->plainDate(), plainDateTime->plainTime()), disambiguation);
     RETURN_IF_EXCEPTION(scope, { });
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::create(vm, globalObject->zonedDateTimeStructure(), WTFMove(epochNs), WTFMove(timeZone))));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::create(vm, globalObject->zonedDateTimeStructure(), WTFMove(epochNs), WTFMove(timeZone), plainDateTime->calendar())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindatetime.prototype.tostring

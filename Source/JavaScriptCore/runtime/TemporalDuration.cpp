@@ -256,7 +256,7 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
     ISO8601::PlainDate isoDate;
     std::optional<ISO8601::PlainTime> time;
     std::optional<ISO8601::TimeZone> timeZone;
-    CalendarID calendar;
+    std::optional<JSObject*> calendar;
     std::optional<String> offsetString;
     if (value.isObject()) {
         JSObject* obj = asObject(value);
@@ -266,7 +266,7 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
             return jsCast<TemporalPlainDate*>(obj);
         if (obj->inherits<TemporalPlainDateTime>())
             RELEASE_AND_RETURN(scope, TemporalPlainDate::from(globalObject, value, std::nullopt));
-        calendar = TemporalCalendar::getTemporalCalendarIdentifierWithISODefault(globalObject, obj);
+        calendar = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, obj);
         RETURN_IF_EXCEPTION(scope, { });
         auto fields =  Vector { FieldName::Day, FieldName::Hour, FieldName::Microsecond,
             FieldName::Millisecond, FieldName::Minute, FieldName::Month, FieldName::MonthCode,
@@ -275,7 +275,7 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
         auto [optionalYear, optionalMonth, optionalMonthCode, optionalDay, optionalHour, optionalMinute,
             optionalSecond, optionalMillisecond, optionalMicrosecond, optionalNanosecond, offsetString1,
             optionalTimeZone] = TemporalCalendar::prepareCalendarFields(globalObject,
-                calendar, obj, fields, std::nullopt);
+                calendar.value(), obj, fields, std::nullopt);
         RETURN_IF_EXCEPTION(scope, { });
         timeZone = optionalTimeZone;
         offsetString = offsetString1;
@@ -286,7 +286,7 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
         auto microsecond = optionalMicrosecond.value_or(0);
         auto nanosecond = optionalNanosecond.value_or(0);
 
-        auto result = TemporalCalendar::interpretTemporalDateTimeFields(globalObject, calendar,
+        auto result = TemporalCalendar::interpretTemporalDateTimeFields(globalObject, calendar.value(),
             optionalYear, optionalMonth, optionalMonthCode, optionalDay, hour, minute, second,
             millisecond, microsecond, nanosecond, TemporalOverflow::Constrain);
         RETURN_IF_EXCEPTION(scope, { });
@@ -328,7 +328,7 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
             matchBehavior = TemporalMatchBehavior::Minutes;
         }
         if (!optionalCalendarRecord)
-            calendar = iso8601CalendarID();
+            calendar = std::nullopt;
         else {
             calendar = TemporalCalendar::canonicalizeCalendar(globalObject,
                 StringView(optionalCalendarRecord.value()));
@@ -338,8 +338,12 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
         time = optionalPlainTime;
     }
     if (!timeZone || !time) {
+        if (calendar) {
+            RELEASE_AND_RETURN(scope, TemporalPlainDate::tryCreateIfValid(globalObject,
+                globalObject->plainDateStructure(), WTFMove(isoDate), calendar.value()));
+        }
         RELEASE_AND_RETURN(scope, TemporalPlainDate::tryCreateIfValid(globalObject,
-            globalObject->plainDateStructure(), WTFMove(isoDate), calendar));
+            globalObject->plainDateStructure(), WTFMove(isoDate), iso8601CalendarID()));
     }
     int64_t offsetNs = 0;
     if (offsetBehavior == TemporalOffsetBehavior::Option) {
@@ -354,8 +358,12 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
         time.value(), offsetBehavior, offsetNs, timeZone.value(), TemporalDisambiguation::Compatible,
         TemporalOffset::Reject, matchBehavior);
     RETURN_IF_EXCEPTION(scope, { });
+    if (calendar) {
+        RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject,
+            globalObject->zonedDateTimeStructure(), WTFMove(epochNanoseconds), WTFMove(timeZone.value()), calendar.value()));
+    }
     RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject,
-        globalObject->zonedDateTimeStructure(), WTFMove(epochNanoseconds), WTFMove(timeZone.value())));
+        globalObject->zonedDateTimeStructure(), WTFMove(epochNanoseconds), WTFMove(timeZone.value()), iso8601CalendarID()));
 }
 
 // DefaultTemporalLargestUnit ( years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds )

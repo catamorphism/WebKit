@@ -286,7 +286,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalInstantPrototypeFuncToZonedDateTimeISO, (JSGlob
     ISO8601::TimeZone timeZone = TemporalTimeZone::toTemporalTimeZoneIdentifier(globalObject, callFrame->argument(0));
     RETURN_IF_EXCEPTION(scope, { });
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), instant->exactTime(), WTFMove(timeZone))));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), instant->exactTime(), WTFMove(timeZone), iso8601CalendarID())));
 }
 
 JSC_DEFINE_CUSTOM_GETTER(temporalInstantPrototypeGetterEpochMilliseconds, (JSGlobalObject* globalObject, EncodedJSValue thisValue, PropertyName))

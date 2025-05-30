@@ -116,7 +116,8 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalZonedDateTime, (JSGlobalObject* global
             return throwVMRangeError(globalObject, scope, makeString("Couldn't parse time zone name: "_s, timeZoneString));
         timeZone = timeZoneParse.value();
     }
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, structure, WTFMove(exactTime), WTFMove(timeZone))));
+    // FIXME: calendar
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, structure, WTFMove(exactTime), WTFMove(timeZone), iso8601CalendarID())));
 }
 
 JSC_DEFINE_HOST_FUNCTION(callTemporalZonedDateTime, (JSGlobalObject* globalObject, CallFrame*))

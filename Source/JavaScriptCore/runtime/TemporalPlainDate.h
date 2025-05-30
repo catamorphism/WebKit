@@ -43,7 +43,10 @@ public:
     }
 
     static TemporalPlainDate* create(VM&, Structure*, ISO8601::PlainDate&&, CalendarID);
+    static TemporalPlainDate* create(VM&, Structure*, ISO8601::PlainDate&&, JSObject*);
+    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, JSObject*);
     static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, CalendarID);
+    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::Duration&&, JSObject*);
     static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::Duration&&, CalendarID);
     static Structure* createStructure(VM&, JSGlobalObject*, JSValue);
 
@@ -55,7 +58,12 @@ public:
 
     static TemporalPlainDate* from(JSGlobalObject*, JSValue, std::optional<JSValue>);
 
-    TemporalCalendar* calendar() { return m_calendar.get(this); }
+    JSObject* calendar() {
+        ASSERT(m_builtInCalendarId || m_customCalendar);
+        if (m_builtInCalendarId)
+            return m_builtInCalendar.get(this);
+        return m_customCalendar.value();
+    }
     ISO8601::PlainDate plainDate() const { return m_plainDate; }
 
 #define JSC_DEFINE_TEMPORAL_PLAIN_DATE_FIELD(name, capitalizedName) \
@@ -87,6 +95,7 @@ public:
 
 private:
     TemporalPlainDate(VM&, Structure*, ISO8601::PlainDate&&, CalendarID);
+    TemporalPlainDate(VM&, Structure*, ISO8601::PlainDate&&, JSObject*);
     void finishCreation(VM&);
 
     template<typename CharacterType>
@@ -96,8 +105,10 @@ private:
     ISO8601::Duration differenceTemporalPlainDate(JSGlobalObject*, bool, TemporalPlainDate*, TemporalUnit, TemporalUnit, RoundingMode, double);
 
     ISO8601::PlainDate m_plainDate;
-    CalendarID m_calendarID;
-    LazyProperty<TemporalPlainDate, TemporalCalendar> m_calendar;
+    std::optional<CalendarID> m_builtInCalendarId;
+    std::optional<JSObject*> m_customCalendar;
+    // Should not be accessed if !m_builtInCalendarID
+    LazyProperty<TemporalPlainDate, TemporalCalendar> m_builtInCalendar;
 };
 
 // https://tc39.es/proposal-temporal/#sec-temporal-isodatewithinlimits

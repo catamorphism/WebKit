@@ -158,7 +158,7 @@ TemporalPlainMonthDay* TemporalPlainMonthDay::from(JSGlobalObject* globalObject,
         if (itemValue.inherits<TemporalPlainMonthDay>())
             return TemporalPlainMonthDay::create(vm, globalObject->plainMonthDayStructure(), jsCast<TemporalPlainMonthDay*>(itemValue)->plainMonthDay());
 
-        CalendarID calendar = TemporalCalendar::getTemporalCalendarIdentifierWithISODefault(globalObject, itemValue);
+        JSObject* calendar = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, itemValue);
         (void) calendar; // TODO: implement calendar ID for PlainMonthDay
 
         std::variant<JSObject*, TemporalOverflow> optionsOrOverflow = TemporalOverflow::Constrain;
@@ -212,7 +212,7 @@ ISO8601::PlainDate TemporalPlainMonthDay::with(JSGlobalObject* globalObject, JSO
     rejectObjectWithCalendarOrTimeZone(globalObject, temporalMonthDayLike);
     RETURN_IF_EXCEPTION(scope, { });
 
-    if (!calendar()->isISO8601()) {
+    if (!TemporalCalendar::isISO8601(calendar())) {
         throwRangeError(globalObject, scope, "unimplemented: with non-ISO8601 calendar"_s);
         return { };
     }

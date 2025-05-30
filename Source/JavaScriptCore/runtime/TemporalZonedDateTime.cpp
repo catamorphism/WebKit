@@ -47,9 +47,16 @@ namespace JSC {
 
 const ClassInfo TemporalZonedDateTime::s_info = { "Object"_s, &Base::s_info, nullptr, nullptr, CREATE_METHOD_TABLE(TemporalZonedDateTime) };
 
-TemporalZonedDateTime* TemporalZonedDateTime::create(VM& vm, Structure* structure, ISO8601::ExactTime&& exactTime, ISO8601::TimeZone&& timeZone)
+TemporalZonedDateTime* TemporalZonedDateTime::create(VM& vm, Structure* structure, ISO8601::ExactTime&& exactTime, ISO8601::TimeZone&& timeZone, CalendarID calendar)
 {
-    auto* object = new (NotNull, allocateCell<TemporalZonedDateTime>(vm)) TemporalZonedDateTime(vm, structure, WTFMove(exactTime), WTFMove(timeZone));
+    auto* object = new (NotNull, allocateCell<TemporalZonedDateTime>(vm)) TemporalZonedDateTime(vm, structure, WTFMove(exactTime), WTFMove(timeZone), calendar);
+    object->finishCreation(vm);
+    return object;
+}
+
+TemporalZonedDateTime* TemporalZonedDateTime::create(VM& vm, Structure* structure, ISO8601::ExactTime&& exactTime, ISO8601::TimeZone&& timeZone, JSObject* calendar)
+{
+    auto* object = new (NotNull, allocateCell<TemporalZonedDateTime>(vm)) TemporalZonedDateTime(vm, structure, WTFMove(exactTime), WTFMove(timeZone), calendar);
     object->finishCreation(vm);
     return object;
 }
@@ -59,10 +66,19 @@ Structure* TemporalZonedDateTime::createStructure(VM& vm, JSGlobalObject* global
     return Structure::create(vm, globalObject, prototype, TypeInfo(ObjectType, StructureFlags), info());
 }
 
-TemporalZonedDateTime::TemporalZonedDateTime(VM& vm, Structure* structure, ISO8601::ExactTime&& exactTime, ISO8601::TimeZone&& timeZone)
+TemporalZonedDateTime::TemporalZonedDateTime(VM& vm, Structure* structure, ISO8601::ExactTime&& exactTime, ISO8601::TimeZone&& timeZone, JSObject* calendar)
     : Base(vm, structure)
     , m_exactTime(WTFMove(exactTime))
     , m_timeZone(WTFMove(timeZone))
+    , m_customCalendar(calendar)
+{
+}
+
+TemporalZonedDateTime::TemporalZonedDateTime(VM& vm, Structure* structure, ISO8601::ExactTime&& exactTime, ISO8601::TimeZone&& timeZone, CalendarID calendar)
+    : Base(vm, structure)
+    , m_exactTime(WTFMove(exactTime))
+    , m_timeZone(WTFMove(timeZone))
+    , m_builtInCalendarId(calendar)
 {
 }
 
@@ -70,14 +86,16 @@ void TemporalZonedDateTime::finishCreation(VM& vm)
 {
     Base::finishCreation(vm);
     ASSERT(inherits(info()));
-    m_calendar.initLater(
-        [] (const auto& init) {
-            VM& vm = init.vm;
-            auto* zonedDateTime = jsCast<TemporalZonedDateTime*>(init.owner);
-            auto* globalObject = zonedDateTime->globalObject();
-            auto* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), iso8601CalendarID());
-            init.set(calendar);
-        });
+    if (m_builtInCalendarId) {
+        m_builtInCalendar.initLater(
+            [] (const auto& init) {
+                VM& vm = init.vm;
+                auto* zonedDateTime = jsCast<TemporalZonedDateTime*>(init.owner);
+                auto* globalObject = zonedDateTime->globalObject();
+                auto* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), zonedDateTime->m_builtInCalendarId.value());
+                init.set(calendar);
+            });
+    }
 }
 
 template<typename Visitor>
@@ -86,19 +104,31 @@ void TemporalZonedDateTime::visitChildrenImpl(JSCell* cell, Visitor& visitor)
     Base::visitChildren(cell, visitor);
 
     auto* thisObject = jsCast<TemporalZonedDateTime*>(cell);
-    thisObject->m_calendar.visit(visitor);
+    if (thisObject->m_customCalendar)
+        Base::visitChildren(static_cast<JSCell*>(thisObject->m_customCalendar.value()), visitor);
+    thisObject->m_builtInCalendar.visit(visitor);
 }
 
 DEFINE_VISIT_CHILDREN(TemporalZonedDateTime);
 
 // https://tc39.es/proposal-temporal/#sec-temporal-createtemporalzoneddatetime
-TemporalZonedDateTime* TemporalZonedDateTime::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::ExactTime&& epochNanoseconds, ISO8601::TimeZone&& timeZone)
+TemporalZonedDateTime* TemporalZonedDateTime::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::ExactTime&& epochNanoseconds, ISO8601::TimeZone&& timeZone, JSObject* calendar)
 {
     VM& vm = globalObject->vm();
 
     ASSERT(epochNanoseconds.isValid());
 
-    return TemporalZonedDateTime::create(vm, structure, WTFMove(epochNanoseconds), WTFMove(timeZone));
+    return TemporalZonedDateTime::create(vm, structure, WTFMove(epochNanoseconds), WTFMove(timeZone), calendar);
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-createtemporalzoneddatetime
+TemporalZonedDateTime* TemporalZonedDateTime::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::ExactTime&& epochNanoseconds, ISO8601::TimeZone&& timeZone, CalendarID calendar)
+{
+    VM& vm = globalObject->vm();
+
+    ASSERT(epochNanoseconds.isValid());
+
+    return TemporalZonedDateTime::create(vm, structure, WTFMove(epochNanoseconds), WTFMove(timeZone), calendar);
 }
 
 // https://tc39.es/proposal-temporal/#sec-isoffsettimezoneidentifier
@@ -156,7 +186,7 @@ JSValue TemporalZonedDateTime::getTimeZoneTransition(JSGlobalObject* globalObjec
     RETURN_IF_EXCEPTION(scope, { });
     if (!transition)
         return jsNull();
-    RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), WTFMove(transition.value()), timeZone()));
+    RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), WTFMove(transition.value()), timeZone(), calendar()));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-interpretisodatetimeoffset
@@ -290,7 +320,7 @@ TemporalZonedDateTime* TemporalZonedDateTime::round(JSGlobalObject* globalObject
         return { };
     }
     if (smallestUnit == TemporalUnit::Nanosecond && roundingIncrement == 1)
-        RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), exactTime(), timeZone()));
+        RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), exactTime(), timeZone(), calendar()));
 
     auto thisNs = m_exactTime.get();
     auto timeZone = m_timeZone;
@@ -324,7 +354,7 @@ TemporalZonedDateTime* TemporalZonedDateTime::round(JSGlobalObject* globalObject
         RETURN_IF_EXCEPTION(scope, { });
     }
     RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(),
-        WTFMove(epochNanoseconds), WTFMove(timeZone)));
+        WTFMove(epochNanoseconds), WTFMove(timeZone), calendar()));
 }
 
 TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject, JSObject* temporalZonedDateTimeLike, JSValue options)
@@ -358,7 +388,7 @@ TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject,
     auto millisecond = isoTime.millisecond();
     auto microsecond = isoTime.microsecond();
     auto nanosecond = isoTime.nanosecond();
-    CalendarID thisCalendar = calendar()->identifier();
+    JSObject* thisCalendar = calendar();
 
     auto fields =  Vector { FieldName::Day, FieldName::Hour, FieldName::Microsecond, FieldName::Millisecond,
         FieldName::Minute, FieldName::Month, FieldName::MonthCode, FieldName::Nanosecond, FieldName::Offset,
@@ -403,7 +433,7 @@ TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject,
         thisTimeZone, disambiguation, offset, TemporalMatchBehavior::Exactly);
     RETURN_IF_EXCEPTION(scope, { });
     RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject,
-        globalObject->zonedDateTimeStructure(), WTFMove(epochNanoseconds), WTFMove(thisTimeZone)));
+        globalObject->zonedDateTimeStructure(), WTFMove(epochNanoseconds), WTFMove(thisTimeZone), calendar()));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-addzoneddatetime
@@ -456,13 +486,13 @@ TemporalZonedDateTime* TemporalZonedDateTime::addDurationToZonedDateTime(JSGloba
     auto epochNanoseconds = addZonedDateTime(globalObject, exactTime(), timeZone(),
         calendar, internalDuration, overflow);
     RETURN_IF_EXCEPTION(scope, { });
-    RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), WTFMove(epochNanoseconds), timeZone()));
+    RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), WTFMove(epochNanoseconds), timeZone(), calendar));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-differencezoneddatetime
 static ISO8601::InternalDuration differenceZonedDateTime(JSGlobalObject* globalObject,
     ISO8601::ExactTime ns1, ISO8601::ExactTime ns2, ISO8601::TimeZone timeZone,
-    TemporalCalendar*, TemporalUnit largestUnit)
+    JSObject*, TemporalUnit largestUnit)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -510,7 +540,7 @@ static ISO8601::InternalDuration differenceZonedDateTime(JSGlobalObject* globalO
 // https://tc39.es/proposal-temporal/#sec-temporal-differencezoneddatetimewithrounding
 ISO8601::InternalDuration TemporalZonedDateTime::differenceZonedDateTimeWithRounding(
     JSGlobalObject* globalObject, ISO8601::ExactTime ns1, ISO8601::ExactTime ns2,
-    ISO8601::TimeZone timeZone, TemporalCalendar* calendar, TemporalUnit largestUnit,
+    ISO8601::TimeZone timeZone, JSObject* calendar, TemporalUnit largestUnit,
     double roundingIncrement, TemporalUnit smallestUnit, RoundingMode roundingMode)
 {
     VM& vm = globalObject->vm();
@@ -718,11 +748,11 @@ TemporalZonedDateTime* TemporalZonedDateTime::from(JSGlobalObject* globalObject,
             }
             auto zdt = jsCast<TemporalZonedDateTime*>(itemValue);
             RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject,
-                globalObject->zonedDateTimeStructure(), zdt->exactTime(), zdt->timeZone()));
+                globalObject->zonedDateTimeStructure(), zdt->exactTime(), zdt->timeZone(), zdt->calendar()));
         }
 
         auto item = jsCast<JSObject*>(itemValue);
-        CalendarID calendar = TemporalCalendar::getTemporalCalendarIdentifierWithISODefault(globalObject, item);
+        JSObject* calendar = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, item);
         RETURN_IF_EXCEPTION(scope, { });
         auto [optionalYear, optionalMonth, optionalMonthCode, optionalDay, optionalHour, optionalMinute,
             optionalSecond, optionalMillisecond, optionalMicrosecond, optionalNanosecond, optionalOffset,
@@ -813,8 +843,9 @@ TemporalZonedDateTime* TemporalZonedDateTime::from(JSGlobalObject* globalObject,
     }
     auto epochNanoseconds = interpretISODateTimeOffset(globalObject, isoDate, time, offsetBehavior, offsetNanoseconds, timeZone, disambiguation, offsetOption, matchBehavior);
     RETURN_IF_EXCEPTION(scope, { });
+    // TODO: calendar
     return TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(),
-        WTFMove(epochNanoseconds), WTFMove(timeZone));
+        WTFMove(epochNanoseconds), WTFMove(timeZone), iso8601CalendarID());
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.compare
