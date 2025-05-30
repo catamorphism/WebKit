@@ -89,6 +89,8 @@ shouldBe(Temporal.PlainDateTime.from('0001-02-03T04:05:06.007008009').toString()
 
     shouldBe(Temporal.PlainDateTime.from({ year: 2007, month: 20, day: 40, hour: 30, minute: 80, second: 80, millisecond: 2000, microsecond: 2000, nanosecond: 2000 }).toString(), '2007-12-31T23:59:59.999999999');
     shouldBe(Temporal.PlainDateTime.from({ year: 2007, month: 20, day: 40, hour: 30, minute: 80, second: 80, millisecond: 2000, microsecond: 2000, nanosecond: 2000 }, { overflow: 'constrain' }).toString(), '2007-12-31T23:59:59.999999999');
+
+    shouldBe(dateTime.toString({ calendarName: "always" }), '2007-01-09T03:24:30[u-ca=iso8601]');
 }
 
 shouldThrow(() => Temporal.PlainDateTime.from(pdt, { overflow: 'bogus' }), RangeError);

@@ -55,7 +55,7 @@ public:
     static TemporalPlainDateTime* from(JSGlobalObject*, JSValue, std::optional<JSValue>);
     static int32_t compare(TemporalPlainDateTime*, TemporalPlainDateTime*);
 
-    JSObject* calendar() {
+    JSObject* calendar() const {
         ASSERT(m_builtInCalendarId || m_customCalendar);
         if (m_builtInCalendarId)
             return m_builtInCalendar.get(this);

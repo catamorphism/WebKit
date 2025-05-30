@@ -291,6 +291,16 @@ static void incrementDay(ISO8601::Duration& duration)
     duration.setYears(year + 1);
 }
 
+static String temporalDateTimeToString(JSGlobalObject* globalObject, ISO8601::PlainDate plainDate,
+    ISO8601::PlainTime plainTime, std::tuple<Precision, unsigned> precision, JSObject* calendar,
+    TemporalShowCalendar showCalendar)
+{
+    WTF::String calendarString = TemporalCalendar::formatCalendarAnnotation(globalObject, calendar,
+        showCalendar);
+    auto dateTimeString = ISO8601::temporalDateTimeToString(plainDate, plainTime, precision);
+    return makeString(dateTimeString, calendarString);
+}
+
 String TemporalPlainDateTime::toString(JSGlobalObject* globalObject, JSValue optionsValue) const
 {
     VM& vm = globalObject->vm();
@@ -302,14 +312,29 @@ String TemporalPlainDateTime::toString(JSGlobalObject* globalObject, JSValue opt
     if (!options)
         return toString();
 
-    PrecisionData data = secondsStringPrecision(globalObject, options);
+    auto showCalendar = getTemporalShowCalendarNameOption(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    TemporalFractionalSecondDigits digits = temporalFractionalSecondDigits(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
 
     auto roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::Trunc);
     RETURN_IF_EXCEPTION(scope, { });
 
+    std::optional<TemporalUnit> smallestUnit = temporalSmallestUnit(globalObject, options,
+        { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day });
+    RETURN_IF_EXCEPTION(scope, { });
+    if (smallestUnit == TemporalUnit::Hour) {
+        throwRangeError(globalObject, scope,
+            "smallest unit cannot be Hour in TemporalPlainDateTime toString()"_s);
+        return { };
+    }
+
+    PrecisionData data = secondsStringPrecision(smallestUnit, digits);
+
     // No need to make a new object if we were given explicit defaults.
-    if (std::get<0>(data.precision) == Precision::Auto && roundingMode == RoundingMode::Trunc)
+    if (std::get<0>(data.precision) == Precision::Auto && roundingMode == RoundingMode::Trunc
+       && showCalendar != TemporalShowCalendar::Critical && showCalendar != TemporalShowCalendar::Always)
         return toString();
 
     auto duration = TemporalPlainTime::roundTime(m_plainTime, data.increment, data.unit, roundingMode, std::nullopt);
@@ -333,7 +358,8 @@ String TemporalPlainDateTime::toString(JSGlobalObject* globalObject, JSValue opt
         return { };
     }
 
-    return ISO8601::temporalDateTimeToString(plainDate, plainTime, data.precision);
+    RELEASE_AND_RETURN(scope, temporalDateTimeToString(globalObject, plainDate, plainTime,
+        data.precision, calendar(), showCalendar));
 }
 
 String TemporalPlainDateTime::monthCode() const

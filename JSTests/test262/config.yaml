@@ -62,13 +62,6 @@ skip:
     - test/built-ins/RegExp/regexp-modifiers/add-ignoreCase-affects-slash-lower-p.js
 
      # Depends on Calendar support
-    - test/built-ins/Temporal/PlainDateTime/prototype/toString/calendarname-always.js
-    - test/built-ins/Temporal/PlainDateTime/prototype/toString/calendarname-auto.js
-    - test/built-ins/Temporal/PlainDateTime/prototype/toString/calendarname-critical.js
-    - test/built-ins/Temporal/PlainDateTime/prototype/toString/calendarname-invalid-string.js
-    - test/built-ins/Temporal/PlainDateTime/prototype/toString/calendarname-never.js
-    - test/built-ins/Temporal/PlainDateTime/prototype/toString/calendarname-undefined.js
-    - test/built-ins/Temporal/PlainDateTime/prototype/toString/calendarname-wrong-type.js
     - test/built-ins/Temporal/PlainMonthDay/calendar-case-insensitive.js
     - test/built-ins/Temporal/PlainMonthDay/calendar-invalid.js
     - test/built-ins/Temporal/PlainMonthDay/calendar-invalid-iso-string.js
