@@ -142,7 +142,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainMonthDayPrototypeFuncWith, (JSGlobalObject
 
     RELEASE_AND_RETURN(scope, JSValue::encode(
         TemporalPlainMonthDay::tryCreateIfValid(
-            globalObject, globalObject->plainMonthDayStructure(), WTFMove(result))));
+            globalObject, globalObject->plainMonthDayStructure(), WTFMove(result), monthDay->calendar())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.prototype.equals
@@ -196,7 +196,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainMonthDayPrototypeFuncToPlainDate, (JSGloba
     }
 
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject,
-        globalObject->plainDateStructure(), WTFMove(plainDateOptional.value()), monthDay->calendar()->identifier())));
+        globalObject->plainDateStructure(), WTFMove(plainDateOptional.value()), monthDay->calendar())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.prototype.tolocalestring

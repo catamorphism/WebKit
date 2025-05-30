@@ -114,3 +114,7 @@ shouldBe(Temporal.PlainMonthDay.prototype.valueOf.length, 0);
 {
     shouldThrow(() => monthDay.valueOf(), TypeError);
 }
+
+{
+    shouldThrow (() => new Temporal.PlainMonthDay(12, 15, "", 1972), RangeError);
+}

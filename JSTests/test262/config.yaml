@@ -62,27 +62,6 @@ skip:
     - test/built-ins/RegExp/regexp-modifiers/add-ignoreCase-affects-slash-lower-p.js
 
      # Depends on Calendar support
-    - test/built-ins/Temporal/PlainMonthDay/calendar-case-insensitive.js
-    - test/built-ins/Temporal/PlainMonthDay/calendar-invalid.js
-    - test/built-ins/Temporal/PlainMonthDay/calendar-invalid-iso-string.js
-    - test/built-ins/Temporal/PlainMonthDay/calendar-iso-string.js
-    - test/built-ins/Temporal/PlainMonthDay/calendar-number.js
-    - test/built-ins/Temporal/PlainMonthDay/calendar-wrong-type.js
-    - test/built-ins/Temporal/PlainMonthDay/from/argument-propertybag-calendar-case-insensitive.js
-    - test/built-ins/Temporal/PlainMonthDay/from/argument-propertybag-calendar-iso-string.js
-    - test/built-ins/Temporal/PlainMonthDay/from/argument-propertybag-calendar-leap-second.js
-    - test/built-ins/Temporal/PlainMonthDay/from/argument-propertybag-calendar-number.js
-    - test/built-ins/Temporal/PlainMonthDay/from/argument-propertybag-calendar-wrong-type.js
-    - test/built-ins/Temporal/PlainMonthDay/from/argument-string-calendar-annotation.js
-    - test/built-ins/Temporal/PlainMonthDay/from/argument-string-unknown-annotation.js
-    - test/built-ins/Temporal/PlainMonthDay/from/fields-string.js
-    - test/built-ins/Temporal/PlainMonthDay/prototype/equals/argument-propertybag-calendar-case-insensitive.js
-    - test/built-ins/Temporal/PlainMonthDay/prototype/equals/argument-propertybag-calendar-iso-string.js
-    - test/built-ins/Temporal/PlainMonthDay/prototype/equals/argument-propertybag-calendar-leap-second.js
-    - test/built-ins/Temporal/PlainMonthDay/prototype/equals/argument-propertybag-calendar-number.js
-    - test/built-ins/Temporal/PlainMonthDay/prototype/equals/argument-propertybag-calendar-wrong-type.js
-    - test/built-ins/Temporal/PlainMonthDay/prototype/equals/argument-string.js
-    - test/built-ins/Temporal/PlainMonthDay/prototype/equals/argument-string-unknown-annotation.js
     - test/built-ins/Temporal/PlainMonthDay/prototype/toString/calendarname-auto.js
     - test/built-ins/Temporal/PlainMonthDay/prototype/toString/calendarname-critical.js
     - test/built-ins/Temporal/PlainMonthDay/prototype/toString/calendarname-never.js

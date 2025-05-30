@@ -110,7 +110,17 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainMonthDay, (JSGlobalObject* global
     if (argumentCount < 2)
         return throwVMRangeError(globalObject, scope, "Temporal.PlainMonthDay requires at least two arguments"_s);
 
-    // Argument 2 is calendar -- ignored for now. TODO
+    std::optional<JSObject*> calendar = std::nullopt;
+    if (argumentCount > 2) {
+        auto value = callFrame->uncheckedArgument(2);
+        if (!value.isUndefined()) {
+            if (!value.isString())
+                return throwVMTypeError(globalObject, scope, "Temporal.PlainMonthDay calendar property must be a string"_s);
+            String calendarString = value.toWTFString(globalObject);
+            RETURN_IF_EXCEPTION(scope, { });
+            calendar = TemporalCalendar::canonicalizeCalendar(globalObject, calendarString);
+       }
+    }
 
     double referenceYear = 1972; // First ISO leap year after the epoch
     if (argumentCount > 3) {
@@ -121,7 +131,10 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainMonthDay, (JSGlobalObject* global
         RETURN_IF_EXCEPTION(scope, { });
     }
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainMonthDay::tryCreateIfValid(globalObject, structure, ISO8601::PlainDate(referenceYear, isoMonth, isoDay))));
+    if (calendar)
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainMonthDay::tryCreateIfValid(globalObject, structure, ISO8601::PlainDate(referenceYear, isoMonth, isoDay), calendar.value())));
+    else
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainMonthDay::tryCreateIfValid(globalObject, structure, ISO8601::PlainDate(referenceYear, isoMonth, isoDay), iso8601CalendarID())));
 }
 
 JSC_DEFINE_HOST_FUNCTION(callTemporalPlainMonthDay, (JSGlobalObject* globalObject, CallFrame*))
@@ -145,7 +158,9 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainMonthDayConstructorFuncFrom, (JSGlobalObje
         toTemporalOverflow(globalObject, callFrame->argument(1));
         RETURN_IF_EXCEPTION(scope, { });
 
-        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainMonthDay::create(vm, globalObject->plainMonthDayStructure(), jsCast<TemporalPlainMonthDay*>(itemValue)->plainMonthDay())));
+        TemporalPlainMonthDay* pmd = jsCast<TemporalPlainMonthDay*>(itemValue);
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainMonthDay::create(vm, globalObject->plainMonthDayStructure(),
+            pmd->plainMonthDay(), pmd->calendar())));
     }
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainMonthDay::from(globalObject, itemValue, callFrame->argument(1))));
 }

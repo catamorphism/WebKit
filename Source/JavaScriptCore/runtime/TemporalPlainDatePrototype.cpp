@@ -169,10 +169,9 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDatePrototypeFuncToPlainMonthDay, (JSGloba
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDate.prototype.toPlainMonthDay called on value that's not a PlainDate"_s);
 
     ISO8601::PlainDate dateToUse(1972, temporalDate->plainDate().month(), temporalDate->plainDate().day());
-    // TODO: support non-iso8601 calendars
     RELEASE_AND_RETURN(scope, JSValue::encode(
         TemporalPlainMonthDay::tryCreateIfValid(
-            globalObject, globalObject->plainMonthDayStructure(), WTFMove(dateToUse))));
+            globalObject, globalObject->plainMonthDayStructure(), WTFMove(dateToUse), temporalDate->calendar())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindate.prototype.toplainyearmonth
