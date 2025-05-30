@@ -81,6 +81,9 @@ const yearMonth = new Temporal.PlainYearMonth(2025, 4, "iso8601");
     shouldThrow(() => { Temporal.PlainYearMonth.from({ year: 2025, monthCode: 'M00' }); }, RangeError);
     shouldThrow(() => { Temporal.PlainYearMonth.from({ year: 2025, month: 0 }); }, RangeError);
     shouldThrow(() => { Temporal.PlainYearMonth.from({ year: 2025, month: 1, monthCode: 'M02' }); }, RangeError);
+
+    shouldBe(yearMonth.toString({ calendarName: "always" }), '2025-04-01[u-ca=iso8601]');
+    shouldBe(yearMonth.toString({ calendarName: "auto" }), '2025-04');
 }
 
 shouldBe(Temporal.PlainYearMonth.prototype.equals.length, 1);

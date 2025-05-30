@@ -491,7 +491,7 @@ String formatUTCOffsetNanoseconds(int64_t);
 String temporalTimeToString(PlainTime, std::tuple<Precision, unsigned>);
 String temporalDateToString(PlainDate);
 String temporalDateTimeToString(PlainDate, PlainTime, std::tuple<Precision, unsigned>);
-String temporalYearMonthToString(PlainYearMonth, StringView);
+String temporalYearMonthToString(PlainYearMonth);
 String temporalMonthDayToString(PlainMonthDay);
 String monthCode(uint32_t);
 bool validMonthCode(StringView);

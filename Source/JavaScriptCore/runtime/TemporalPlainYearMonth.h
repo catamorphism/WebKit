@@ -77,7 +77,7 @@ public:
     String toString(JSGlobalObject*, JSValue options) const;
     String toString() const
     {
-        return ISO8601::temporalYearMonthToString(m_plainYearMonth, ""_s);
+        return ISO8601::temporalYearMonthToString(m_plainYearMonth);
     }
 
     ISO8601::Duration until(JSGlobalObject*, TemporalPlainYearMonth*, JSValue options);

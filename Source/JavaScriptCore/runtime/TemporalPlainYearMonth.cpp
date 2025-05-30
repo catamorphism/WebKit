@@ -131,6 +131,36 @@ TemporalPlainYearMonth* TemporalPlainYearMonth::tryCreateIfValid(JSGlobalObject*
     return TemporalPlainYearMonth::create(vm, structure, ISO8601::PlainYearMonth(WTFMove(plainDate)), calendarId);
 }
 
+static String temporalYearMonthToString(JSGlobalObject* globalObject, ISO8601::PlainYearMonth plainYearMonth,
+    JSObject* calendar, TemporalShowCalendar showCalendar)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    WTF::String calendarString = TemporalCalendar::formatCalendarAnnotation(globalObject, calendar,
+        showCalendar);
+    RETURN_IF_EXCEPTION(scope, { });
+    String dateString;
+    switch (showCalendar) {
+    case TemporalShowCalendar::Always:
+    case TemporalShowCalendar::Critical:
+         dateString = ISO8601::temporalDateToString(plainYearMonth.isoPlainDate());
+         break;
+    default: {
+          JSString* jsString = calendar->toString(globalObject);
+          RETURN_IF_EXCEPTION(scope, { });
+          StringView calendar = jsString->view(globalObject);
+          RETURN_IF_EXCEPTION(scope, { });
+          if (calendar != "iso8601"_s)
+              dateString = ISO8601::temporalDateToString(plainYearMonth.isoPlainDate());
+          else
+              dateString = ISO8601::temporalYearMonthToString(plainYearMonth);
+          break;
+    }
+    }
+    return makeString(dateString, calendarString);
+}
+
 String TemporalPlainYearMonth::toString(JSGlobalObject* globalObject, JSValue optionsValue) const
 {
     VM& vm = globalObject->vm();
@@ -142,10 +172,11 @@ String TemporalPlainYearMonth::toString(JSGlobalObject* globalObject, JSValue op
     if (!options)
         return toString();
 
-    String calendarName = toTemporalCalendarName(globalObject, options);
+    auto showCalendar = getTemporalShowCalendarNameOption(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
 
-    return ISO8601::temporalYearMonthToString(m_plainYearMonth, calendarName);
+    RELEASE_AND_RETURN(scope, temporalYearMonthToString(globalObject, m_plainYearMonth,
+        calendar(), showCalendar));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainyearmonth.from
