@@ -54,7 +54,7 @@ public:
     static TemporalZonedDateTime* from(JSGlobalObject*, JSValue, std::optional<JSValue>);
     static int32_t compare(const TemporalZonedDateTime*, const TemporalZonedDateTime*);
 
-    JSObject* calendar() {
+    JSObject* calendar() const {
         ASSERT(m_builtInCalendarId || m_customCalendar);
         if (m_builtInCalendarId)
             return m_builtInCalendar.get(this);
@@ -76,7 +76,7 @@ public:
     ExactTime exactTime() const { return m_exactTime.get(); }
     TimeZone timeZone() const { return m_timeZone; }
 
-    static String temporalZonedDateTimeToString(JSGlobalObject*, ExactTime, TimeZone,
+    static String temporalZonedDateTimeToString(JSGlobalObject*, ExactTime, TimeZone, JSObject*,
         PrecisionData, TemporalShowCalendar, TemporalShowTimeZone, TemporalShowOffset,
         unsigned, TemporalUnit, RoundingMode);
 
@@ -96,7 +96,7 @@ public:
     String toString(JSGlobalObject*, JSValue options) const;
     String toString(JSGlobalObject* globalObject) const
     {
-        return temporalZonedDateTimeToString(globalObject, m_exactTime.get(), m_timeZone,
+        return temporalZonedDateTimeToString(globalObject, m_exactTime.get(), m_timeZone, calendar(),
             PrecisionData { { Precision::Auto, 0 }, TemporalUnit::Nanosecond, 1 },
             TemporalShowCalendar::Auto,
             TemporalShowTimeZone::Auto, TemporalShowOffset::Auto, 1, TemporalUnit::Nanosecond, RoundingMode::Trunc);

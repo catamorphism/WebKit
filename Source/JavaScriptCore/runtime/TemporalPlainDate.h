@@ -58,7 +58,7 @@ public:
 
     static TemporalPlainDate* from(JSGlobalObject*, JSValue, std::optional<JSValue>);
 
-    JSObject* calendar() {
+    JSObject* calendar() const {
         ASSERT(m_builtInCalendarId || m_customCalendar);
         if (m_builtInCalendarId)
             return m_builtInCalendar.get(this);

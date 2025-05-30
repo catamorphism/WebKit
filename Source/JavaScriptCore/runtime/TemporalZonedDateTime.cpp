@@ -647,8 +647,8 @@ ISO8601::Duration TemporalZonedDateTime::until(JSGlobalObject* globalObject, JSV
 
 // https://tc39.es/proposal-temporal/#sec-temporal-temporalzoneddatetimetostring
 String TemporalZonedDateTime::temporalZonedDateTimeToString(JSGlobalObject* globalObject,
-    ISO8601::ExactTime exactTime,
-    ISO8601::TimeZone timeZone, PrecisionData precision, TemporalShowCalendar showCalendar,
+    ISO8601::ExactTime exactTime, ISO8601::TimeZone timeZone, JSObject* calendar,
+    PrecisionData precision, TemporalShowCalendar showCalendar,
     TemporalShowTimeZone showTimeZone, TemporalShowOffset showOffset, unsigned increment,
     TemporalUnit unit, RoundingMode roundingMode)
 {
@@ -671,7 +671,8 @@ String TemporalZonedDateTime::temporalZonedDateTimeToString(JSGlobalObject* glob
             flag = "!"_s;
         timeZoneString = makeString('[', flag, formatTimeZone(timeZone), ']');
     }
-    auto calendarString = TemporalCalendar::formatCalendarAnnotation(showCalendar);
+    auto calendarString = TemporalCalendar::formatCalendarAnnotation(globalObject, calendar, showCalendar);
+    RETURN_IF_EXCEPTION(scope, { });
     return makeString(dateTimeString, offsetString, timeZoneString, calendarString);
 }
 
@@ -709,7 +710,7 @@ String TemporalZonedDateTime::toString(JSGlobalObject* globalObject, JSValue opt
     RETURN_IF_EXCEPTION(scope, { });
 
     RELEASE_AND_RETURN(scope, temporalZonedDateTimeToString(globalObject, m_exactTime.get(),
-        m_timeZone, precision, showCalendar, showTimeZone,
+        m_timeZone, calendar(), precision, showCalendar, showTimeZone,
         showOffset, precision.increment, precision.unit, roundingMode));
 }
 

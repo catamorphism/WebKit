@@ -299,18 +299,26 @@ ISO8601::PlainDateTime TemporalCalendar::getISOPartsFromEpoch(ISO8601::ExactTime
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-formatcalendarannotation
-String TemporalCalendar::formatCalendarAnnotation(TemporalShowCalendar showCalendar)
+String TemporalCalendar::formatCalendarAnnotation(JSGlobalObject* globalObject,
+    JSObject* calendar, TemporalShowCalendar showCalendar)
 {
-    // TODO: non-iso8601 calendars
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    JSString* jsString = calendar->toString(globalObject);
+    RETURN_IF_EXCEPTION(scope, { });
+    StringView calendarString = jsString->view(globalObject);
+    RETURN_IF_EXCEPTION(scope, { });
+
     switch (showCalendar) {
     case TemporalShowCalendar::Never:
         return ""_s;
     case TemporalShowCalendar::Auto:
         return ""_s;
     case TemporalShowCalendar::Critical:
-        return "[!u-ca=iso8601]"_s;
+        return makeString("[!u-ca="_s, calendarString, "]"_s);
     case TemporalShowCalendar::Always:
-        return "[u-ca=iso8601]"_s;
+        return makeString("[u-ca="_s, calendarString, "]"_s);
     default:
         RELEASE_ASSERT_NOT_REACHED();
     }

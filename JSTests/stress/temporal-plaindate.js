@@ -93,6 +93,8 @@ shouldBe(String(Temporal.PlainDate.from('2007-01-09[UTC][u-ca=iso8601]')), `2007
     shouldBe(Temporal.PlainDate.from({ year: 2007, month: 20, day: 40 }).toString(), '2007-12-31');
     shouldBe(Temporal.PlainDate.from({ year: 2007, month: 20, day: 40 }, { overflow: 'constrain' }).toString(), '2007-12-31');
 
+    shouldBe(date.toString({ calendarName: "always" }), '2007-01-09[u-ca=iso8601]');
+
     shouldBe(date.toJSON(), date.toString());
     shouldBe(date.toLocaleString(), new Intl.DateTimeFormat().format(date));
 }
