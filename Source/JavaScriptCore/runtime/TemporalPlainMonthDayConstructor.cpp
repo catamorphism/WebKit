@@ -119,16 +119,20 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainMonthDay, (JSGlobalObject* global
             String calendarString = value.toWTFString(globalObject);
             RETURN_IF_EXCEPTION(scope, { });
             calendar = TemporalCalendar::canonicalizeCalendar(globalObject, calendarString);
+            RETURN_IF_EXCEPTION(scope, { });
        }
     }
 
     double referenceYear = 1972; // First ISO leap year after the epoch
     if (argumentCount > 3) {
-        auto value = callFrame->uncheckedArgument(3).toIntegerWithTruncation(globalObject);
-        if (!std::isfinite(value))
-            return throwVMRangeError(globalObject, scope, "Temporal.PlainMonthDay reference year must be finite"_s);
-        referenceYear = value;
-        RETURN_IF_EXCEPTION(scope, { });
+        auto value = callFrame->uncheckedArgument(3);
+        if (!value.isUndefined()) {
+            auto integerValue = callFrame->uncheckedArgument(3).toIntegerWithTruncation(globalObject);
+            RETURN_IF_EXCEPTION(scope, { });
+            if (!std::isfinite(integerValue))
+                return throwVMRangeError(globalObject, scope, "Temporal.PlainMonthDay reference year must be finite"_s);
+            referenceYear = integerValue;
+        }
     }
 
     if (calendar)

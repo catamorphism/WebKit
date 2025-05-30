@@ -93,6 +93,7 @@ shouldBe(Temporal.PlainMonthDay.prototype.with.length, 1);
 
     shouldBe(monthDay.toString({ calendarName: "always" }), '1972-04-29[u-ca=iso8601]');
     shouldBe(monthDay.toString({ calendarName: "auto" }), '04-29');
+    shouldBe(new Temporal.PlainMonthDay(4, 29, "iso8601", undefined).toString({ calendarName: "always"}), '1972-04-29[u-ca=iso8601]');
 }
 
 shouldBe(Temporal.PlainMonthDay.prototype.equals.length, 1);
