@@ -26,9 +26,11 @@ shouldBe(Object.getOwnPropertyDescriptor(Temporal.PlainYearMonth, 'prototype').e
 shouldBe(Object.getOwnPropertyDescriptor(Temporal.PlainYearMonth, 'prototype').configurable, false);
 shouldBe(Temporal.PlainYearMonth.prototype.constructor, Temporal.PlainYearMonth);
 
-const yearMonth = new Temporal.PlainYearMonth(2025, 4);
+const yearMonth = new Temporal.PlainYearMonth(2025, 4, "iso8601");
 
 {
+    shouldBe(yearMonth.era, undefined);
+    shouldBe(yearMonth.eraYear, undefined);
     shouldBe(yearMonth.year, 2025);
     shouldBe(yearMonth.monthCode, "M04");
     shouldBe(yearMonth.day, undefined);
