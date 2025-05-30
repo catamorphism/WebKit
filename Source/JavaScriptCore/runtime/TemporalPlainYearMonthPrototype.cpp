@@ -136,7 +136,7 @@ temporalPlainYearMonthPrototypeAddOrSubtract(JSGlobalObject* globalObject, CallF
     RETURN_IF_EXCEPTION(scope, { });
 
     return JSValue::encode(TemporalPlainYearMonth::create(
-        vm, globalObject->plainYearMonthStructure(), WTFMove(result)));
+        vm, globalObject->plainYearMonthStructure(), WTFMove(result), yearMonth->calendar()));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainyearmonth.prototype.add
@@ -171,7 +171,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainYearMonthPrototypeFuncWith, (JSGlobalObjec
 
     RELEASE_AND_RETURN(scope, JSValue::encode(
         TemporalPlainYearMonth::tryCreateIfValid(
-            globalObject, globalObject->plainYearMonthStructure(), WTFMove(result))));
+            globalObject, globalObject->plainYearMonthStructure(), WTFMove(result), yearMonth->calendar())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainyearmonth.prototype.until
@@ -263,7 +263,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainYearMonthPrototypeFuncToPlainDate, (JSGlob
     }
 
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject,
-        globalObject->plainDateStructure(), WTFMove(plainDateOptional.value()), yearMonth->calendar()->identifier())));
+        globalObject->plainDateStructure(), WTFMove(plainDateOptional.value()), yearMonth->calendar())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainyearmonth.prototype.tostring

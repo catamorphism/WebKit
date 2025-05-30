@@ -112,7 +112,18 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainYearMonth, (JSGlobalObject* globa
     if (argumentCount < 2)
         return throwVMRangeError(globalObject, scope, "Temporal.PlainYearMonth requires at least two arguments"_s);
 
-    // Argument 2 is calendar -- ignored for now. TODO
+    std::optional<JSObject*> calendar = std::nullopt;
+    if (argumentCount > 2) {
+        auto value = callFrame->uncheckedArgument(2);
+        if (!value.isUndefined()) {
+            if (!value.isString())
+                return throwVMTypeError(globalObject, scope, "Temporal.PlainYearMonth calendar property must be a string"_s);
+            String calendarString = value.toWTFString(globalObject);
+            RETURN_IF_EXCEPTION(scope, { });
+            calendar = TemporalCalendar::canonicalizeCalendar(globalObject, calendarString);
+            RETURN_IF_EXCEPTION(scope, { });
+       }
+    }
 
     double referenceDay = 1;
     if (argumentCount > 3) {
@@ -126,7 +137,11 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainYearMonth, (JSGlobalObject* globa
     if (!TemporalPlainDate::isValidISODate(isoYear, isoMonth, referenceDay)) {
         return throwVMRangeError(globalObject, scope, "Temporal.PlainYearMonth: not a valid ISO date"_s);
     };
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainYearMonth::tryCreateIfValid(globalObject, structure, ISO8601::PlainDate(isoYear, isoMonth, referenceDay))));
+
+    if (calendar)
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainYearMonth::tryCreateIfValid(globalObject, structure, ISO8601::PlainDate(isoYear, isoMonth, referenceDay), calendar.value())));
+    else
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainYearMonth::tryCreateIfValid(globalObject, structure, ISO8601::PlainDate(isoYear, isoMonth, referenceDay), iso8601CalendarID())));
 }
 
 JSC_DEFINE_HOST_FUNCTION(callTemporalPlainYearMonth, (JSGlobalObject* globalObject, CallFrame*))
@@ -150,7 +165,9 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainYearMonthConstructorFuncFrom, (JSGlobalObj
         toTemporalOverflow(globalObject, callFrame->argument(1));
         RETURN_IF_EXCEPTION(scope, { });
 
-        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainYearMonth::create(vm, globalObject->plainYearMonthStructure(), jsCast<TemporalPlainYearMonth*>(itemValue)->plainYearMonth())));
+        TemporalPlainYearMonth* pym = jsCast<TemporalPlainYearMonth*>(itemValue);
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainYearMonth::create(vm, globalObject->plainYearMonthStructure(),
+            pym->plainYearMonth(), pym->calendar())));
     }
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainYearMonth::from(globalObject, itemValue, callFrame->argument(1))));
 }

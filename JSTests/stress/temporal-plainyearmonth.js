@@ -179,3 +179,7 @@ shouldBe(Temporal.PlainYearMonth.prototype.until.length, 1);
     shouldThrow(() => { yearMonth.until('2019-02', { largestUnit: 'week' }); }, RangeError);
     shouldThrow(() => { yearMonth.until('2019-02', { largestUnit: 'year', smallestUnit: 'day' }); }, RangeError);
 }
+
+{
+    shouldThrow (() => new Temporal.PlainYearMonth(2000, 5, ""), RangeError);
+}
