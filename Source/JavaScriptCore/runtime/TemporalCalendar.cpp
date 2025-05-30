@@ -230,7 +230,7 @@ TemporalCalendar* TemporalCalendar::canonicalizeCalendar(JSGlobalObject* globalO
         }
     }
     if (!canonicalID) {
-        throwRangeError(globalObject, scope, makeString("unsupported calendar"_s, id));
+        throwRangeError(globalObject, scope, makeString("unsupported calendar "_s, id));
         return { };
     }
     return TemporalCalendar::create(vm, globalObject->calendarStructure(), canonicalID.value());

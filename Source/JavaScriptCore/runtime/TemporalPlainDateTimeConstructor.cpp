@@ -101,8 +101,8 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainDateTime, (JSGlobalObject* global
             return throwVMRangeError(globalObject, scope, "Temporal.PlainDateTime properties must be finite"_s);
     }
 
-    if (argumentCount > (numberOfTemporalPlainDateUnits + numberOfTemporalPlainTimeUnits + 1)) {
-        auto value = callFrame->uncheckedArgument(count + 1);
+    if (argumentCount > (numberOfTemporalPlainDateUnits + numberOfTemporalPlainTimeUnits)) {
+        auto value = callFrame->uncheckedArgument(count);
         if (!value.isUndefined()) {
             if (!value.isString())
                 return throwVMTypeError(globalObject, scope, "Temporal.PlainDate calendar property must be a string"_s);

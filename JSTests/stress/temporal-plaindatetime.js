@@ -331,3 +331,7 @@ shouldBe(Temporal.PlainDateTime.prototype.until.length, 1);
 
     shouldThrow(() => pdt1.until('1969-01-01', { largestUnit: 'day', smallestUnit: 'month' }), RangeError);
 } 
+
+{
+    shouldThrow (() => (new Temporal.PlainDateTime(2000, 5, 2, 15, 23, 30, 987, 654, 321, "")), RangeError);
+}
