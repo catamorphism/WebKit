@@ -90,6 +90,9 @@ shouldBe(Temporal.PlainMonthDay.prototype.with.length, 1);
     shouldThrow(() => { Temporal.PlainMonthDay.from({ monthCode: 'M00', day: 9 }); }, RangeError);
     shouldThrow(() => { Temporal.PlainMonthDay.from({ month: 1, day: 0 }); }, RangeError);
     shouldThrow(() => { Temporal.PlainMonthDay.from({ month: 1, monthCode: 'M02', day: 9 }); }, RangeError);
+
+    shouldBe(monthDay.toString({ calendarName: "always" }), '1972-04-29[u-ca=iso8601]');
+    shouldBe(monthDay.toString({ calendarName: "auto" }), '04-29');
 }
 
 shouldBe(Temporal.PlainMonthDay.prototype.equals.length, 1);

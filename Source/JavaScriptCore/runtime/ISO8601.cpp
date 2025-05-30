@@ -1987,14 +1987,8 @@ String temporalYearMonthToString(PlainYearMonth plainYearMonth, StringView calen
     return temporalDateToString(plainYearMonth.year(), plainYearMonth.month());
 }
 
-String temporalMonthDayToString(PlainMonthDay plainMonthDay, StringView calendarName)
+String temporalMonthDayToString(PlainMonthDay plainMonthDay)
 {
-    if (calendarName == "always"_s) {
-        // TODO: print the correct calendar ID when calendars are fully implemented
-        auto first = temporalDateToString(plainMonthDay.isoPlainDate());
-        return makeString(first, "[u-ca=iso8601]"_s);
-    }
-
     return makeString(pad('0', 2, plainMonthDay.month()), '-', pad('0', 2, plainMonthDay.day()));
 }
 

@@ -74,7 +74,7 @@ public:
     String toString(JSGlobalObject*, JSValue options) const;
     String toString() const
     {
-        return ISO8601::temporalMonthDayToString(m_plainMonthDay, ""_s);
+        return ISO8601::temporalMonthDayToString(m_plainMonthDay);
     }
 
     DECLARE_VISIT_CHILDREN;

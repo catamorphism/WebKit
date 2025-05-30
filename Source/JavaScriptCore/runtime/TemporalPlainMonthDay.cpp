@@ -142,6 +142,36 @@ TemporalPlainMonthDay* TemporalPlainMonthDay::tryCreateIfValid(JSGlobalObject* g
     return TemporalPlainMonthDay::create(vm, structure, ISO8601::PlainMonthDay(WTFMove(plainDate)), calendarId);
 }
 
+static String temporalMonthDayToString(JSGlobalObject* globalObject, ISO8601::PlainMonthDay plainMonthDay,
+    JSObject* calendar, TemporalShowCalendar showCalendar)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    WTF::String calendarString = TemporalCalendar::formatCalendarAnnotation(globalObject, calendar,
+        showCalendar);
+    RETURN_IF_EXCEPTION(scope, { });
+    String dateString;
+    switch (showCalendar) {
+    case TemporalShowCalendar::Always:
+    case TemporalShowCalendar::Critical:
+         dateString = ISO8601::temporalDateToString(plainMonthDay.isoPlainDate());
+         break;
+    default: {
+          JSString* jsString = calendar->toString(globalObject);
+          RETURN_IF_EXCEPTION(scope, { });
+          StringView calendar = jsString->view(globalObject);
+          RETURN_IF_EXCEPTION(scope, { });
+          if (calendar != "iso8601"_s)
+              dateString = ISO8601::temporalDateToString(plainMonthDay.isoPlainDate());
+          else
+              dateString = ISO8601::temporalMonthDayToString(plainMonthDay);
+          break;
+    }
+    }
+    return makeString(dateString, calendarString);
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.prototype.with
 String TemporalPlainMonthDay::toString(JSGlobalObject* globalObject, JSValue optionsValue) const
 {
@@ -154,10 +184,11 @@ String TemporalPlainMonthDay::toString(JSGlobalObject* globalObject, JSValue opt
     if (!options)
         return toString();
 
-    String calendarName = toTemporalCalendarName(globalObject, options);
+    auto showCalendar = getTemporalShowCalendarNameOption(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
 
-    return ISO8601::temporalMonthDayToString(m_plainMonthDay, calendarName);
+    RELEASE_AND_RETURN(scope, temporalMonthDayToString(globalObject, m_plainMonthDay,
+        calendar(), showCalendar));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.from

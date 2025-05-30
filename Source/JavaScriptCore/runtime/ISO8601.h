@@ -492,7 +492,7 @@ String temporalTimeToString(PlainTime, std::tuple<Precision, unsigned>);
 String temporalDateToString(PlainDate);
 String temporalDateTimeToString(PlainDate, PlainTime, std::tuple<Precision, unsigned>);
 String temporalYearMonthToString(PlainYearMonth, StringView);
-String temporalMonthDayToString(PlainMonthDay, StringView);
+String temporalMonthDayToString(PlainMonthDay);
 String monthCode(uint32_t);
 bool validMonthCode(StringView);
 uint8_t monthFromCode(StringView);
