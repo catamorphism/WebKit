@@ -108,7 +108,8 @@ JSObject* TemporalCalendar::toTemporalCalendarWithISODefault(JSGlobalObject* glo
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-totemporalcalendaridentifier
-JSObject* TemporalCalendar::toTemporalCalendarIdentifier(JSGlobalObject* globalObject, JSValue temporalCalendarLike)
+std::variant<TemporalCalendar*, CalendarID>
+TemporalCalendar::toTemporalCalendarIdentifier(JSGlobalObject* globalObject, JSValue temporalCalendarLike)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -147,11 +148,12 @@ JSObject* TemporalCalendar::toTemporalCalendarIdentifier(JSGlobalObject* globalO
 
     ASSERT(calendarId);
 
-    return TemporalCalendar::create(vm, globalObject->calendarStructure(), calendarId.value());
+    return calendarId.value();
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-gettemporalcalendarslotvaluewithisodefault
-JSObject* TemporalCalendar::getTemporalCalendarWithISODefault(JSGlobalObject* globalObject, JSValue itemValue)
+std::variant<TemporalCalendar*, CalendarID>
+TemporalCalendar::getTemporalCalendarWithISODefault(JSGlobalObject* globalObject, JSValue itemValue)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -168,7 +170,7 @@ JSObject* TemporalCalendar::getTemporalCalendarWithISODefault(JSGlobalObject* gl
     JSValue calendar = itemValue.get(globalObject, vm.propertyNames->calendar);
     RETURN_IF_EXCEPTION(scope, { });
     if (calendar.isUndefined())
-        return TemporalCalendar::create(vm, globalObject->calendarStructure(), iso8601CalendarID()); 
+        return iso8601CalendarID();
     RELEASE_AND_RETURN(scope, toTemporalCalendarIdentifier(globalObject, calendar));
 }
 
@@ -215,7 +217,7 @@ std::optional<CalendarID> TemporalCalendar::isBuiltinCalendar(StringView string)
     return std::nullopt;
 }
 
-TemporalCalendar* TemporalCalendar::canonicalizeCalendar(JSGlobalObject* globalObject, StringView id)
+CalendarID TemporalCalendar::canonicalizeCalendar(JSGlobalObject* globalObject, StringView id)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -233,7 +235,7 @@ TemporalCalendar* TemporalCalendar::canonicalizeCalendar(JSGlobalObject* globalO
         throwRangeError(globalObject, scope, makeString("unsupported calendar "_s, id));
         return { };
     }
-    return TemporalCalendar::create(vm, globalObject->calendarStructure(), canonicalID.value());
+    return canonicalID.value();
 }
 
 
@@ -680,7 +682,7 @@ static String toOffsetString(JSGlobalObject* globalObject, JSValue argument)
 std::tuple<std::optional<double>, std::optional<double>, std::optional<String>, std::optional<double>,
 std::optional<double>, std::optional<double>, std::optional<double>, std::optional<double>,
 std::optional<double>, std::optional<double>, std::optional<String>, std::optional<ISO8601::TimeZone>>
-TemporalCalendar::prepareCalendarFields(JSGlobalObject* globalObject, JSObject*, JSObject* fields,
+TemporalCalendar::prepareCalendarFields(JSGlobalObject* globalObject, CalendarID, JSObject* fields,
     Vector<FieldName> fieldNames, std::optional<Vector<FieldName>> requiredFieldNames)
 {
     VM& vm = globalObject->vm();
@@ -802,14 +804,14 @@ TemporalCalendar::prepareCalendarFields(JSGlobalObject* globalObject, JSObject*,
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-calendarresolvefields
-static void calendarResolveFields(JSGlobalObject* globalObject, JSObject* calendar, std::optional<double> optionalYear,
+static void calendarResolveFields(JSGlobalObject* globalObject, CalendarID calendar, std::optional<double> optionalYear,
     std::optional<double> optionalMonth, std::optional<String> optionalMonthCode, std::optional<double> optionalDay,
     double& month, TemporalDateFormat format)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    if (TemporalCalendar::isISO8601(calendar)) {
+    if (calendar == iso8601CalendarID()) {
         if ((format == TemporalDateFormat::Date || format == TemporalDateFormat::YearMonth) && !optionalYear) {
             throwTypeError(globalObject, scope, "year property missing in Temporal.ZonedDateTime.from"_s);
             return;
@@ -852,7 +854,7 @@ static void calendarResolveFields(JSGlobalObject* globalObject, JSObject* calend
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-calendardatetoiso
-static ISO8601::PlainDate calendarDateToISO(JSGlobalObject* globalObject, JSObject* calendar,
+static ISO8601::PlainDate calendarDateToISO(JSGlobalObject* globalObject, CalendarID calendar,
     std::optional<double> optionalYear,
     std::optional<double> optionalMonth, std::optional<double> optionalDay,
     TemporalOverflow overflow)
@@ -860,7 +862,7 @@ static ISO8601::PlainDate calendarDateToISO(JSGlobalObject* globalObject, JSObje
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    if (TemporalCalendar::isISO8601(calendar)) {
+    if (calendar == iso8601CalendarID()) {
         ASSERT(optionalYear && optionalMonth && optionalDay);
         auto result = TemporalPlainDate::regulateISODate(optionalYear.value(),
             optionalMonth.value(), optionalDay.value(), overflow);
@@ -876,7 +878,7 @@ static ISO8601::PlainDate calendarDateToISO(JSGlobalObject* globalObject, JSObje
 
 // https://tc39.es/proposal-temporal/#sec-temporal-calendardatefromfields
 static ISO8601::PlainDate calendarDateFromFields(JSGlobalObject* globalObject,
-    JSObject* calendar, std::optional<double> optionalYear,
+    CalendarID calendar, std::optional<double> optionalYear,
     std::optional<double> optionalMonth, std::optional<String> optionalMonthCode, std::optional<double> optionalDay,
     TemporalOverflow overflow)
 {
@@ -897,7 +899,7 @@ static ISO8601::PlainDate calendarDateFromFields(JSGlobalObject* globalObject,
 
 // https://tc39.es/proposal-temporal/#sec-temporal-interprettemporaldatetimefields
 ISO8601::PlainDateTime
-TemporalCalendar::interpretTemporalDateTimeFields(JSGlobalObject* globalObject, JSObject* calendar,
+TemporalCalendar::interpretTemporalDateTimeFields(JSGlobalObject* globalObject, CalendarID calendar,
     std::optional<double> optionalYear, std::optional<double> optionalMonth, std::optional<String> optionalMonthCode,
     std::optional<double> optionalDay, double hour, double minute, double second, double millisecond,
     double microsecond, double nanosecond, TemporalOverflow overflow)

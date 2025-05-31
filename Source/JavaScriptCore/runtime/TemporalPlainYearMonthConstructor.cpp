@@ -112,7 +112,7 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainYearMonth, (JSGlobalObject* globa
     if (argumentCount < 2)
         return throwVMRangeError(globalObject, scope, "Temporal.PlainYearMonth requires at least two arguments"_s);
 
-    std::optional<JSObject*> calendar = std::nullopt;
+    CalendarID calendar = iso8601CalendarID();
     if (argumentCount > 2) {
         auto value = callFrame->uncheckedArgument(2);
         if (!value.isUndefined()) {
@@ -138,10 +138,7 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainYearMonth, (JSGlobalObject* globa
         return throwVMRangeError(globalObject, scope, "Temporal.PlainYearMonth: not a valid ISO date"_s);
     };
 
-    if (calendar)
-        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainYearMonth::tryCreateIfValid(globalObject, structure, ISO8601::PlainDate(isoYear, isoMonth, referenceDay), calendar.value())));
-    else
-        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainYearMonth::tryCreateIfValid(globalObject, structure, ISO8601::PlainDate(isoYear, isoMonth, referenceDay), iso8601CalendarID())));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainYearMonth::tryCreateIfValid(globalObject, structure, ISO8601::PlainDate(isoYear, isoMonth, referenceDay), calendar)));
 }
 
 JSC_DEFINE_HOST_FUNCTION(callTemporalPlainYearMonth, (JSGlobalObject* globalObject, CallFrame*))

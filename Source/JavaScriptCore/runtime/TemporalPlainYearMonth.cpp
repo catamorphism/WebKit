@@ -38,17 +38,17 @@ namespace JSC {
 
 const ClassInfo TemporalPlainYearMonth::s_info = { "Object"_s, &Base::s_info, nullptr, nullptr, CREATE_METHOD_TABLE(TemporalPlainYearMonth) };
 
-TemporalPlainYearMonth* TemporalPlainYearMonth::create(VM& vm, Structure* structure, ISO8601::PlainYearMonth&& plainYearMonth, JSObject* calendar)
+TemporalPlainYearMonth* TemporalPlainYearMonth::create(VM& vm, Structure* structure, ISO8601::PlainYearMonth&& plainYearMonth, TemporalCalendar* calendar)
 {
     auto* object = new (NotNull, allocateCell<TemporalPlainYearMonth>(vm)) TemporalPlainYearMonth(vm, structure, WTFMove(plainYearMonth), calendar);
-    object->finishCreation(vm);
+    object->finishCreation(vm, true);
     return object;
 }
 
 TemporalPlainYearMonth* TemporalPlainYearMonth::create(VM& vm, Structure* structure, ISO8601::PlainYearMonth&& plainYearMonth, CalendarID calendarId)
 {
     auto* object = new (NotNull, allocateCell<TemporalPlainYearMonth>(vm)) TemporalPlainYearMonth(vm, structure, WTFMove(plainYearMonth), calendarId);
-    object->finishCreation(vm);
+    object->finishCreation(vm, false);
     return object;
 }
 
@@ -57,34 +57,34 @@ Structure* TemporalPlainYearMonth::createStructure(VM& vm, JSGlobalObject* globa
     return Structure::create(vm, globalObject, prototype, TypeInfo(ObjectType, StructureFlags), info());
 }
 
-TemporalPlainYearMonth::TemporalPlainYearMonth(VM& vm, Structure* structure, ISO8601::PlainYearMonth&& plainYearMonth, JSObject* calendar)
+TemporalPlainYearMonth::TemporalPlainYearMonth(VM& vm, Structure* structure, ISO8601::PlainYearMonth&& plainYearMonth, TemporalCalendar* calendar)
     : Base(vm, structure)
     , m_plainYearMonth(WTFMove(plainYearMonth))
-    , m_customCalendar(calendar)
+    , m_calendarId(calendar->identifier())
 {
+    m_calendar.set(vm, this, calendar);
 }
 
 TemporalPlainYearMonth::TemporalPlainYearMonth(VM& vm, Structure* structure, ISO8601::PlainYearMonth&& plainYearMonth, CalendarID calendarId)
     : Base(vm, structure)
     , m_plainYearMonth(WTFMove(plainYearMonth))
-    , m_builtInCalendarId(calendarId)
+    , m_calendarId(calendarId)
 {
 }
 
-void TemporalPlainYearMonth::finishCreation(VM& vm)
+void TemporalPlainYearMonth::finishCreation(VM& vm, bool calendarAlreadyInitialized)
 {
     Base::finishCreation(vm);
     ASSERT(inherits(info()));
-    if (m_builtInCalendarId) {
-        m_builtInCalendar.initLater(
+    if (!calendarAlreadyInitialized) {
+        m_calendar.initLater(
             [] (const auto& init) {
                 VM& vm = init.vm;
                 auto* plainYearMonth = jsCast<TemporalPlainYearMonth*>(init.owner);
                 auto* globalObject = plainYearMonth->globalObject();
-                ASSERT(plainYearMonth->m_builtInCalendarId);
-                auto* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), plainYearMonth->m_builtInCalendarId.value());
+                auto* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), plainYearMonth->m_calendarId);
                 init.set(calendar);
-        });
+            });
     }
 }
 
@@ -94,16 +94,14 @@ void TemporalPlainYearMonth::visitChildrenImpl(JSCell* cell, Visitor& visitor)
     Base::visitChildren(cell, visitor);
 
     auto* thisObject = jsCast<TemporalPlainYearMonth*>(cell);
-    if (thisObject->m_customCalendar)
-        Base::visitChildren(static_cast<JSCell*>(thisObject->m_customCalendar.value()), visitor);
-    thisObject->m_builtInCalendar.visit(visitor);
+    thisObject->m_calendar.visit(visitor);
 }
 
 DEFINE_VISIT_CHILDREN(TemporalPlainYearMonth);
 
 // CreateTemporalYearMonth ( isoDate, calendar [, newTarget ] )
 // https://tc39.es/proposal-temporal/#sec-temporal-createtemporalyearmonth
-TemporalPlainYearMonth* TemporalPlainYearMonth::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::PlainDate&& plainDate, JSObject* calendar)
+TemporalPlainYearMonth* TemporalPlainYearMonth::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::PlainDate&& plainDate, TemporalCalendar* calendar)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -226,7 +224,7 @@ TemporalPlainYearMonth* TemporalPlainYearMonth::from(JSGlobalObject* globalObjec
         if (itemValue.inherits<TemporalPlainYearMonth>())
             return jsCast<TemporalPlainYearMonth*>(itemValue);
 
-        JSObject* calendar = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, itemValue); 
+        auto calendar = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, itemValue); 
 
         std::variant<JSObject*, TemporalOverflow> optionsOrOverflow = TemporalOverflow::Constrain;
         if (options)
@@ -235,7 +233,9 @@ TemporalPlainYearMonth* TemporalPlainYearMonth::from(JSGlobalObject* globalObjec
         auto plainYearMonth = TemporalCalendar::isoDateFromFields(globalObject, asObject(itemValue), TemporalDateFormat::YearMonth, optionsOrOverflow, overflow);
         RETURN_IF_EXCEPTION(scope, { });
 
-        return TemporalPlainYearMonth::create(vm, globalObject->plainYearMonthStructure(), WTFMove(plainYearMonth), calendar);
+        if (std::holds_alternative<TemporalCalendar*>(calendar))
+            return TemporalPlainYearMonth::create(vm, globalObject->plainYearMonthStructure(), WTFMove(plainYearMonth), std::get<TemporalCalendar*>(calendar));
+        return TemporalPlainYearMonth::create(vm, globalObject->plainYearMonthStructure(), WTFMove(plainYearMonth), std::get<CalendarID>(calendar));
     }
 
     throwTypeError(globalObject, scope, "can only convert to PlainYearMonth from object or string values"_s);

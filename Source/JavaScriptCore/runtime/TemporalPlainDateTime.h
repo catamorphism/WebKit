@@ -43,11 +43,11 @@ public:
     }
 
     static TemporalPlainDateTime* create(VM&, Structure*, ISO8601::PlainDate&&, ISO8601::PlainTime&&, CalendarID);
-    static TemporalPlainDateTime* create(VM&, Structure*, ISO8601::PlainDate&&, ISO8601::PlainTime&&, JSObject*);
+    static TemporalPlainDateTime* create(VM&, Structure*, ISO8601::PlainDate&&, ISO8601::PlainTime&&, TemporalCalendar*);
     static TemporalPlainDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, ISO8601::PlainTime&&, CalendarID);
-    static TemporalPlainDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, ISO8601::PlainTime&&, JSObject*);
+    static TemporalPlainDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, ISO8601::PlainTime&&, TemporalCalendar*);
     static TemporalPlainDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::Duration&&, CalendarID);
-    static TemporalPlainDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::Duration&&, JSObject*);
+    static TemporalPlainDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::Duration&&, TemporalCalendar*);
     static Structure* createStructure(VM&, JSGlobalObject*, JSValue);
 
     DECLARE_INFO;
@@ -55,12 +55,7 @@ public:
     static TemporalPlainDateTime* from(JSGlobalObject*, JSValue, std::optional<JSValue>);
     static int32_t compare(TemporalPlainDateTime*, TemporalPlainDateTime*);
 
-    JSObject* calendar() const {
-        ASSERT(m_builtInCalendarId || m_customCalendar);
-        if (m_builtInCalendarId)
-            return m_builtInCalendar.get(this);
-        return m_customCalendar.value();
-    }
+    TemporalCalendar* calendar() const { return m_calendar.get(this); }
     ISO8601::PlainDate plainDate() const { return m_plainDate; }
     ISO8601::PlainTime plainTime() const { return m_plainTime; }
 
@@ -111,15 +106,13 @@ public:
 
 private:
     TemporalPlainDateTime(VM&, Structure*, ISO8601::PlainDate&&, ISO8601::PlainTime&&, CalendarID);
-    TemporalPlainDateTime(VM&, Structure*, ISO8601::PlainDate&&, ISO8601::PlainTime&&, JSObject*);
-    void finishCreation(VM&);
+    TemporalPlainDateTime(VM&, Structure*, ISO8601::PlainDate&&, ISO8601::PlainTime&&, TemporalCalendar*);
+    void finishCreation(VM&, bool);
 
     ISO8601::PlainDate m_plainDate;
     ISO8601::PlainTime m_plainTime;
-    std::optional<CalendarID> m_builtInCalendarId;
-    std::optional<JSObject*> m_customCalendar;
-    // Should not be accessed if !m_builtInCalendarID
-    LazyProperty<TemporalPlainDateTime, TemporalCalendar> m_builtInCalendar;
+    CalendarID m_calendarId;
+    LazyProperty<TemporalPlainDateTime, TemporalCalendar> m_calendar;
 };
 
 // https://tc39.es/proposal-temporal/#sec-temporal-isodatetimewithinlimits

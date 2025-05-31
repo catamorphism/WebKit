@@ -63,9 +63,11 @@ public:
     DECLARE_INFO;
 
     static JSObject* toTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
-    static JSObject* getTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
+    static std::variant<TemporalCalendar*, CalendarID>
+        getTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
     static std::optional<CalendarID> parseTemporalCalendarString(JSGlobalObject*, StringView);
-    static JSObject* toTemporalCalendarIdentifier(JSGlobalObject*, JSValue);
+    static std::variant<TemporalCalendar*, CalendarID>
+        toTemporalCalendarIdentifier(JSGlobalObject*, JSValue);
     // static CalendarID getTemporalCalendarIdentifierWithISODefault(JSGlobalObject*, JSValue);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, JSObject*, TemporalDateFormat, std::variant<JSObject*, TemporalOverflow>, TemporalOverflow&);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, TemporalDateFormat, double year, double month, double day, TemporalOverflow);
@@ -73,10 +75,10 @@ public:
     static std::tuple<std::optional<double>, std::optional<double>, std::optional<String>, std::optional<double>,
         std::optional<double>, std::optional<double>, std::optional<double>, std::optional<double>,
         std::optional<double>, std::optional<double>, std::optional<String>, std::optional<ISO8601::TimeZone>>
-        prepareCalendarFields(JSGlobalObject*, JSObject*, JSObject*, Vector<FieldName>,
+        prepareCalendarFields(JSGlobalObject*, CalendarID, JSObject*, Vector<FieldName>,
             std::optional<Vector<FieldName>>);
     static ISO8601::PlainDateTime interpretTemporalDateTimeFields(JSGlobalObject*,
-        JSObject*, std::optional<double>, std::optional<double>, std::optional<String>, std::optional<double>,
+        CalendarID, std::optional<double>, std::optional<double>, std::optional<String>, std::optional<double>,
         double, double, double, double, double, double, TemporalOverflow);
     static ISO8601::Duration differenceTemporalPlainYearMonth(JSGlobalObject*,
         bool, const ISO8601::PlainYearMonth&, const ISO8601::PlainYearMonth&,
@@ -101,7 +103,7 @@ public:
     }
 
     static std::optional<CalendarID> isBuiltinCalendar(StringView);
-    static TemporalCalendar* canonicalizeCalendar(JSGlobalObject*, StringView);
+    static CalendarID canonicalizeCalendar(JSGlobalObject*, StringView);
 
     static JSObject* from(JSGlobalObject*, JSValue);
 

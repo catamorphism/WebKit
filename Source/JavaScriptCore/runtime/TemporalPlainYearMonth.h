@@ -41,9 +41,9 @@ public:
         return vm.temporalPlainYearMonthSpace<mode>();
     }
 
-    static TemporalPlainYearMonth* create(VM&, Structure*, ISO8601::PlainYearMonth&&, JSObject*);
+    static TemporalPlainYearMonth* create(VM&, Structure*, ISO8601::PlainYearMonth&&, TemporalCalendar*);
     static TemporalPlainYearMonth* create(VM&, Structure*, ISO8601::PlainYearMonth&&, CalendarID);
-    static TemporalPlainYearMonth* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, JSObject*);
+    static TemporalPlainYearMonth* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, TemporalCalendar*);
     static TemporalPlainYearMonth* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, CalendarID);
     static Structure* createStructure(VM&, JSGlobalObject*, JSValue);
 
@@ -57,12 +57,7 @@ public:
     static TemporalPlainYearMonth* from(JSGlobalObject*, JSValue, std::optional<JSValue>);
     static TemporalPlainYearMonth* from(JSGlobalObject*, WTF::String);
 
-   JSObject* calendar() const {
-        ASSERT(m_builtInCalendarId || m_customCalendar);
-        if (m_builtInCalendarId)
-            return m_builtInCalendar.get(this);
-        return m_customCalendar.value();
-    }
+    TemporalCalendar* calendar() const { return m_calendar.get(this); }
     ISO8601::PlainYearMonth plainYearMonth() const { return m_plainYearMonth; }
 
 #define JSC_DEFINE_TEMPORAL_PLAIN_YEAR_MONTH_FIELD(name, capitalizedName) \
@@ -86,19 +81,17 @@ public:
     DECLARE_VISIT_CHILDREN;
 
 private:
-    TemporalPlainYearMonth(VM&, Structure*, ISO8601::PlainYearMonth&&, JSObject*);
+    TemporalPlainYearMonth(VM&, Structure*, ISO8601::PlainYearMonth&&, TemporalCalendar*);
     TemporalPlainYearMonth(VM&, Structure*, ISO8601::PlainYearMonth&&, CalendarID);
-    void finishCreation(VM&);
+    void finishCreation(VM&, bool);
 
     template<typename CharacterType>
     static std::optional<ISO8601::PlainYearMonth> parse(StringParsingBuffer<CharacterType>&);
     static ISO8601::PlainYearMonth fromObject(JSGlobalObject*, JSObject*);
 
     ISO8601::PlainYearMonth m_plainYearMonth;
-    std::optional<CalendarID> m_builtInCalendarId;
-    std::optional<JSObject*> m_customCalendar;
-    // Should not be accessed if !m_builtInCalendarID
-    LazyProperty<TemporalPlainYearMonth, TemporalCalendar> m_builtInCalendar;
+    CalendarID m_calendarId;
+    LazyProperty<TemporalPlainYearMonth, TemporalCalendar> m_calendar;
 };
 
 } // namespace JSC

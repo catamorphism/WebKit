@@ -44,9 +44,9 @@ public:
     }
 
     static TemporalZonedDateTime* create(VM&, Structure*, ExactTime&&, TimeZone&&, CalendarID);
-    static TemporalZonedDateTime* create(VM&, Structure*, ExactTime&&, TimeZone&&, JSObject*);
+    static TemporalZonedDateTime* create(VM&, Structure*, ExactTime&&, TimeZone&&, TemporalCalendar*);
     static TemporalZonedDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ExactTime&&, TimeZone&&, CalendarID);
-    static TemporalZonedDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ExactTime&&, TimeZone&&, JSObject*);
+    static TemporalZonedDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ExactTime&&, TimeZone&&, TemporalCalendar*);
     static Structure* createStructure(VM&, JSGlobalObject*, JSValue);
 
     DECLARE_INFO;
@@ -54,12 +54,7 @@ public:
     static TemporalZonedDateTime* from(JSGlobalObject*, JSValue, std::optional<JSValue>);
     static int32_t compare(const TemporalZonedDateTime*, const TemporalZonedDateTime*);
 
-    JSObject* calendar() const {
-        ASSERT(m_builtInCalendarId || m_customCalendar);
-        if (m_builtInCalendarId)
-            return m_builtInCalendar.get(this);
-        return m_customCalendar.value();
-    }
+    TemporalCalendar* calendar() const { return m_calendar.get(this); }
 
     TemporalZonedDateTime* addDurationToZonedDateTime(JSGlobalObject*, bool, ISO8601::Duration, JSObject*);
     TemporalZonedDateTime* with(JSGlobalObject*, JSObject* temporalDateLike, JSValue options);
@@ -106,18 +101,16 @@ public:
 
 private:
     TemporalZonedDateTime(VM&, Structure*, ExactTime&&, TimeZone&&, CalendarID);
-    TemporalZonedDateTime(VM&, Structure*, ExactTime&&, TimeZone&&, JSObject*);
-    void finishCreation(VM&);
+    TemporalZonedDateTime(VM&, Structure*, ExactTime&&, TimeZone&&, TemporalCalendar*);
+    void finishCreation(VM&, bool);
 
     ISO8601::Duration differenceTemporalZonedDateTime(bool, JSGlobalObject*, JSValue,
         TemporalZonedDateTime*);
 
     Packed<ExactTime> m_exactTime;
     TimeZone m_timeZone;
-    std::optional<CalendarID> m_builtInCalendarId;
-    std::optional<JSObject*> m_customCalendar;
-    // Should not be accessed if !m_builtInCalendarId
-    LazyProperty<TemporalZonedDateTime, TemporalCalendar> m_builtInCalendar;
+    CalendarID m_calendarId;
+    LazyProperty<TemporalZonedDateTime, TemporalCalendar> m_calendar;
 };
 
 } // namespace JSC

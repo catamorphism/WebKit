@@ -256,7 +256,7 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
     ISO8601::PlainDate isoDate;
     std::optional<ISO8601::PlainTime> time;
     std::optional<ISO8601::TimeZone> timeZone;
-    std::optional<JSObject*> calendar;
+    std::optional<CalendarID> calendar;
     std::optional<String> offsetString;
     if (value.isObject()) {
         JSObject* obj = asObject(value);
@@ -266,7 +266,12 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
             return jsCast<TemporalPlainDate*>(obj);
         if (obj->inherits<TemporalPlainDateTime>())
             RELEASE_AND_RETURN(scope, TemporalPlainDate::from(globalObject, value, std::nullopt));
-        calendar = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, obj);
+        auto calendarOrCalendarID = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, obj);
+        RETURN_IF_EXCEPTION(scope, { });
+        if (std::holds_alternative<TemporalCalendar*>(calendarOrCalendarID))
+            calendar = std::get<TemporalCalendar*>(calendarOrCalendarID)->identifier();
+        else
+            calendar = std::get<CalendarID>(calendarOrCalendarID);
         RETURN_IF_EXCEPTION(scope, { });
         auto fields =  Vector { FieldName::Day, FieldName::Hour, FieldName::Microsecond,
             FieldName::Millisecond, FieldName::Minute, FieldName::Month, FieldName::MonthCode,

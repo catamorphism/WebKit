@@ -275,10 +275,12 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncWithCalendar, (JSGlob
     if (!zonedDateTime)
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.withCalendar called on value that's not a ZonedDateTime"_s);
 
-    JSObject* calendar = TemporalCalendar::toTemporalCalendarIdentifier(globalObject, callFrame->argument(0));
+    auto calendar = TemporalCalendar::toTemporalCalendarIdentifier(globalObject, callFrame->argument(0));
     RETURN_IF_EXCEPTION(scope, { });
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), zonedDateTime->exactTime(), zonedDateTime->timeZone(), calendar)));
+    if (std::holds_alternative<TemporalCalendar*>(calendar))
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), zonedDateTime->exactTime(), zonedDateTime->timeZone(), std::get<TemporalCalendar*>(calendar))));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), zonedDateTime->exactTime(), zonedDateTime->timeZone(), std::get<CalendarID>(calendar))));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.until
