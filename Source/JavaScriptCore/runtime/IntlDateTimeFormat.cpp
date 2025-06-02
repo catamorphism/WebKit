@@ -1510,7 +1510,8 @@ JSValue IntlDateTimeFormat::format(JSGlobalObject* globalObject, ExactTime value
 
         if (calendar
             && (calendar.value() != iso8601CalendarID()
-                || dateTimeFormat == TemporalDateTimeFormat::PlainMonthDay)
+                || (dateTimeFormat == TemporalDateTimeFormat::PlainMonthDay
+                    || dateTimeFormat == TemporalDateTimeFormat::PlainYearMonth))
             && TemporalCalendar::calendarIdToString(calendar.value()) != m_calendar) {
             throwRangeError(globalObject, scope, "calendar in Temporal object must match locale calendar"_s);
             return { };

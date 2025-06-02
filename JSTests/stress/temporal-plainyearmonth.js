@@ -43,7 +43,8 @@ const yearMonth = new Temporal.PlainYearMonth(2025, 4, "iso8601");
 {
     shouldBe(yearMonth.toString(), '2025-04');
     shouldBe(yearMonth.toJSON(), yearMonth.toString());
-    shouldBe(yearMonth.toLocaleString("en"), "4/2025");
+    const hasCalendar = new Temporal.PlainYearMonth(2025, 4, "gregory");
+    shouldBe(hasCalendar.toLocaleString("en-US"), "4/2025");
 }
 
 {

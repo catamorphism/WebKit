@@ -87,6 +87,8 @@ skip:
     - test/intl402/Temporal/PlainYearMonth/from/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainYearMonth/from/one-of-era-erayear-undefined.js
     - test/intl402/Temporal/PlainYearMonth/from/reference-day-gregory.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/equals/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/since/infinity-throws-rangeerror.js
      ## depends on "japanese" calendar support (eras)
     - test/intl402/Temporal/PlainDate/from/remapping-era.js
     - test/intl402/Temporal/PlainDate/prototype/with/cross-era-boundary.js
@@ -108,6 +110,7 @@ skip:
     - test/intl402/Temporal/PlainYearMonth/from/calendar-not-supporting-eras.js
     - test/intl402/Temporal/PlainYearMonth/from/reference-day-hebrew.js
     - test/intl402/Temporal/PlainYearMonth/prototype/add/options-undefined.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/subtract/options-undefined.js
      ## depends on "islamic-tbla" calendar support
     - test/intl402/Temporal/PlainMonthDay/prototype/toLocaleString/dateStyle.js
      ## depends on all supported calendars
@@ -130,13 +133,8 @@ skip:
     - test/intl402/Temporal/PlainYearMonth/canonicalize-calendar.js
     - test/intl402/Temporal/PlainYearMonth/from/canonicalize-calendar.js
     - test/intl402/Temporal/PlainYearMonth/prototype/equals/canonicalize-calendar.js
-     ## ...
-    - test/intl402/Temporal/PlainYearMonth/prototype/equals/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainYearMonth/prototype/since/canonicalize-calendar.js
-    - test/intl402/Temporal/PlainYearMonth/prototype/since/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/PlainYearMonth/prototype/since/mixed-calendar-invalid.js
-    - test/intl402/Temporal/PlainYearMonth/prototype/subtract/options-undefined.js
-    - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/calendar-mismatch.js
+     ## ...
     - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/dateStyle.js
     - test/intl402/Temporal/PlainYearMonth/prototype/toString/calendarname-always.js
     - test/intl402/Temporal/PlainYearMonth/prototype/toString/calendarname-auto.js
