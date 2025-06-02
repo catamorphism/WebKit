@@ -744,6 +744,11 @@ ISO8601::Duration TemporalPlainDateTime::differenceTemporalPlainDateTime(JSGloba
     auto plainDateTimeThis = ISO8601::PlainDateTime(plainDate(), plainTime());
     auto plainDateTimeOther = ISO8601::PlainDateTime(other->plainDate(), other->plainTime());
 
+    if (calendar()->identifier() != other->calendar()->identifier()) {
+        throwRangeError(globalObject, scope, "calendars must match in since or until"_s);
+        return { };
+    }
+
     if (!TemporalCalendar::isoDateTimeCompare(plainDateTimeThis, plainDateTimeOther))
         return ISO8601::Duration();
 

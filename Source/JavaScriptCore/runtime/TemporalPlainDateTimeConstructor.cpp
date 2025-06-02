@@ -105,7 +105,7 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainDateTime, (JSGlobalObject* global
         auto value = callFrame->uncheckedArgument(count);
         if (!value.isUndefined()) {
             if (!value.isString())
-                return throwVMTypeError(globalObject, scope, "Temporal.PlainDate calendar property must be a string"_s);
+                return throwVMTypeError(globalObject, scope, "Temporal.PlainDateTime calendar property must be a string"_s);
             String calendarString = value.toWTFString(globalObject);
             RETURN_IF_EXCEPTION(scope, { });
             auto calendar = TemporalCalendar::canonicalizeCalendar(globalObject, calendarString);

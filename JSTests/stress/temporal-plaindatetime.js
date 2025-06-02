@@ -342,6 +342,10 @@ shouldBe(Temporal.PlainDateTime.prototype.until.length, 1);
     shouldBe(earlier.until(later, { smallestUnit: "years", roundingIncrement: 4, roundingMode: "halfExpand" }).toString(), "P4Y");
 
     shouldThrow(() => pdt1.until('1969-01-01', { largestUnit: 'day', smallestUnit: 'month' }), RangeError);
+
+    const differentCalendar = new Temporal.PlainDateTime(1970, 1, 1, 0, 0, 0, 0, 0, 0, "gregory");
+    shouldThrow(() => pdt.since(differentCalendar), RangeError);
+    shouldThrow(() => pdt.until(differentCalendar), RangeError);
 } 
 
 {
