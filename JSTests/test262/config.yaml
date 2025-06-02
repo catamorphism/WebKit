@@ -94,6 +94,8 @@ skip:
     - test/intl402/Temporal/PlainMonthDay/from/fields-underspecified.js
     - test/intl402/Temporal/PlainMonthDay/from/reference-date-noniso-calendar.js
     - test/intl402/Temporal/PlainMonthDay/from/reference-year-1972.js
+     ## depends on "islamic-tbla" calendar support
+    - test/intl402/Temporal/PlainMonthDay/prototype/toLocaleString/dateStyle.js
      ## depends on all supported calendars
     - test/intl402/Temporal/PlainMonthDay/from/constrain-to-leap-day.js
      ## depends on calendar aliases
@@ -112,8 +114,6 @@ skip:
     - test/intl402/Temporal/PlainMonthDay/from/canonicalize-calendar.js
     - test/intl402/Temporal/PlainMonthDay/prototype/equals/canonicalize-calendar.js
      ## ...
-    - test/intl402/Temporal/PlainMonthDay/prototype/toLocaleString/calendar-mismatch.js
-    - test/intl402/Temporal/PlainMonthDay/prototype/toLocaleString/dateStyle.js
     - test/intl402/Temporal/PlainMonthDay/prototype/toPlainDate/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainMonthDay/prototype/toString/calendarname-always.js
     - test/intl402/Temporal/PlainMonthDay/prototype/toString/calendarname-auto.js

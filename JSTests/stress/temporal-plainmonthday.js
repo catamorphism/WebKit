@@ -41,7 +41,8 @@ const monthDay = new Temporal.PlainMonthDay(4, 29);
 {
     shouldBe(monthDay.toString(), '04-29');
     shouldBe(monthDay.toJSON(), monthDay.toString());
-    shouldBe(monthDay.toLocaleString({ locale: undefined }), '4/29');
+    const hasCalendar = new Temporal.PlainMonthDay(4, 29, "gregory");
+    shouldBe(hasCalendar.toLocaleString({ locale: "en-US" }), '4/29');
 }
 
 shouldBe(Temporal.PlainMonthDay.prototype.with.length, 1);

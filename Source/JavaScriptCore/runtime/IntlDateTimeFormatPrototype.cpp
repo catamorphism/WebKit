@@ -299,7 +299,8 @@ IntlDateTimeFormat::handleDateTimeValue(JSGlobalObject* globalObject, JSValue x,
             m_timeZone, isoDateTime, TemporalDisambiguation::Compatible);
         RETURN_IF_EXCEPTION(scope, { });
 
-        return std::tuple(epochNs, TemporalDateTimeFormat::PlainMonthDay, std::nullopt, std::nullopt);
+        return std::tuple(epochNs, TemporalDateTimeFormat::PlainMonthDay, std::nullopt,
+            plainMonthDay->calendar()->identifier());
     }
 
     // https://tc39.es/proposal-temporal/#sec-temporal-handledatetimetemporalyearmonth
