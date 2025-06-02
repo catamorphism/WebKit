@@ -29,6 +29,8 @@ shouldBe(Temporal.PlainDate.prototype.constructor, Temporal.PlainDate);
 {
     let date = new Temporal.PlainDate(1, 2, 3);
     shouldBe(String(date), `0001-02-03`);
+    shouldBe(date.era, undefined);
+    shouldBe(date.eraYear, undefined);
     shouldBe(date.year, 1);
     shouldBe(date.month, 2);
     shouldBe(date.day, 3);

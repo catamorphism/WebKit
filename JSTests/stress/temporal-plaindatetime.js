@@ -60,6 +60,8 @@ fields.forEach((field, i) => {
     shouldBe(pdt[field], i + 1);
 });
 
+shouldBe(pdt.era, undefined);
+shouldBe(pdt.eraYear, undefined);
 shouldBe(pdt.calendar instanceof Temporal.Calendar, true);
 shouldBe(pdt.calendar.toString(), 'iso8601');
 {
