@@ -77,12 +77,6 @@ skip:
     - test/intl402/Temporal/PlainDate/prototype/equals/canonicalize-calendar.js
     - test/intl402/Temporal/PlainDate/prototype/since/canonicalize-calendar.js
      ## ...
-    - test/intl402/Temporal/PlainDate/prototype/toString/calendarname-always.js
-    - test/intl402/Temporal/PlainDate/prototype/toString/calendarname-auto.js
-    - test/intl402/Temporal/PlainDate/prototype/toString/calendarname-critical.js
-    - test/intl402/Temporal/PlainDate/prototype/toString/calendarname-undefined.js
-    - test/intl402/Temporal/PlainDate/prototype/toString/calendarname-wrong-type.js
-    - test/intl402/Temporal/PlainDate/prototype/toString/options-undefined.js
     - test/intl402/Temporal/PlainDate/prototype/until/canonicalize-calendar.js
     - test/intl402/Temporal/PlainDate/prototype/until/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainDate/prototype/until/until-across-lunisolar-leap-months.js

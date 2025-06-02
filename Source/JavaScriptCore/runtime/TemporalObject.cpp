@@ -535,12 +535,21 @@ RoundingMode temporalRoundingMode(JSGlobalObject* globalObject, JSObject* option
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-gettemporalshowcalendarnameoption
-TemporalShowCalendar getTemporalShowCalendarNameOption(JSGlobalObject* globalObject, JSObject* options)
+TemporalShowCalendar getTemporalShowCalendarNameOption(JSGlobalObject* globalObject, JSValue optionsValue)
 {
-    return intlOption<TemporalShowCalendar>(globalObject, options, globalObject->vm().propertyNames->calendarName, {
-        { "auto"_s, TemporalShowCalendar::Auto }, { "always"_s, TemporalShowCalendar::Always },
-        { "never"_s, TemporalShowCalendar::Never }, { "critical"_s, TemporalShowCalendar::Critical }
-        }, "calendarName must be \"auto\", \"always\", \"never\", or \"critical\""_s, TemporalShowCalendar::Auto);
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    if (optionsValue.isUndefined())
+        return TemporalShowCalendar::Auto;
+    JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    RELEASE_AND_RETURN(scope,
+        intlOption<TemporalShowCalendar>(globalObject, options, globalObject->vm().propertyNames->calendarName, {
+            { "auto"_s, TemporalShowCalendar::Auto }, { "always"_s, TemporalShowCalendar::Always },
+            { "never"_s, TemporalShowCalendar::Never }, { "critical"_s, TemporalShowCalendar::Critical }
+            }, "calendarName must be \"auto\", \"always\", \"never\", or \"critical\""_s, TemporalShowCalendar::Auto));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-gettemporalshowoffsetoption

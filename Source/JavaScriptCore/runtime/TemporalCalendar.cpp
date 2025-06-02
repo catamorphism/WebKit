@@ -320,7 +320,7 @@ String TemporalCalendar::formatCalendarAnnotation(JSGlobalObject* globalObject,
     case TemporalShowCalendar::Never:
         return ""_s;
     case TemporalShowCalendar::Auto:
-        return ""_s;
+        return calendarString == "iso8601"_s ? ""_s : makeString("[u-ca="_s, calendarString, "]"_s);
     case TemporalShowCalendar::Critical:
         return makeString("[!u-ca="_s, calendarString, "]"_s);
     case TemporalShowCalendar::Always:

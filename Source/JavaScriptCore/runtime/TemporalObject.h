@@ -218,7 +218,7 @@ std::optional<TemporalUnit> temporalUnitType(StringView);
 std::optional<TemporalLargestUnit> temporalLargestUnit(JSGlobalObject*, JSObject* options, std::initializer_list<TemporalUnit> disallowedUnits, std::optional<TemporalUnit> autoValue);
 std::optional<TemporalUnit> temporalSmallestUnit(JSGlobalObject*, std::variant<JSObject*, TemporalUnit>, std::initializer_list<TemporalUnit>);
 std::tuple<TemporalUnit, TemporalUnit, RoundingMode, double> extractDifferenceOptions(JSGlobalObject*, JSValue, UnitGroup, TemporalUnit defaultSmallestUnit, TemporalUnit defaultLargestUnit);
-TemporalShowCalendar getTemporalShowCalendarNameOption(JSGlobalObject*, JSObject*);
+TemporalShowCalendar getTemporalShowCalendarNameOption(JSGlobalObject*, JSValue);
 TemporalShowOffset getTemporalShowOffsetOption(JSGlobalObject*, JSObject*);
 std::optional<TemporalDirectionOption> getDirectionOption(JSGlobalObject*, JSObject*);
 TemporalOffset getTemporalOffsetOption(JSGlobalObject*, JSObject*, TemporalOffset);

@@ -72,9 +72,9 @@ shouldBe(String(Temporal.PlainDate.from("2007-01-09T03:24:30+01:00[CocoaCappucci
 shouldBe(String(Temporal.PlainDate.from('2007-01-09 03:24:30+01:00[+01]')), `2007-01-09`);
 shouldBe(String(Temporal.PlainDate.from('2007-01-09 03:24:30+01:00[+01:00]')), `2007-01-09`);
 shouldBe(String(Temporal.PlainDate.from('2007-01-09 03:24:30+01:00[-01:00]')), `2007-01-09`);
-shouldBe(String(Temporal.PlainDate.from('2007-01-09 03:24:30+01:00[u-ca=japanese]')), `2007-01-09`);
-shouldBe(String(Temporal.PlainDate.from('2007-01-09 03:24:30+01:00[Europe/Brussels][u-ca=japanese]')), `2007-01-09`);
-shouldBe(String(Temporal.PlainDate.from('2007-01-09[u-ca=japanese]')), `2007-01-09`);
+shouldBe(String(Temporal.PlainDate.from('2007-01-09 03:24:30+01:00[u-ca=japanese]')), `2007-01-09[u-ca=japanese]`);
+shouldBe(String(Temporal.PlainDate.from('2007-01-09 03:24:30+01:00[Europe/Brussels][u-ca=japanese]')), `2007-01-09[u-ca=japanese]`);
+shouldBe(String(Temporal.PlainDate.from('2007-01-09[u-ca=japanese]')), `2007-01-09[u-ca=japanese]`);
 shouldBe(String(Temporal.PlainDate.from('2007-01-09[UTC][u-ca=iso8601]')), `2007-01-09`);
 {
     let date = Temporal.PlainDate.from('2007-01-09T03:24:30+01:00[Europe/Brussels]');
@@ -94,6 +94,9 @@ shouldBe(String(Temporal.PlainDate.from('2007-01-09[UTC][u-ca=iso8601]')), `2007
     shouldBe(Temporal.PlainDate.from({ year: 2007, month: 20, day: 40 }, { overflow: 'constrain' }).toString(), '2007-12-31');
 
     shouldBe(date.toString({ calendarName: "always" }), '2007-01-09[u-ca=iso8601]');
+    shouldBe(date.toString({ calendarName: "auto" }), '2007-01-09');
+    shouldBe(date.withCalendar("gregory").toString({ calendarName: "auto" }), '2007-01-09[u-ca=gregory]');
+    shouldBe(date.withCalendar("gregory").toString(undefined), '2007-01-09[u-ca=gregory]');
 
     shouldBe(date.toJSON(), date.toString());
     shouldBe(date.toLocaleString(), new Intl.DateTimeFormat().format(date));

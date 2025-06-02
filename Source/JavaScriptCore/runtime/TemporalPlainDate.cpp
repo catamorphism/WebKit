@@ -205,12 +205,7 @@ String TemporalPlainDate::toString(JSGlobalObject* globalObject, JSValue options
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
-    RETURN_IF_EXCEPTION(scope, { });
-
-    if (!options)
-        return toString();
-    auto showCalendar = getTemporalShowCalendarNameOption(globalObject, options);
+    auto showCalendar = getTemporalShowCalendarNameOption(globalObject, optionsValue);
     RETURN_IF_EXCEPTION(scope, { });
 
     RELEASE_AND_RETURN(scope, temporalDateToString(globalObject, m_plainDate,
