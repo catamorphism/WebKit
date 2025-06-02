@@ -62,7 +62,6 @@ skip:
     - test/built-ins/RegExp/regexp-modifiers/add-ignoreCase-affects-slash-lower-p.js
 
      # Depends on Calendar support
-    - test/built-ins/Temporal/ZonedDateTime/timezone-iso-string.js
     - test/intl402/Temporal/Duration/prototype/round/relativeto-infinity-throws-rangeerror.js
     - test/intl402/Temporal/Duration/prototype/total/relativeto-infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainDate/canonicalize-calendar.js

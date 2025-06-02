@@ -727,9 +727,8 @@ static bool parseTimeZoneIANAName(StringView string)
 
 // https://tc39.es/proposal-temporal/#sec-parsetimezoneidentifier
 // Returns a pair of the time zone and the original name
-static std::optional<ISO8601::TimeZone>
-parseTimeZoneIdentifier(JSGlobalObject* globalObject,
-    StringView identifier)
+std::optional<ISO8601::TimeZone>
+TemporalTimeZone::parseTimeZoneIdentifier(JSGlobalObject* globalObject, StringView identifier)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -752,7 +751,7 @@ parseTimeZoneIdentifier(JSGlobalObject* globalObject,
     return ISO8601::TimeZone::offset(offsetNanoseconds);
 }
 
-static std::optional<ISO8601::TimeZone> parseTimeZoneFromAnnotation(JSGlobalObject* globalObject,
+std::optional<ISO8601::TimeZone> TemporalTimeZone::parseTimeZoneFromAnnotation(JSGlobalObject* globalObject,
     const ISO8601::TimeZoneAnnotation& annotation)
 {
     if (annotation.m_offset) {

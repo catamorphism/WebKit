@@ -71,11 +71,15 @@ public:
         TimeZoneID, Int128);
 
     static std::optional<TimeZone> parseTemporalTimeZoneString(JSGlobalObject*, StringView);
+    static std::optional<TimeZone> parseTimeZoneIdentifier(JSGlobalObject*, StringView);
     static ISO8601::TimeZone toTemporalTimeZoneIdentifier(JSGlobalObject*, JSValue);
     static String formatDateTimeUTCOffsetRounded(Int128);
     static String formatOffsetTimeZoneIdentifier(int64_t, std::optional<bool>);
 
 private:
+    static std::optional<TimeZone> parseTimeZoneFromAnnotation(JSGlobalObject*,
+        const ISO8601::TimeZoneAnnotation&);
+
     TemporalTimeZone(VM&, Structure*, TimeZone);
 
     // TimeZoneID or UTC offset.

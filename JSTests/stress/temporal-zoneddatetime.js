@@ -48,6 +48,7 @@ const zdt = new Temporal.ZonedDateTime(0n, "UTC");
 
     shouldThrow(() => new Temporal.ZonedDateTime(0n, null), TypeError);
     shouldThrow(() => new Temporal.ZonedDateTime(864n * 10n ** 19n + 1n, "UTC"), RangeError);
+    shouldThrow(() => new Temporal.ZonedDateTime(0n, "1997-12-04T12:34[+01:00]", "iso8601"), RangeError);
 }
 
 {
