@@ -320,13 +320,10 @@ String TemporalPlainDateTime::toString(JSGlobalObject* globalObject, JSValue opt
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
+    auto showCalendar = getTemporalShowCalendarNameOption(globalObject, optionsValue);
     RETURN_IF_EXCEPTION(scope, { });
 
-    if (!options)
-        return toString();
-
-    auto showCalendar = getTemporalShowCalendarNameOption(globalObject, options);
+    JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
     RETURN_IF_EXCEPTION(scope, { });
 
     TemporalFractionalSecondDigits digits = temporalFractionalSecondDigits(globalObject, options);
@@ -348,7 +345,9 @@ String TemporalPlainDateTime::toString(JSGlobalObject* globalObject, JSValue opt
 
     // No need to make a new object if we were given explicit defaults.
     if (std::get<0>(data.precision) == Precision::Auto && roundingMode == RoundingMode::Trunc
-       && showCalendar != TemporalShowCalendar::Critical && showCalendar != TemporalShowCalendar::Always)
+       && (showCalendar == TemporalShowCalendar::Never
+           || (calendar()->identifier() == iso8601CalendarID()
+               && showCalendar == TemporalShowCalendar::Auto)))
         return toString();
 
     auto duration = TemporalPlainTime::roundTime(m_plainTime, data.increment, data.unit, roundingMode, std::nullopt);

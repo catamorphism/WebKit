@@ -76,6 +76,7 @@ skip:
     - test/intl402/Temporal/PlainDateTime/from/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainDateTime/prototype/equals/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainDateTime/prototype/since/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/PlainDateTime/prototype/until/infinity-throws-rangeerror.js
      ## depends on "japanese" calendar support (eras)
     - test/intl402/Temporal/PlainDate/from/remapping-era.js
     - test/intl402/Temporal/PlainDate/prototype/with/cross-era-boundary.js
@@ -85,6 +86,7 @@ skip:
      ## depends on "hebrew" Calendar support
     - test/intl402/Temporal/PlainDate/prototype/with/non-iso-calendar-fields.js
     - test/intl402/Temporal/PlainDateTime/from/calendar-not-supporting-eras.js
+    - test/intl402/Temporal/PlainDateTime/prototype/with/non-iso-calendar-fields.js
      ## depends on calendar aliases
     - test/intl402/Temporal/PlainDate/canonicalize-calendar.js
     - test/intl402/Temporal/PlainDate/from/canonicalize-calendar.js
@@ -96,17 +98,8 @@ skip:
     - test/intl402/Temporal/PlainDateTime/from/canonicalize-calendar.js
     - test/intl402/Temporal/PlainDateTime/prototype/equals/canonicalize-calendar.js
     - test/intl402/Temporal/PlainDateTime/prototype/since/canonicalize-calendar.js
-     ## ...
-    - test/intl402/Temporal/PlainDateTime/prototype/toLocaleString/calendar-mismatch.js
-    - test/intl402/Temporal/PlainDateTime/prototype/toString/calendarname-always.js
-    - test/intl402/Temporal/PlainDateTime/prototype/toString/calendarname-auto.js
-    - test/intl402/Temporal/PlainDateTime/prototype/toString/calendarname-critical.js
-    - test/intl402/Temporal/PlainDateTime/prototype/toString/calendarname-undefined.js
-    - test/intl402/Temporal/PlainDateTime/prototype/toString/calendarname-wrong-type.js
-    - test/intl402/Temporal/PlainDateTime/prototype/toString/options-undefined.js
     - test/intl402/Temporal/PlainDateTime/prototype/until/canonicalize-calendar.js
-    - test/intl402/Temporal/PlainDateTime/prototype/until/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/PlainDateTime/prototype/with/non-iso-calendar-fields.js
+     ## ...
     - test/intl402/Temporal/PlainMonthDay/canonicalize-calendar.js
     - test/intl402/Temporal/PlainMonthDay/from/canonicalize-calendar.js
     - test/intl402/Temporal/PlainMonthDay/prototype/equals/calendars.js
