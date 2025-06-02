@@ -171,19 +171,21 @@ static String temporalMonthDayToString(JSGlobalObject* globalObject, ISO8601::Pl
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.prototype.with
-String TemporalPlainMonthDay::toString(JSGlobalObject* globalObject, JSValue optionsValue) const
+String TemporalPlainMonthDay::toString(JSGlobalObject* globalObject, std::optional<JSValue> optionsValue) const
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
-    RETURN_IF_EXCEPTION(scope, { });
+    auto showCalendar = TemporalShowCalendar::Auto;
+    if (optionsValue) {
+        showCalendar = getTemporalShowCalendarNameOption(globalObject, optionsValue.value());
+        RETURN_IF_EXCEPTION(scope, { });
+    }
 
-    if (!options)
+    if (calendar()->identifier() == iso8601CalendarID()
+        && (showCalendar == TemporalShowCalendar::Auto
+            || showCalendar == TemporalShowCalendar::Never))
         return toString();
-
-    auto showCalendar = getTemporalShowCalendarNameOption(globalObject, options);
-    RETURN_IF_EXCEPTION(scope, { });
 
     RELEASE_AND_RETURN(scope, temporalMonthDayToString(globalObject, m_plainMonthDay,
         calendar(), showCalendar));

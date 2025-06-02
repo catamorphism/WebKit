@@ -77,6 +77,8 @@ skip:
     - test/intl402/Temporal/PlainDateTime/prototype/equals/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainDateTime/prototype/since/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainDateTime/prototype/until/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/PlainMonthDay/from/fields-missing-properties.js
+    - test/intl402/Temporal/PlainMonthDay/prototype/equals/infinity-throws-rangeerror.js
      ## depends on "japanese" calendar support (eras)
     - test/intl402/Temporal/PlainDate/from/remapping-era.js
     - test/intl402/Temporal/PlainDate/prototype/with/cross-era-boundary.js
@@ -87,6 +89,13 @@ skip:
     - test/intl402/Temporal/PlainDate/prototype/with/non-iso-calendar-fields.js
     - test/intl402/Temporal/PlainDateTime/from/calendar-not-supporting-eras.js
     - test/intl402/Temporal/PlainDateTime/prototype/with/non-iso-calendar-fields.js
+    - test/intl402/Temporal/PlainMonthDay/from/calendar-not-supporting-eras.js
+    - test/intl402/Temporal/PlainMonthDay/from/fields-object.js
+    - test/intl402/Temporal/PlainMonthDay/from/fields-underspecified.js
+    - test/intl402/Temporal/PlainMonthDay/from/reference-date-noniso-calendar.js
+    - test/intl402/Temporal/PlainMonthDay/from/reference-year-1972.js
+     ## depends on all supported calendars
+    - test/intl402/Temporal/PlainMonthDay/from/constrain-to-leap-day.js
      ## depends on calendar aliases
     - test/intl402/Temporal/PlainDate/canonicalize-calendar.js
     - test/intl402/Temporal/PlainDate/from/canonicalize-calendar.js
@@ -101,18 +110,8 @@ skip:
     - test/intl402/Temporal/PlainDateTime/prototype/until/canonicalize-calendar.js
     - test/intl402/Temporal/PlainMonthDay/canonicalize-calendar.js
     - test/intl402/Temporal/PlainMonthDay/from/canonicalize-calendar.js
-     ## ...
     - test/intl402/Temporal/PlainMonthDay/prototype/equals/canonicalize-calendar.js
-    - test/intl402/Temporal/PlainMonthDay/from/calendar-not-supporting-eras.js
-    - test/intl402/Temporal/PlainMonthDay/from/constrain-to-leap-day.js
-    - test/intl402/Temporal/PlainMonthDay/from/fields-missing-properties.js
-    - test/intl402/Temporal/PlainMonthDay/from/fields-object.js
-    - test/intl402/Temporal/PlainMonthDay/from/fields-underspecified.js
-    - test/intl402/Temporal/PlainMonthDay/from/reference-date-noniso-calendar.js
-    - test/intl402/Temporal/PlainMonthDay/from/reference-year-1972.js
-    - test/intl402/Temporal/PlainMonthDay/prototype/equals/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/PlainMonthDay/prototype/toJSON/calendarname.js
-    - test/intl402/Temporal/PlainMonthDay/prototype/toJSON/year-format.js
+     ## ...
     - test/intl402/Temporal/PlainMonthDay/prototype/toLocaleString/calendar-mismatch.js
     - test/intl402/Temporal/PlainMonthDay/prototype/toLocaleString/dateStyle.js
     - test/intl402/Temporal/PlainMonthDay/prototype/toPlainDate/infinity-throws-rangeerror.js

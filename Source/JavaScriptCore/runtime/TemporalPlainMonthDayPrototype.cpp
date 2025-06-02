@@ -120,7 +120,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainMonthDayPrototypeFuncToJSON, (JSGlobalObje
     if (!monthDay)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainMonthDay.prototype.toJSON called on value that's not a PlainMonthDay"_s);
 
-    return JSValue::encode(jsString(vm, monthDay->toString()));
+    RELEASE_AND_RETURN(scope, JSValue::encode(jsString(vm, monthDay->toString(globalObject, std::nullopt))));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.prototype.with
