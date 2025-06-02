@@ -355,7 +355,8 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncEquals, (JSGlobalObje
     auto* other = TemporalZonedDateTime::from(globalObject, callFrame->argument(0), std::nullopt);
     RETURN_IF_EXCEPTION(scope, { });
 
-    if (zonedDateTime->exactTime() != other->exactTime() || zonedDateTime->timeZone() != other->timeZone())
+    if (zonedDateTime->exactTime() != other->exactTime() || zonedDateTime->timeZone() != other->timeZone()
+        || zonedDateTime->calendar()->identifier() != other->calendar()->identifier())
         return JSValue::encode(jsBoolean(false));
 
     RELEASE_AND_RETURN(scope, JSValue::encode(jsBoolean(TemporalCalendar::equals(globalObject,
