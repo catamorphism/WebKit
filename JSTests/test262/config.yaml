@@ -60,12 +60,14 @@ skip:
     - test/built-ins/RegExp/regexp-modifiers/add-ignoreCase-affects-slash-lower-p.js
 
      # Depends on Calendar support
+     ## depends on "gregory" calendar support and validating era property
     - test/intl402/Temporal/Duration/prototype/round/relativeto-infinity-throws-rangeerror.js
     - test/intl402/Temporal/Duration/prototype/total/relativeto-infinity-throws-rangeerror.js
-    - test/intl402/Temporal/PlainDate/canonicalize-calendar.js
     - test/intl402/Temporal/PlainDate/compare/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/PlainDate/from/calendar-not-supporting-eras.js
+     ## depends on calendar aliases
+    - test/intl402/Temporal/PlainDate/canonicalize-calendar.js
     - test/intl402/Temporal/PlainDate/from/canonicalize-calendar.js
+     ## ...
     - test/intl402/Temporal/PlainDate/from/canonicalize-era-codes.js
     - test/intl402/Temporal/PlainDate/from/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainDate/from/one-of-era-erayear-undefined.js

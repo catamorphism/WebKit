@@ -238,6 +238,10 @@ CalendarID TemporalCalendar::canonicalizeCalendar(JSGlobalObject* globalObject, 
     return canonicalID.value();
 }
 
+StringView TemporalCalendar::calendarIdToString(CalendarID id)
+{
+    return intlAvailableCalendars()[id];
+}
 
 // https://tc39.es/ecma262/#sec-hourfromtime
 static double hourFromTime(double t)

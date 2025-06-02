@@ -104,6 +104,7 @@ public:
 
     static std::optional<CalendarID> isBuiltinCalendar(StringView);
     static CalendarID canonicalizeCalendar(JSGlobalObject*, StringView);
+    static StringView calendarIdToString(CalendarID);
 
     static JSObject* from(JSGlobalObject*, JSValue);
 
