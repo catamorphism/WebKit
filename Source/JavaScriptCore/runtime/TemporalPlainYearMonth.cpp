@@ -164,14 +164,13 @@ String TemporalPlainYearMonth::toString(JSGlobalObject* globalObject, JSValue op
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
+    auto showCalendar = getTemporalShowCalendarNameOption(globalObject, optionsValue);
     RETURN_IF_EXCEPTION(scope, { });
 
-    if (!options)
+    if (calendar()->identifier() == iso8601CalendarID()
+        && (showCalendar == TemporalShowCalendar::Auto
+            || showCalendar == TemporalShowCalendar::Never))
         return toString();
-
-    auto showCalendar = getTemporalShowCalendarNameOption(globalObject, options);
-    RETURN_IF_EXCEPTION(scope, { });
 
     RELEASE_AND_RETURN(scope, temporalYearMonthToString(globalObject, m_plainYearMonth,
         calendar(), showCalendar));

@@ -113,6 +113,7 @@ skip:
     - test/intl402/Temporal/PlainYearMonth/prototype/subtract/options-undefined.js
      ## depends on "islamic-tbla" calendar support
     - test/intl402/Temporal/PlainMonthDay/prototype/toLocaleString/dateStyle.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/dateStyle.js
      ## depends on all supported calendars
     - test/intl402/Temporal/PlainMonthDay/from/constrain-to-leap-day.js
      ## depends on calendar aliases
@@ -135,14 +136,6 @@ skip:
     - test/intl402/Temporal/PlainYearMonth/prototype/equals/canonicalize-calendar.js
     - test/intl402/Temporal/PlainYearMonth/prototype/since/canonicalize-calendar.js
      ## ...
-    - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/dateStyle.js
-    - test/intl402/Temporal/PlainYearMonth/prototype/toString/calendarname-always.js
-    - test/intl402/Temporal/PlainYearMonth/prototype/toString/calendarname-auto.js
-    - test/intl402/Temporal/PlainYearMonth/prototype/toString/calendarname-critical.js
-    - test/intl402/Temporal/PlainYearMonth/prototype/toString/calendarname-never.js
-    - test/intl402/Temporal/PlainYearMonth/prototype/toString/calendarname-undefined.js
-    - test/intl402/Temporal/PlainYearMonth/prototype/toString/calendarname-wrong-type.js
-    - test/intl402/Temporal/PlainYearMonth/prototype/toString/options-undefined.js
     - test/intl402/Temporal/PlainYearMonth/prototype/until/canonicalize-calendar.js
     - test/intl402/Temporal/PlainYearMonth/prototype/until/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainYearMonth/prototype/until/mixed-calendar-invalid.js
