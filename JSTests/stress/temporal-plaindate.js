@@ -407,6 +407,15 @@ shouldBe(Temporal.PlainDate.prototype.with.length, 1);
     shouldThrow(() => { date.with({ month: 2 }, { overflow: 'reject' }); }, RangeError);
 }
 
+shouldBe(Temporal.PlainDate.prototype.withCalendar.length, 1);
+{
+    const date = new Temporal.PlainDate(2020,1,30);
+    const calendar = "iso8601";
+    const result = date.withCalendar("iso8601");
+    shouldBe(result.calendarId, "iso8601");
+    shouldBe(result === date, false);
+}
+
 shouldBe(Temporal.PlainDate.prototype.since.length, 1);
 shouldBe(Temporal.PlainDate.prototype.until.length, 1);
 {

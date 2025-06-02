@@ -18,8 +18,6 @@ skip:
     - source-phase-imports
     - import-defer
   paths:
-    - test/built-ins/Temporal/PlainDate/prototype/withCalendar
-    - test/built-ins/Temporal/PlainDateTime/prototype/withCalendar
     - test/intl402/Temporal/PlainDateTime/prototype/withCalendar
     - test/staging/Intl402
     - test/staging/JSON

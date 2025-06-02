@@ -285,6 +285,14 @@ shouldBe(pdt.with({ second: 15 }).toString(), '0001-02-03T04:05:15.007008009');
 shouldBe(pdt.with({ day: 30 }).toString(), '0001-02-28T04:05:06.007008009');
 shouldThrow(() => { pdt.with({ day: 30 }, { overflow: 'reject' }); }, RangeError);
 
+shouldBe(Temporal.PlainDate.prototype.withCalendar.length, 1);
+{
+    const calendar = "iso8601";
+    const result = pdt.withCalendar("iso8601");
+    shouldBe(result.calendarId, "iso8601");
+    shouldBe(result === pdt, false);
+}
+
 shouldBe(Temporal.PlainDateTime.prototype.withPlainTime.length, 0);
 shouldBe(pdt.withPlainTime().toString(), '0001-02-03T00:00:00');
 shouldBe(pdt.withPlainTime({ hour: 1, minute: 2, second: 3 }).toString(), '0001-02-03T01:02:03');
