@@ -519,8 +519,8 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterCalendarId, (JSGlob
     if (!zonedDateTime)
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.calendarId called on value that's not a ZonedDateTime"_s);
 
-    // TODO: when calendars are supported, get the string ID of the calendar
-    return JSValue::encode(jsString(vm, String::fromLatin1("iso8601")));
+    return JSValue::encode(jsString(vm,
+        TemporalCalendar::calendarIdToString(zonedDateTime->calendar()->identifier())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-get-temporal.zoneddatetime.prototype.timezoneid

@@ -64,7 +64,7 @@ TemporalCalendar::TemporalCalendar(VM& vm, Structure* structure, CalendarID iden
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-parsetemporalcalendarstring
-std::optional<CalendarID> TemporalCalendar::parseTemporalCalendarString(JSGlobalObject* globalObject,
+CalendarID TemporalCalendar::parseTemporalCalendarString(JSGlobalObject* globalObject,
     StringView string)
 {
     VM& vm = globalObject->vm();
@@ -86,7 +86,7 @@ std::optional<CalendarID> TemporalCalendar::parseTemporalCalendarString(JSGlobal
                 calendarParseResult = ISO8601::parseCalendarName(string);
                 if (!calendarParseResult) {
                     throwRangeError(globalObject, scope, "invalid calendar ID"_s);
-                    return std::nullopt;
+                    return { };
                 }
             }
         }
@@ -96,8 +96,8 @@ std::optional<CalendarID> TemporalCalendar::parseTemporalCalendarString(JSGlobal
     if (WTF::String(calendarParseResult.value()).convertToASCIILowercase() == "iso8601"_s)
         return iso8601CalendarID();
 
-    throwRangeError(globalObject, scope, "calendar ID not supported yet"_s);
-    return std::nullopt;
+    RELEASE_AND_RETURN(scope, TemporalCalendar::canonicalizeCalendar(globalObject,
+        StringView(calendarParseResult.value())));
 }
 
 JSObject* TemporalCalendar::toTemporalCalendarWithISODefault(JSGlobalObject* globalObject, JSValue temporalCalendarLike)

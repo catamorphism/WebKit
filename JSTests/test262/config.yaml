@@ -122,6 +122,7 @@ skip:
     - test/intl402/Temporal/PlainYearMonth/prototype/subtract/options-undefined.js
     - test/intl402/Temporal/PlainYearMonth/prototype/with/non-iso-calendar-fields.js
     - test/intl402/Temporal/ZonedDateTime/from/calendar-not-supporting-eras.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/with/non-iso-calendar-fields.js
      ## depends on "islamic-tbla" calendar support
     - test/intl402/Temporal/PlainMonthDay/prototype/toLocaleString/dateStyle.js
     - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/dateStyle.js
@@ -153,12 +154,7 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/since/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/canonicalize-calendar.js
-     ## ...
-    - test/intl402/Temporal/ZonedDateTime/prototype/with/non-iso-calendar-fields.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/basic.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/calendar-case-insensitive.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/canonicalize-calendar.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/withTimeZone/preserves-calendar.js
 
     # Depends on annotations in datetime strings
     - test/built-ins/Temporal/PlainDate/compare/argument-string-time-zone-annotation.js

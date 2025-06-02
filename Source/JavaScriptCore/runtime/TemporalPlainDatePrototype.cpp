@@ -481,7 +481,6 @@ JSC_DEFINE_CUSTOM_GETTER(temporalPlainDatePrototypeGetterCalendarId, (JSGlobalOb
     if (!plainDate)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDate.prototype.calendarId called on value that's not a PlainDate"_s);
 
-    // TODO: when calendars are supported, get the string ID of the calendar
     return JSValue::encode(jsString(vm,
         TemporalCalendar::calendarIdToString(plainDate->calendar()->identifier())));
 }

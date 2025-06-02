@@ -65,7 +65,7 @@ public:
     static JSObject* toTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
     static std::variant<TemporalCalendar*, CalendarID>
         getTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
-    static std::optional<CalendarID> parseTemporalCalendarString(JSGlobalObject*, StringView);
+    static CalendarID parseTemporalCalendarString(JSGlobalObject*, StringView);
     static std::variant<TemporalCalendar*, CalendarID>
         toTemporalCalendarIdentifier(JSGlobalObject*, JSValue);
     // static CalendarID getTemporalCalendarIdentifierWithISODefault(JSGlobalObject*, JSValue);
