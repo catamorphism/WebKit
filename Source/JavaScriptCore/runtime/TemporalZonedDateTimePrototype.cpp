@@ -61,6 +61,8 @@ static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToPlainTime);
 static JSC_DECLARE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToPlainDateTime);
 static JSC_DECLARE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterCalendarId);
 static JSC_DECLARE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterTimeZoneId);
+static JSC_DECLARE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterEra);
+static JSC_DECLARE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterEraYear);
 static JSC_DECLARE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterYear);
 static JSC_DECLARE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterMonth);
 static JSC_DECLARE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterMonthCode);
@@ -118,6 +120,8 @@ const ClassInfo TemporalZonedDateTimePrototype::s_info = { "Temporal.ZonedDateTi
   toPlainDateTime       temporalZonedDateTimePrototypeFuncToPlainDateTime       DontEnum|Function 0
   calendarId            temporalZonedDateTimePrototypeGetterCalendarId          DontEnum|ReadOnly|CustomAccessor
   timeZoneId            temporalZonedDateTimePrototypeGetterTimeZoneId          DontEnum|ReadOnly|CustomAccessor
+  era                   temporalZonedDateTimePrototypeGetterEra                 DontEnum|ReadOnly|CustomAccessor
+  eraYear               temporalZonedDateTimePrototypeGetterEraYear             DontEnum|ReadOnly|CustomAccessor
   year                  temporalZonedDateTimePrototypeGetterYear                DontEnum|ReadOnly|CustomAccessor
   month                 temporalZonedDateTimePrototypeGetterMonth               DontEnum|ReadOnly|CustomAccessor
   monthCode             temporalZonedDateTimePrototypeGetterMonthCode           DontEnum|ReadOnly|CustomAccessor
@@ -529,6 +533,32 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterTimeZoneId, (JSGlob
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.timeZoneId called on value that's not a ZonedDateTime"_s);
 
     return JSValue::encode(jsString(vm, ISO8601::formatTimeZone(zdt->timeZone())));
+}
+
+JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterEra, (JSGlobalObject* globalObject, EncodedJSValue thisValue, PropertyName))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* zdt = jsDynamicCast<TemporalZonedDateTime*>(JSValue::decode(thisValue));
+    if (!zdt)
+        return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.era called on value that's not a ZonedDateTime"_s);
+
+    // TODO: non-ISO8601 calendars
+    return JSValue::encode(jsUndefined());
+}
+
+JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterEraYear, (JSGlobalObject* globalObject, EncodedJSValue thisValue, PropertyName))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* zdt = jsDynamicCast<TemporalZonedDateTime*>(JSValue::decode(thisValue));
+    if (!zdt)
+        return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.eraYear called on value that's not a ZonedDateTime"_s);
+
+    // TODO: non-ISO8601 calendars
+    return JSValue::encode(jsUndefined());
 }
 
 // https://tc39.es/proposal-temporal/#sec-get-temporal.zoneddatetime.prototype.year

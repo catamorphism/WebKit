@@ -29,6 +29,8 @@ shouldBe(Temporal.ZonedDateTime.prototype.constructor, Temporal.ZonedDateTime);
 const zdt = new Temporal.ZonedDateTime(0n, "UTC");
 
 {
+    shouldBe(zdt.era, undefined);
+    shouldBe(zdt.eraYear, undefined);
     shouldBe(zdt.year, 1970);
     shouldBe(zdt.month, 1);
     shouldBe(zdt.monthCode, "M01");
