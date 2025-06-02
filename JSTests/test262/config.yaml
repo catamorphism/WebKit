@@ -99,10 +99,9 @@ skip:
     - test/intl402/Temporal/PlainDateTime/prototype/equals/canonicalize-calendar.js
     - test/intl402/Temporal/PlainDateTime/prototype/since/canonicalize-calendar.js
     - test/intl402/Temporal/PlainDateTime/prototype/until/canonicalize-calendar.js
-     ## ...
     - test/intl402/Temporal/PlainMonthDay/canonicalize-calendar.js
     - test/intl402/Temporal/PlainMonthDay/from/canonicalize-calendar.js
-    - test/intl402/Temporal/PlainMonthDay/prototype/equals/calendars.js
+     ## ...
     - test/intl402/Temporal/PlainMonthDay/prototype/equals/canonicalize-calendar.js
     - test/intl402/Temporal/PlainMonthDay/from/calendar-not-supporting-eras.js
     - test/intl402/Temporal/PlainMonthDay/from/constrain-to-leap-day.js

@@ -158,7 +158,8 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainMonthDayPrototypeFuncEquals, (JSGlobalObje
     auto* other = TemporalPlainMonthDay::from(globalObject, callFrame->argument(0), std::nullopt);
     RETURN_IF_EXCEPTION(scope, { });
 
-    if (monthDay->plainMonthDay() != other->plainMonthDay())
+    if ((monthDay->calendar()->identifier() != other->calendar()->identifier())
+        || (monthDay->plainMonthDay() != other->plainMonthDay()))
         return JSValue::encode(jsBoolean(false));
 
     return JSValue::encode(jsBoolean(true));
