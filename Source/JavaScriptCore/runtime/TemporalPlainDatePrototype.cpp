@@ -563,6 +563,10 @@ JSC_DEFINE_CUSTOM_GETTER(temporalPlainDatePrototypeGetterWeekOfYear, (JSGlobalOb
     if (!plainDate)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDate.prototype.weekOfYear called on value that's not a PlainDate"_s);
 
+    // TODO: For now, assuming that only iso8601 calendar supports week numbers
+    if (plainDate->calendar()->identifier() != iso8601CalendarID())
+        return JSValue::encode(jsUndefined());
+
     return JSValue::encode(jsNumber(plainDate->weekOfYear()));
 }
 
@@ -574,6 +578,10 @@ JSC_DEFINE_CUSTOM_GETTER(temporalPlainDatePrototypeGetterYearOfWeek, (JSGlobalOb
     auto* plainDate = jsDynamicCast<TemporalPlainDate*>(JSValue::decode(thisValue));
     if (!plainDate)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDate.prototype.yearOfWeek called on value that's not a PlainDate"_s);
+
+    // TODO: For now, assuming that only iso8601 calendar supports week numbers
+    if (plainDate->calendar()->identifier() != iso8601CalendarID())
+        return JSValue::encode(jsUndefined());
 
     YearWeekRecord yearWeekRecord = TemporalCalendar::calendarDateWeekOfYear(globalObject, plainDate->plainDate());
     RETURN_IF_EXCEPTION(scope, { });

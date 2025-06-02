@@ -276,6 +276,8 @@ for (let text of failures) {
     shouldBe(Temporal.PlainDate.from('1994-12-30').weekOfYear, 52); // Tuesday
     shouldBe(Temporal.PlainDate.from('1994-12-31').weekOfYear, 52); // Wednesday
     shouldBe(Temporal.PlainDate.from('1995-01-01').weekOfYear, 52); // Thursday
+
+    shouldBe(Temporal.PlainDate.from('1995-01-01[u-ca=gregory]').weekOfYear, undefined);
 }
 
 {
@@ -297,6 +299,8 @@ for (let text of failures) {
     shouldBe(Temporal.PlainDate.from('1976-12-31').yearOfWeek, 1976);
     shouldBe(Temporal.PlainDate.from('1977-01-01').yearOfWeek, 1976);
     shouldBe(Temporal.PlainDate.from('1977-01-02').yearOfWeek, 1976);
+
+    shouldBe(Temporal.PlainDate.from('1977-01-02[u-ca=gregory]').yearOfWeek, undefined);
 }
 
 {
