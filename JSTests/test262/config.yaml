@@ -67,18 +67,14 @@ skip:
     - test/intl402/Temporal/PlainDate/from/canonicalize-era-codes.js
     - test/intl402/Temporal/PlainDate/from/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainDate/from/one-of-era-erayear-undefined.js
+    - test/intl402/Temporal/PlainDate/prototype/equals/infinity-throws-rangeerror.js
      ## depends on "japanese" calendar support (remapping eras)
     - test/intl402/Temporal/PlainDate/from/remapping-era.js
      ## depends on calendar aliases
     - test/intl402/Temporal/PlainDate/canonicalize-calendar.js
     - test/intl402/Temporal/PlainDate/from/canonicalize-calendar.js
-     ## ...
     - test/intl402/Temporal/PlainDate/prototype/equals/canonicalize-calendar.js
-    - test/intl402/Temporal/PlainDate/prototype/equals/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/PlainDate/prototype/era/branding.js
-    - test/intl402/Temporal/PlainDate/prototype/era/prop-desc.js
-    - test/intl402/Temporal/PlainDate/prototype/eraYear/branding.js
-    - test/intl402/Temporal/PlainDate/prototype/eraYear/prop-desc.js
+     ## ...
     - test/intl402/Temporal/PlainDate/prototype/since/calendar-mismatch.js
     - test/intl402/Temporal/PlainDate/prototype/since/canonicalize-calendar.js
     - test/intl402/Temporal/PlainDate/prototype/since/infinity-throws-rangeerror.js
