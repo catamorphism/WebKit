@@ -79,6 +79,7 @@ skip:
     - test/intl402/Temporal/PlainDateTime/prototype/until/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainMonthDay/from/fields-missing-properties.js
     - test/intl402/Temporal/PlainMonthDay/prototype/equals/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/PlainMonthDay/prototype/toPlainDate/infinity-throws-rangeerror.js
      ## depends on "japanese" calendar support (eras)
     - test/intl402/Temporal/PlainDate/from/remapping-era.js
     - test/intl402/Temporal/PlainDate/prototype/with/cross-era-boundary.js
@@ -114,15 +115,6 @@ skip:
     - test/intl402/Temporal/PlainMonthDay/from/canonicalize-calendar.js
     - test/intl402/Temporal/PlainMonthDay/prototype/equals/canonicalize-calendar.js
      ## ...
-    - test/intl402/Temporal/PlainMonthDay/prototype/toPlainDate/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/PlainMonthDay/prototype/toString/calendarname-always.js
-    - test/intl402/Temporal/PlainMonthDay/prototype/toString/calendarname-auto.js
-    - test/intl402/Temporal/PlainMonthDay/prototype/toString/calendarname-critical.js
-    - test/intl402/Temporal/PlainMonthDay/prototype/toString/calendarname-never.js
-    - test/intl402/Temporal/PlainMonthDay/prototype/toString/calendarname-undefined.js
-    - test/intl402/Temporal/PlainMonthDay/prototype/toString/calendarname-wrong-type.js
-    - test/intl402/Temporal/PlainMonthDay/prototype/toString/options-undefined.js
-    - test/intl402/Temporal/PlainMonthDay/prototype/toString/year-format.js
     - test/intl402/Temporal/PlainMonthDay/prototype/with/fields-missing-properties.js
     - test/intl402/Temporal/PlainMonthDay/prototype/with/non-iso-calendar-fields.js
     - test/intl402/Temporal/PlainYearMonth/canonicalize-calendar.js
