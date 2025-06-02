@@ -96,6 +96,8 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/from/canonicalize-era-codes.js
     - test/intl402/Temporal/ZonedDateTime/from/infinity-throws-rangeerror.js
     - test/intl402/Temporal/ZonedDateTime/prototype/equals/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/since/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/until/infinity-throws-rangeerror.js
      ## depends on "japanese" calendar support (eras)
     - test/intl402/Temporal/PlainDate/from/remapping-era.js
     - test/intl402/Temporal/PlainDate/prototype/with/cross-era-boundary.js
@@ -123,6 +125,7 @@ skip:
      ## depends on "islamic-tbla" calendar support
     - test/intl402/Temporal/PlainMonthDay/prototype/toLocaleString/dateStyle.js
     - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/dateStyle.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/toLocaleString/dateStyle.js
      ## depends on all supported calendars
     - test/intl402/Temporal/PlainMonthDay/from/constrain-to-leap-day.js
      ## depends on calendar aliases
@@ -148,28 +151,14 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/from/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonicalize-calendar.js
-     ## ...
     - test/intl402/Temporal/ZonedDateTime/prototype/since/canonicalize-calendar.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/since/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/toLocaleString/calendar-mismatch.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/toLocaleString/dateStyle.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/toPlainDate/preserves-calendar.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/toString/calendarname-always.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/toString/calendarname-auto.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/toString/calendarname-critical.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/toString/calendarname-undefined.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/toString/calendarname-wrong-type.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/toString/options-undefined.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/canonicalize-calendar.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/until/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/weekOfYear/gregory-iso-weekofyear.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/weekOfYear/non-iso-week-of-year.js
+     ## ...
     - test/intl402/Temporal/ZonedDateTime/prototype/with/non-iso-calendar-fields.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/basic.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/calendar-case-insensitive.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withTimeZone/preserves-calendar.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/yearOfWeek/non-iso-week-of-year.js
 
     # Depends on annotations in datetime strings
     - test/built-ins/Temporal/PlainDate/compare/argument-string-time-zone-annotation.js

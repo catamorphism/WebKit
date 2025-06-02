@@ -230,3 +230,9 @@ shouldBe(Temporal.ZonedDateTime.prototype.getTimeZoneTransition.length, 1);
     shouldBe(zdt.offset, "+00:00");
     shouldBe(zdt.offsetNanoseconds, 0);
 }
+
+{
+    const hasCalendar = new Temporal.ZonedDateTime(0n, "UTC", "gregory");
+    shouldBe(hasCalendar.weekOfYear, undefined);
+    shouldBe(hasCalendar.yearOfWeek, undefined);
+}

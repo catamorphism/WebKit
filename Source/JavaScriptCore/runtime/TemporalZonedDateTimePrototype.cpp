@@ -806,6 +806,10 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterWeekOfYear, (JSGlob
     if (!zonedDateTime)
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.weekOfYear called on value that's not a ZonedDateTime"_s);
 
+    // TODO: For now, assuming that only iso8601 calendar supports week numbers
+    if (zonedDateTime->calendar()->identifier() != iso8601CalendarID())
+        return JSValue::encode(jsUndefined());
+
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject,
         zonedDateTime->timeZone(), zonedDateTime->exactTime());
     RETURN_IF_EXCEPTION(scope, { });
@@ -822,6 +826,10 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterYearOfWeek, (JSGlob
     auto* zonedDateTime = jsDynamicCast<TemporalZonedDateTime*>(JSValue::decode(thisValue));
     if (!zonedDateTime)
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.weekOfYear called on value that's not a ZonedDateTime"_s);
+
+    // TODO: For now, assuming that only iso8601 calendar supports week numbers
+    if (zonedDateTime->calendar()->identifier() != iso8601CalendarID())
+        return JSValue::encode(jsUndefined());
 
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject,
         zonedDateTime->timeZone(), zonedDateTime->exactTime());
