@@ -229,7 +229,8 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainYearMonthPrototypeFuncEquals, (JSGlobalObj
     auto* other = TemporalPlainYearMonth::from(globalObject, callFrame->argument(0), std::nullopt);
     RETURN_IF_EXCEPTION(scope, { });
 
-    if (yearMonth->plainYearMonth() != other->plainYearMonth())
+    if ((yearMonth->calendar()->identifier() != other->calendar()->identifier())
+        || (yearMonth->plainYearMonth() != other->plainYearMonth()))
         return JSValue::encode(jsBoolean(false));
 
     return JSValue::encode(jsBoolean(true));

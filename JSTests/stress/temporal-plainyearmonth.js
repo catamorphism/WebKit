@@ -92,6 +92,9 @@ shouldBe(Temporal.PlainYearMonth.prototype.equals.length, 1);
     shouldBe(ones.equals(new Temporal.PlainYearMonth(1,1)), true);
     shouldBe(ones.equals(new Temporal.PlainYearMonth(2,1)), false);
     shouldBe(ones.equals(new Temporal.PlainYearMonth(1,2)), false);
+
+    const calendar = new Temporal.PlainYearMonth(1, 1, "gregory");
+    shouldBe(ones.equals(calendar), false);
 }
 
 shouldBe(Temporal.PlainYearMonth.prototype.valueOf.length, 0);
