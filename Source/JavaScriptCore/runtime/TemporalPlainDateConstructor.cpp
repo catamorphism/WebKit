@@ -125,6 +125,7 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainDate, (JSGlobalObject* globalObje
            String calendarString = value.toWTFString(globalObject);
            RETURN_IF_EXCEPTION(scope, { });
            calendar = TemporalCalendar::canonicalizeCalendar(globalObject, calendarString);
+           RETURN_IF_EXCEPTION(scope, { });
        }
     }
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject, structure,

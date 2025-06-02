@@ -34,6 +34,7 @@
 #include "JSCInlines.h"
 #include "JSDateMath.h"
 #include "ObjectConstructor.h"
+#include "TemporalCalendar.h"
 #include <unicode/ucal.h>
 #include <unicode/uenum.h>
 #include <wtf/Range.h>
@@ -1491,7 +1492,7 @@ String IntlDateTimeFormat::dateTimeFormatToICUDateFormat(TemporalDateTimeFormat 
 // https://tc39.es/ecma402/#sec-formatdatetime
 JSValue IntlDateTimeFormat::format(JSGlobalObject* globalObject, ExactTime value,
     std::optional<TemporalDateTimeFormat> dateTimeFormat,
-    std::optional<ISO8601::TimeZone> timeZone) const
+    std::optional<ISO8601::TimeZone> timeZone, std::optional<CalendarID> calendar) const
 {
     ASSERT(m_dateFormat);
 
@@ -1506,6 +1507,13 @@ JSValue IntlDateTimeFormat::format(JSGlobalObject* globalObject, ExactTime value
     // a different pattern (and possibly a different calendar)
     if (dateTimeFormat) {
         UErrorCode status = U_ZERO_ERROR;
+
+        if (calendar
+            && calendar.value() != iso8601CalendarID()
+            && TemporalCalendar::calendarIdToString(calendar.value()) != m_calendar) {
+            throwRangeError(globalObject, scope, "calendar in Temporal object must match locale calendar"_s);
+            return { };
+        }
 
         dateFormat = udat_clone(dateFormat, &status);
         if (U_FAILURE(status)) {
@@ -1898,7 +1906,7 @@ JSValue IntlDateTimeFormat::formatRange(JSGlobalObject* globalObject, ExactTime 
     }
 
     if (equal)
-        RELEASE_AND_RETURN(scope, format(globalObject, startDate, startFormat, std::nullopt)); // TODO: ZonedDateTime
+        RELEASE_AND_RETURN(scope, format(globalObject, startDate, startFormat, std::nullopt, std::nullopt)); // TODO: ZonedDateTime
 
     int32_t formattedStringLength = 0;
     const UChar* formattedStringPointer = ufmtval_getString(formattedValue, &formattedStringLength, &status);

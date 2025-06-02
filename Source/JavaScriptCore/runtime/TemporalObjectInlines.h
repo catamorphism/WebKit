@@ -61,12 +61,12 @@ static inline JSValue callIntlDateTimeFormat(JSGlobalObject* globalObject, JSObj
         IntlDateTimeFormat::RequiredComponent::Any, IntlDateTimeFormat::Defaults::Date);
     RETURN_IF_EXCEPTION(scope, { });
 
-    auto [value, optionalDateTimeFormat, optionalTimeZone] =
+    auto [value, optionalDateTimeFormat, optionalTimeZone, optionalCalendar] =
         dateTimeFormat->IntlDateTimeFormat::handleDateTimeValue(globalObject, temporalObject, true);
     RETURN_IF_EXCEPTION(scope, { });
 
     RELEASE_AND_RETURN(scope, dateTimeFormat->format(globalObject, value,
-        optionalDateTimeFormat, optionalTimeZone));
+        optionalDateTimeFormat, optionalTimeZone, optionalCalendar));
 }
 
 } // namespace JSC

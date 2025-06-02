@@ -81,7 +81,7 @@ public:
     enum class Defaults : uint8_t { Date, Time, All };
     void initializeDateTimeFormat(JSGlobalObject*, JSValue locales, JSValue options, RequiredComponent, Defaults);
     JSValue format(JSGlobalObject*, ExactTime value, std::optional<TemporalDateTimeFormat>,
-        std::optional<ISO8601::TimeZone>) const;
+        std::optional<ISO8601::TimeZone>, std::optional<CalendarID>) const;
     JSValue formatToParts(JSGlobalObject*, ExactTime value, std::optional<TemporalDateTimeFormat>,
         JSString* sourceType = nullptr) const;
     JSValue formatRange(JSGlobalObject*, ExactTime, ExactTime, std::optional<TemporalDateTimeFormat>);
@@ -118,7 +118,8 @@ private:
     enum class TimeZoneName : uint8_t { None, Short, Long, ShortOffset, LongOffset, ShortGeneric, LongGeneric };
     enum class DateTimeStyle : uint8_t { None, Full, Long, Medium, Short };
 
-    std::tuple<ExactTime, std::optional<TemporalDateTimeFormat>, std::optional<ISO8601::TimeZone>>
+    std::tuple<ExactTime, std::optional<TemporalDateTimeFormat>, std::optional<ISO8601::TimeZone>,
+        std::optional<CalendarID>>
     handleDateTimeValue(JSGlobalObject*, JSValue, bool);
     void checkTimeOptions(JSGlobalObject*, StringView);
     void checkDateOptions(JSGlobalObject*, StringView);

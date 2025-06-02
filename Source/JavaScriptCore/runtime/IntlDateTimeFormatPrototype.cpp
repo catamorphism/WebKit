@@ -240,14 +240,14 @@ void IntlDateTimeFormat::checkOptionsCompatibility(JSGlobalObject* globalObject,
 
 // HandleDateTimeValue ( dateTimeFormat, x )
 // https://tc39.es/proposal-temporal/#sec-temporal-handledatetimevalue
-std::tuple<ExactTime, std::optional<TemporalDateTimeFormat>, std::optional<ISO8601::TimeZone>>
+std::tuple<ExactTime, std::optional<TemporalDateTimeFormat>, std::optional<ISO8601::TimeZone>, std::optional<CalendarID>>
 IntlDateTimeFormat::handleDateTimeValue(JSGlobalObject* globalObject, JSValue x, bool zonedDateTimeOK)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
     if (x.isUndefined())
-        return std::tuple(ISO8601::ExactTime::now(), std::nullopt, std::nullopt);
+        return std::tuple(ISO8601::ExactTime::now(), std::nullopt, std::nullopt, std::nullopt);
 
     // In the spec, these checks are in the PartitionDateTimeRangePattern AO;
     // but since in the implementation, a single date-time formatter can be re-used
@@ -260,7 +260,7 @@ IntlDateTimeFormat::handleDateTimeValue(JSGlobalObject* globalObject, JSValue x,
     // https://tc39.es/proposal-temporal/#sec-temporal-handledatetimetemporalinstant
     TemporalInstant* instant = jsDynamicCast<TemporalInstant*>(x);
     if (instant)
-        return std::tuple(instant->exactTime(), TemporalDateTimeFormat::Instant, std::nullopt);
+        return std::tuple(instant->exactTime(), TemporalDateTimeFormat::Instant, std::nullopt, std::nullopt);
 
     // https://tc39.es/proposal-temporal/#sec-temporal-handledatetimetemporaldate
     TemporalPlainDate* plainDate = jsDynamicCast<TemporalPlainDate*>(x);
@@ -272,7 +272,8 @@ IntlDateTimeFormat::handleDateTimeValue(JSGlobalObject* globalObject, JSValue x,
             m_timeZone, isoDateTime, TemporalDisambiguation::Compatible);
         RETURN_IF_EXCEPTION(scope, { });
 
-        return std::tuple(result, TemporalDateTimeFormat::PlainDate, std::nullopt);
+        return std::tuple(result, TemporalDateTimeFormat::PlainDate, std::nullopt,
+            plainDate->calendar()->identifier());
     }
 
     // https://tc39.es/proposal-temporal/#sec-temporal-handledatetimetemporaldatetime
@@ -284,7 +285,8 @@ IntlDateTimeFormat::handleDateTimeValue(JSGlobalObject* globalObject, JSValue x,
         ExactTime result = TemporalTimeZone::getEpochNanosecondsFor(globalObject,
             m_timeZone, isoDateTime, TemporalDisambiguation::Compatible);
         RETURN_IF_EXCEPTION(scope, { });
-        return std::tuple(result, TemporalDateTimeFormat::PlainDateTime, std::nullopt);
+        return std::tuple(result, TemporalDateTimeFormat::PlainDateTime, std::nullopt,
+            plainDateTime->calendar()->identifier());
     }
 
     // https://tc39.es/proposal-temporal/#sec-temporal-handledatetimetemporalmonthday
@@ -297,7 +299,7 @@ IntlDateTimeFormat::handleDateTimeValue(JSGlobalObject* globalObject, JSValue x,
             m_timeZone, isoDateTime, TemporalDisambiguation::Compatible);
         RETURN_IF_EXCEPTION(scope, { });
 
-        return std::tuple(epochNs, TemporalDateTimeFormat::PlainMonthDay, std::nullopt);
+        return std::tuple(epochNs, TemporalDateTimeFormat::PlainMonthDay, std::nullopt, std::nullopt);
     }
 
     // https://tc39.es/proposal-temporal/#sec-temporal-handledatetimetemporalyearmonth
@@ -310,7 +312,8 @@ IntlDateTimeFormat::handleDateTimeValue(JSGlobalObject* globalObject, JSValue x,
             m_timeZone, isoDateTime, TemporalDisambiguation::Compatible);
         RETURN_IF_EXCEPTION(scope, { });
 
-        return std::tuple(epochNs, TemporalDateTimeFormat::PlainYearMonth, std::nullopt);
+        return std::tuple(epochNs, TemporalDateTimeFormat::PlainYearMonth, std::nullopt,
+            plainYearMonth->calendar()->identifier());
     }
 
     // https://tc39.es/proposal-temporal/#sec-temporal-handledatetimetemporaltime
@@ -323,7 +326,7 @@ IntlDateTimeFormat::handleDateTimeValue(JSGlobalObject* globalObject, JSValue x,
             m_timeZone, isoDateTime, TemporalDisambiguation::Compatible);
         RETURN_IF_EXCEPTION(scope, { });
 
-        return std::tuple(epochNs, TemporalDateTimeFormat::PlainTime, std::nullopt);
+        return std::tuple(epochNs, TemporalDateTimeFormat::PlainTime, std::nullopt, std::nullopt);
     }
 
     TemporalZonedDateTime* zonedDateTime = jsDynamicCast<TemporalZonedDateTime*>(x);
@@ -333,7 +336,7 @@ IntlDateTimeFormat::handleDateTimeValue(JSGlobalObject* globalObject, JSValue x,
             return { };
         }
         RELEASE_AND_RETURN(scope, std::tuple(zonedDateTime->exactTime(),
-            TemporalDateTimeFormat::ZonedDateTime, zonedDateTime->timeZone()));
+            TemporalDateTimeFormat::ZonedDateTime, zonedDateTime->timeZone(), zonedDateTime->calendar()->identifier()));
     }
 
     double x1 = WTF::timeClip(x.toNumber(globalObject));
@@ -343,7 +346,7 @@ IntlDateTimeFormat::handleDateTimeValue(JSGlobalObject* globalObject, JSValue x,
         return { };
     }
     auto epochNanoseconds = ExactTime(1'000'000 * static_cast<Int128>(x1));
-    return std::tuple(epochNanoseconds, std::nullopt, std::nullopt);
+    return std::tuple(epochNanoseconds, std::nullopt, std::nullopt, std::nullopt);
 }
 
 JSC_DEFINE_HOST_FUNCTION(intlDateTimeFormatFuncFormatDateTime, (JSGlobalObject* globalObject, CallFrame* callFrame))
@@ -358,12 +361,12 @@ JSC_DEFINE_HOST_FUNCTION(intlDateTimeFormatFuncFormatDateTime, (JSGlobalObject* 
         return JSValue::encode(throwTypeError(globalObject, scope, "Intl.DateTimeFormat.prototype.format called on value that's not a DateTimeFormat"_s));
 
     JSValue date = callFrame->argument(0);
-    auto [value, optionalDateTimeFormat, optionalTimeZone] =
+    auto [value, optionalDateTimeFormat, optionalTimeZone, optionalCalendar] =
         format->IntlDateTimeFormat::handleDateTimeValue(globalObject, date, false);
     RETURN_IF_EXCEPTION(scope, { });
 
     RELEASE_AND_RETURN(scope, JSValue::encode(format->format(globalObject, value,
-        optionalDateTimeFormat, optionalTimeZone)));
+        optionalDateTimeFormat, optionalTimeZone, optionalCalendar)));
 }
 
 JSC_DEFINE_CUSTOM_GETTER(intlDateTimeFormatPrototypeGetterFormat, (JSGlobalObject* globalObject, EncodedJSValue thisValue, PropertyName))
@@ -413,8 +416,8 @@ JSC_DEFINE_HOST_FUNCTION(intlDateTimeFormatPrototypeFuncFormatToParts, (JSGlobal
         return JSValue::encode(throwTypeError(globalObject, scope, "Intl.DateTimeFormat.prototype.formatToParts called on value that's not a DateTimeFormat"_s));
 
     JSValue date = callFrame->argument(0);
-    auto [value, optionalDateTimeFormat, optionalTimeZone] = dateTimeFormat->handleDateTimeValue(globalObject,
-        date, false);
+    auto [value, optionalDateTimeFormat, optionalTimeZone, optionalCalendar] =
+        dateTimeFormat->handleDateTimeValue(globalObject, date, false);
     RETURN_IF_EXCEPTION(scope, { });
 
     RELEASE_AND_RETURN(scope, JSValue::encode(dateTimeFormat->formatToParts(globalObject,
@@ -475,10 +478,10 @@ JSC_DEFINE_HOST_FUNCTION(intlDateTimeFormatPrototypeFuncFormatRange, (JSGlobalOb
         }
     }
 
-    auto [startDate, startFormat, startTimeZone] = dateTimeFormat->handleDateTimeValue(globalObject, x, false);
+    auto [startDate, startFormat, startTimeZone, startCalendar] = dateTimeFormat->handleDateTimeValue(globalObject, x, false);
     RETURN_IF_EXCEPTION(scope, { });
     // Note: since sameTemporalType(x, y) is true, startFormat == endFormat
-    auto [endDate, endFormat, endTimeZone] = dateTimeFormat->handleDateTimeValue(globalObject, y, false);
+    auto [endDate, endFormat, endTimeZone, endCalendar] = dateTimeFormat->handleDateTimeValue(globalObject, y, false);
     RETURN_IF_EXCEPTION(scope, { });
 
     RELEASE_AND_RETURN(scope, JSValue::encode(dateTimeFormat->formatRange(globalObject,
@@ -515,10 +518,10 @@ JSC_DEFINE_HOST_FUNCTION(intlDateTimeFormatPrototypeFuncFormatRangeToParts, (JSG
         }
     }
 
-    auto [startDate, startFormat, startTimeZone] = dateTimeFormat->handleDateTimeValue(globalObject, x, false);
+    auto [startDate, startFormat, startTimeZone, startCalendar] = dateTimeFormat->handleDateTimeValue(globalObject, x, false);
     RETURN_IF_EXCEPTION(scope, { });
     // Note: since sameTemporalType(x, y) is true, startFormat == endFormat
-    auto [endDate, endFormat, endTimeZone] = dateTimeFormat->handleDateTimeValue(globalObject, y, false);
+    auto [endDate, endFormat, endTimeZone, endCalendar] = dateTimeFormat->handleDateTimeValue(globalObject, y, false);
     RETURN_IF_EXCEPTION(scope, { });
 
     RELEASE_AND_RETURN(scope, JSValue::encode(dateTimeFormat->formatRangeToParts(globalObject, startDate, endDate, startFormat)));

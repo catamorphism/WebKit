@@ -262,7 +262,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalInstantPrototypeFuncToLocaleString, (JSGlobalOb
     formatter->initializeDateTimeFormat(globalObject, callFrame->argument(0), callFrame->argument(1), IntlDateTimeFormat::RequiredComponent::Any, IntlDateTimeFormat::Defaults::All);
     RETURN_IF_EXCEPTION(scope, { });
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(formatter->format(globalObject, instant->exactTime(), TemporalDateTimeFormat::Instant, std::nullopt)));
+    RELEASE_AND_RETURN(scope, JSValue::encode(formatter->format(globalObject, instant->exactTime(), TemporalDateTimeFormat::Instant, std::nullopt, std::nullopt)));
 }
 
 JSC_DEFINE_HOST_FUNCTION(temporalInstantPrototypeFuncValueOf, (JSGlobalObject* globalObject, CallFrame*))
