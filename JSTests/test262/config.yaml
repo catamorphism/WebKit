@@ -62,15 +62,10 @@ skip:
     - test/built-ins/RegExp/regexp-modifiers/add-ignoreCase-affects-slash-lower-p.js
 
      # Depends on Calendar support
-    - test/built-ins/Temporal/ZonedDateTime/calendar-case-insensitive.js
-    - test/built-ins/Temporal/ZonedDateTime/calendar-invalid-iso-string.js
-    - test/built-ins/Temporal/ZonedDateTime/calendar-wrong-type.js
-    - test/built-ins/Temporal/ZonedDateTime/compare/argument-propertybag-calendar-case-insensitive.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/era/branding.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/era/prop-desc.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/eraYear/branding.js
     - test/built-ins/Temporal/ZonedDateTime/prototype/eraYear/prop-desc.js
-    - test/built-ins/Temporal/ZonedDateTime/prototype/withCalendar/calendar-case-insensitive.js
     - test/built-ins/Temporal/ZonedDateTime/timezone-iso-string.js
     - test/intl402/Temporal/Duration/prototype/round/relativeto-infinity-throws-rangeerror.js
     - test/intl402/Temporal/Duration/prototype/total/relativeto-infinity-throws-rangeerror.js
