@@ -95,6 +95,7 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/construct-non-utc-non-iso.js
     - test/intl402/Temporal/ZonedDateTime/from/canonicalize-era-codes.js
     - test/intl402/Temporal/ZonedDateTime/from/infinity-throws-rangeerror.js
+    - test/intl402/Temporal/ZonedDateTime/prototype/equals/infinity-throws-rangeerror.js
      ## depends on "japanese" calendar support (eras)
     - test/intl402/Temporal/PlainDate/from/remapping-era.js
     - test/intl402/Temporal/PlainDate/prototype/with/cross-era-boundary.js
@@ -148,12 +149,6 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/from/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/equals/canonicalize-calendar.js
      ## ...
-    - test/intl402/Temporal/ZonedDateTime/prototype/equals/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/era/branding.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/era/prop-desc.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/eraYear/branding.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/eraYear/prop-desc.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/since/calendar-mismatch.js
     - test/intl402/Temporal/ZonedDateTime/prototype/since/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/since/infinity-throws-rangeerror.js
     - test/intl402/Temporal/ZonedDateTime/prototype/toLocaleString/calendar-mismatch.js
@@ -165,7 +160,6 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/prototype/toString/calendarname-undefined.js
     - test/intl402/Temporal/ZonedDateTime/prototype/toString/calendarname-wrong-type.js
     - test/intl402/Temporal/ZonedDateTime/prototype/toString/options-undefined.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/until/calendar-mismatch.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/infinity-throws-rangeerror.js
     - test/intl402/Temporal/ZonedDateTime/prototype/weekOfYear/gregory-iso-weekofyear.js

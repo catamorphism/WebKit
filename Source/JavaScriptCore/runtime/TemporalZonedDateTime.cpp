@@ -594,6 +594,11 @@ ISO8601::Duration TemporalZonedDateTime::differenceTemporalZonedDateTime(bool is
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
+    if (calendar()->identifier() != other->calendar()->identifier()) {
+        throwRangeError(globalObject, scope, "calendars must match in since or until"_s);
+        return { };
+    }
+
     auto [smallestUnit, largestUnit, roundingMode, increment] = extractDifferenceOptions(globalObject, options, UnitGroup::DateTime, TemporalUnit::Nanosecond, TemporalUnit::Hour);
     RETURN_IF_EXCEPTION(scope, { });
 
