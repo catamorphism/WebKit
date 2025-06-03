@@ -155,6 +155,3 @@ skip:
     - test/intl402/Temporal/ZonedDateTime/prototype/since/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/until/canonicalize-calendar.js
     - test/intl402/Temporal/ZonedDateTime/prototype/withCalendar/canonicalize-calendar.js
-
-    # Depends on annotations in datetime strings
-     - test/built-ins/Temporal/ZonedDateTime/from/argument-string-time-zone-annotation.js

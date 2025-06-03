@@ -367,8 +367,7 @@ class TimeZone {
     }
     bool isUTC() const
     {
-        return (std::holds_alternative<TimeZoneID>(m_timezone) && std::get<TimeZoneID>(m_timezone) == utcTimeZoneID())
-            || (std::holds_alternative<int64_t>(m_timezone) && !std::get<int64_t>(m_timezone));
+        return std::holds_alternative<TimeZoneID>(m_timezone) && std::get<TimeZoneID>(m_timezone) == utcTimeZoneID();
     }
     bool isOffset() const
     {

@@ -726,7 +726,6 @@ static bool parseTimeZoneIANAName(StringView string)
 }
 
 // https://tc39.es/proposal-temporal/#sec-parsetimezoneidentifier
-// Returns a pair of the time zone and the original name
 std::optional<ISO8601::TimeZone>
 TemporalTimeZone::parseTimeZoneIdentifier(JSGlobalObject* globalObject, StringView identifier)
 {
@@ -734,7 +733,7 @@ TemporalTimeZone::parseTimeZoneIdentifier(JSGlobalObject* globalObject, StringVi
     auto scope = DECLARE_THROW_SCOPE(vm);
 
     if (isUTCTimeZoneString(identifier))
-        return ISO8601::TimeZone::offset(0);
+        return ISO8601::TimeZone::utc();
 
     auto parseResult = ISO8601::parseUTCOffset(identifier, false); // Don't accept sub-minute precision
     bool isIANAName = false;
