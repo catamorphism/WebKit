@@ -236,3 +236,10 @@ shouldBe(Temporal.ZonedDateTime.prototype.getTimeZoneTransition.length, 1);
     shouldBe(hasCalendar.weekOfYear, undefined);
     shouldBe(hasCalendar.yearOfWeek, undefined);
 }
+
+{
+    shouldBe(Temporal.ZonedDateTime.from("1970-01-01T00:00[UTC][foo=bar]").toString(), zdt.toString());
+    shouldBe(Temporal.ZonedDateTime.from("1970-01-01T00:00[UTC][foo=bar][u-ca=iso8601]").toString(), zdt.toString());
+    shouldBe(Temporal.ZonedDateTime.from("1970-01-01T00:00[UTC][u-ca=iso8601][foo=bar]").toString(), zdt.toString());
+    shouldBe(Temporal.ZonedDateTime.from("1970-01-01T00:00[UTC][foo=bar][_foo-bar0=Ignore-This-999999999999]").toString(), zdt.toString());
+}
