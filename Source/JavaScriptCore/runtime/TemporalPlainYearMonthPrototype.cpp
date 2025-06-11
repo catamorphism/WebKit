@@ -268,7 +268,8 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainYearMonthPrototypeFuncToPlainDate, (JSGlob
     }
 
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject,
-        globalObject->plainDateStructure(), WTFMove(plainDateOptional.value()), yearMonth->calendar())));
+        globalObject->plainDateStructure(), WTFMove(plainDateOptional.value()), yearMonth->calendar(),
+        std::nullopt, std::nullopt)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainyearmonth.prototype.tostring

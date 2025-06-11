@@ -371,7 +371,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncToPlainDate, (JSGloba
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDateTime.prototype.toPlainDate called on value that's not a PlainDateTime"_s);
 
     return JSValue::encode(TemporalPlainDate::create(vm, globalObject->plainDateStructure(),
-        plainDateTime->plainDate(), plainDateTime->calendar()));
+        plainDateTime->plainDate(), plainDateTime->calendar(), std::nullopt, std::nullopt));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindatetime.prototype.toplaintime

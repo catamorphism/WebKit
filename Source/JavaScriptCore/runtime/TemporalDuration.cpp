@@ -258,6 +258,8 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
     std::optional<ISO8601::TimeZone> timeZone;
     std::optional<CalendarID> calendar;
     std::optional<String> offsetString;
+    std::optional<String> era;
+    std::optional<double> eraYear;
     if (value.isObject()) {
         JSObject* obj = asObject(value);
         if (obj->inherits<TemporalZonedDateTime>())
@@ -283,6 +285,8 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
         RETURN_IF_EXCEPTION(scope, { });
         timeZone = fieldsRecord.timeZone;
         offsetString = fieldsRecord.offsetString;
+        era = fieldsRecord.era;
+        eraYear = fieldsRecord.eraYear;
         auto result = TemporalCalendar::interpretTemporalDateTimeFields(globalObject, calendar.value(),
             fieldsRecord, TemporalOverflow::Constrain);
         RETURN_IF_EXCEPTION(scope, { });
@@ -336,10 +340,10 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
     if (!timeZone || !time) {
         if (calendar) {
             RELEASE_AND_RETURN(scope, TemporalPlainDate::tryCreateIfValid(globalObject,
-                globalObject->plainDateStructure(), WTFMove(isoDate), calendar.value()));
+                globalObject->plainDateStructure(), WTFMove(isoDate), calendar.value(), era, eraYear));
         }
         RELEASE_AND_RETURN(scope, TemporalPlainDate::tryCreateIfValid(globalObject,
-            globalObject->plainDateStructure(), WTFMove(isoDate), iso8601CalendarID()));
+            globalObject->plainDateStructure(), WTFMove(isoDate), iso8601CalendarID(), era, eraYear));
     }
     int64_t offsetNs = 0;
     if (offsetBehavior == TemporalOffsetBehavior::Option) {

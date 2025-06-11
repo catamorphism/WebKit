@@ -126,6 +126,7 @@ public:
             return jsCast<TemporalCalendar*>(cal)->identifier() == iso8601CalendarID();
         return false;
     }
+    static bool hasEras(CalendarID calendarID);
 
     static std::optional<CalendarID> isBuiltinCalendar(StringView);
     static CalendarID canonicalizeCalendar(JSGlobalObject*, StringView);

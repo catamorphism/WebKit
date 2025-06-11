@@ -42,12 +42,12 @@ public:
         return vm.temporalPlainDateSpace<mode>();
     }
 
-    static TemporalPlainDate* create(VM&, Structure*, ISO8601::PlainDate&&, CalendarID);
-    static TemporalPlainDate* create(VM&, Structure*, ISO8601::PlainDate&&, TemporalCalendar*);
-    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, TemporalCalendar*);
-    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, CalendarID);
-    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::Duration&&, TemporalCalendar*);
-    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::Duration&&, CalendarID);
+    static TemporalPlainDate* create(VM&, Structure*, ISO8601::PlainDate&&, CalendarID, std::optional<String>, std::optional<double>);
+    static TemporalPlainDate* create(VM&, Structure*, ISO8601::PlainDate&&, TemporalCalendar*, std::optional<String>, std::optional<double>);
+    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, TemporalCalendar*, std::optional<String>, std::optional<double>);
+    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, CalendarID, std::optional<String>, std::optional<double>);
+    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::Duration&&, TemporalCalendar*, std::optional<String>, std::optional<double>);
+    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::Duration&&, CalendarID, std::optional<String>, std::optional<double>);
     static Structure* createStructure(VM&, JSGlobalObject*, JSValue);
 
     DECLARE_INFO;
@@ -60,6 +60,8 @@ public:
 
     TemporalCalendar* calendar() const { return m_calendar.get(this); }
     ISO8601::PlainDate plainDate() const { return m_plainDate; }
+    std::optional<String> era() const { return m_era; }
+    std::optional<double> eraYear() const { return m_eraYear; }
 
 #define JSC_DEFINE_TEMPORAL_PLAIN_DATE_FIELD(name, capitalizedName) \
     decltype(auto) name() const { return m_plainDate.name(); }
@@ -89,8 +91,10 @@ public:
     DECLARE_VISIT_CHILDREN;
 
 private:
-    TemporalPlainDate(VM&, Structure*, ISO8601::PlainDate&&, CalendarID);
-    TemporalPlainDate(VM&, Structure*, ISO8601::PlainDate&&, TemporalCalendar*);
+    TemporalPlainDate(VM&, Structure*, ISO8601::PlainDate&&, CalendarID, std::optional<String>,
+        std::optional<double>);
+    TemporalPlainDate(VM&, Structure*, ISO8601::PlainDate&&, TemporalCalendar*, std::optional<String>,
+        std::optional<double>);
     void finishCreation(VM&, bool);
 
     template<typename CharacterType>
@@ -102,6 +106,8 @@ private:
     ISO8601::PlainDate m_plainDate;
     CalendarID m_calendarId;
     LazyProperty<TemporalPlainDate, TemporalCalendar> m_calendar;
+    std::optional<String> m_era;
+    std::optional<double> m_eraYear;
 };
 
 // https://tc39.es/proposal-temporal/#sec-temporal-isodatewithinlimits

@@ -192,7 +192,8 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainMonthDayPrototypeFuncToPlainDate, (JSGloba
     RETURN_IF_EXCEPTION(scope, { });
 
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject,
-        globalObject->plainDateStructure(), WTFMove(isoDate), monthDay->calendar())));
+        globalObject->plainDateStructure(), WTFMove(isoDate), monthDay->calendar(),
+        mergedFields.era, mergedFields.eraYear)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.prototype.tolocalestring

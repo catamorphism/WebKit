@@ -123,7 +123,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalCalendarPrototypeFuncDateFromFields, (JSGlobalO
     RETURN_IF_EXCEPTION(scope, { });
 
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::create(vm, globalObject->plainDateStructure(),
-        WTFMove(plainDate), calendar->identifier())));
+        WTFMove(plainDate), calendar->identifier(), std::nullopt, std::nullopt)));
 }
 
 // https://tc39.es/proposal-temporal/#sup-temporal.calendar.prototype.dateadd
@@ -152,8 +152,9 @@ JSC_DEFINE_HOST_FUNCTION(temporalCalendarPrototypeFuncDateAdd, (JSGlobalObject* 
     ISO8601::PlainDate plainDate = calendar->addDurationToDate(globalObject, date->plainDate(), duration, overflow);
     RETURN_IF_EXCEPTION(scope, { });
 
+    // Non-ISO8601 calendars not supported yet => no era or eraYear
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::create(vm, globalObject->plainDateStructure(),
-        WTFMove(plainDate), calendar->identifier())));
+        WTFMove(plainDate), calendar->identifier(), std::nullopt, std::nullopt)));
 }
 
 // https://tc39.es/proposal-temporal/#sup-temporal.calendar.prototype.dateuntil

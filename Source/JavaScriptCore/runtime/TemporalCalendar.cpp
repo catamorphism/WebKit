@@ -1384,4 +1384,9 @@ YearWeekRecord TemporalCalendar::calendarDateWeekOfYear(JSGlobalObject* globalOb
     return { weekOfYear, yearOfWeek };
 }
 
+bool TemporalCalendar::hasEras(CalendarID calendarID) {
+    return calendarID != iso8601CalendarID();
+}
+
+
 } // namespace JSC
