@@ -208,18 +208,9 @@ TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject,
         auto fields =  Vector { FieldName::Day, FieldName::Hour, FieldName::Microsecond, FieldName::Millisecond,
             FieldName::Minute, FieldName::Month, FieldName::MonthCode, FieldName::Nanosecond, FieldName::Second,
             FieldName::Year };
-        auto [optionalYear, optionalMonth, optionalMonthCode, optionalDay, optionalHour, optionalMinute,
-            optionalSecond, optionalMillisecond, optionalMicrosecond, optionalNanosecond, optionalOffset,
-            timeZoneOptional] = TemporalCalendar::prepareCalendarFields(globalObject,
+        auto fieldsRecord = TemporalCalendar::prepareCalendarFields(globalObject,
                 calendarId, asObject(itemValue), fields, std::nullopt);
         RETURN_IF_EXCEPTION(scope, { });
-
-        auto hour = optionalHour.value_or(0);
-        auto minute = optionalMinute.value_or(0);
-        auto second = optionalSecond.value_or(0);
-        auto millisecond = optionalMillisecond.value_or(0);
-        auto microsecond = optionalMicrosecond.value_or(0);
-        auto nanosecond = optionalNanosecond.value_or(0);
 
         auto overflow = TemporalOverflow::Constrain;
         if (optionsValue) {
@@ -227,9 +218,8 @@ TemporalPlainDateTime* TemporalPlainDateTime::from(JSGlobalObject* globalObject,
             RETURN_IF_EXCEPTION(scope, { });
         }
 
-        auto result = TemporalCalendar::interpretTemporalDateTimeFields(globalObject, calendarId,
-            optionalYear, optionalMonth, optionalMonthCode, optionalDay, hour, minute, second,
-            millisecond, microsecond, nanosecond, overflow);
+        auto result = TemporalCalendar::interpretTemporalDateTimeFields(globalObject, calendarId, fieldsRecord,
+            overflow);
         RETURN_IF_EXCEPTION(scope, { });
 
         if (std::holds_alternative<TemporalCalendar*>(calendar))

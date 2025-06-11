@@ -370,6 +370,7 @@ TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject,
 
     auto epochNs = exactTime();
     auto thisTimeZone = timeZone();
+    auto thisCalendar = calendar()->identifier();
     auto offsetNanoseconds = TemporalTimeZone::getOffsetNanosecondsFor(globalObject,
         thisTimeZone, epochNs.epochNanoseconds());
     RETURN_IF_EXCEPTION(scope, { });
@@ -377,44 +378,24 @@ TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject,
     RETURN_IF_EXCEPTION(scope, { });
     auto isoDate = isoDateTime.date();
     auto isoTime = isoDateTime.time();
-    auto year = isoDate.year();
-    auto month = isoDate.month();
-    std::optional<WTF::String> monthCode = std::nullopt;
-    auto day = isoDate.day();
-    auto hour = isoTime.hour();
-    auto minute = isoTime.minute();
-    auto second = isoTime.second();
-    auto millisecond = isoTime.millisecond();
-    auto microsecond = isoTime.microsecond();
-    auto nanosecond = isoTime.nanosecond();
-    TemporalCalendar* thisCalendar = calendar();
+    auto fields = TemporalCalendar::isoDateToFields(globalObject, thisCalendar, isoDate, TemporalDateFormat::Date);
+    RETURN_IF_EXCEPTION(scope, { });
+    fields.hour = isoTime.hour();
+    fields.minute = isoTime.minute();
+    fields.second = isoTime.second();
+    fields.millisecond = isoTime.millisecond();
+    fields.microsecond = isoTime.microsecond();
+    fields.nanosecond = isoTime.nanosecond();
+    fields.offsetString = ISO8601::formatUTCOffsetNanoseconds(offsetNanoseconds);
 
-    auto fields =  Vector { FieldName::Day, FieldName::Hour, FieldName::Microsecond, FieldName::Millisecond,
+    auto fieldList =  Vector { FieldName::Day, FieldName::Hour, FieldName::Microsecond, FieldName::Millisecond,
         FieldName::Minute, FieldName::Month, FieldName::MonthCode, FieldName::Nanosecond, FieldName::Offset,
         FieldName::Second, FieldName::Year };
-    auto [optionalYear, optionalMonth, optionalMonthCode, optionalDay, optionalHour, optionalMinute,
-        optionalSecond, optionalMillisecond, optionalMicrosecond, optionalNanosecond, optionalOffset,
-        timeZoneOptional] = TemporalCalendar::prepareCalendarFields(globalObject,
-            thisCalendar->identifier(), temporalZonedDateTimeLike, fields, std::nullopt);
+    auto partialZonedDateTime = TemporalCalendar::prepareCalendarFields(globalObject,
+            thisCalendar, temporalZonedDateTimeLike, fieldList, std::nullopt);
     RETURN_IF_EXCEPTION(scope, { });
-    year = optionalYear.value_or(year);
-    month = optionalMonth.value_or(month);
-    monthCode = optionalMonthCode;
-    day = optionalDay.value_or(day);
-    hour = optionalHour.value_or(hour);
-    minute = optionalMinute.value_or(minute);
-    second = optionalSecond.value_or(second);
-    millisecond = optionalMillisecond.value_or(millisecond);
-    microsecond = optionalMicrosecond.value_or(microsecond);
-    nanosecond = optionalNanosecond.value_or(nanosecond);
-    if (optionalOffset) {
-        auto offsetNanosecondsOptional = ISO8601::parseUTCOffset(optionalOffset.value(), false);
-        if (!offsetNanosecondsOptional) {
-            throwRangeError(globalObject, scope, "invalid offset string in Temporal.ZonedDateTime.with"_s);
-            return { };
-        }
-        offsetNanoseconds = offsetNanosecondsOptional.value();
-    }
+    fields = TemporalCalendar::calendarMergeFields(thisCalendar, fields, partialZonedDateTime);
+
     auto resolvedOptions = intlGetOptionsObject(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
     auto disambiguation = getTemporalDisambiguationOption(globalObject, resolvedOptions);
@@ -424,11 +405,16 @@ TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject,
     auto overflow = toTemporalOverflow(globalObject, resolvedOptions);
     RETURN_IF_EXCEPTION(scope, { });
     auto dateTimeResult = TemporalCalendar::interpretTemporalDateTimeFields(globalObject,
-        thisCalendar->identifier(), year, month, monthCode, day, hour, minute, second, millisecond,
-        microsecond, nanosecond, overflow);
+        thisCalendar, fields, overflow);
     RETURN_IF_EXCEPTION(scope, { });
+    ASSERT(fields.offsetString);
+    auto newOffsetNanoseconds = ISO8601::parseDateTimeUTCOffset(fields.offsetString.value());
+    if (!newOffsetNanoseconds) {
+        throwRangeError(globalObject, scope, "Temporal.ZonedDateTime.with: Couldn't parse offset string"_s);
+        return { };
+    }
     auto epochNanoseconds = interpretISODateTimeOffset(globalObject, dateTimeResult.date(),
-        dateTimeResult.time(), TemporalOffsetBehavior::Option, static_cast<int64_t>(offsetNanoseconds),
+        dateTimeResult.time(), TemporalOffsetBehavior::Option, static_cast<int64_t>(newOffsetNanoseconds.value()),
         thisTimeZone, disambiguation, offset, TemporalMatchBehavior::Exactly);
     RETURN_IF_EXCEPTION(scope, { });
     RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject,
@@ -766,15 +752,13 @@ TemporalZonedDateTime* TemporalZonedDateTime::from(JSGlobalObject* globalObject,
         if (std::holds_alternative<TemporalCalendar*>(calendarOrId))
             calendar = std::get<TemporalCalendar*>(calendarOrId);
 
-        auto [optionalYear, optionalMonth, optionalMonthCode, optionalDay, optionalHour, optionalMinute,
-            optionalSecond, optionalMillisecond, optionalMicrosecond, optionalNanosecond, optionalOffset,
-            timeZoneOptional] = TemporalCalendar::prepareCalendarFields(globalObject, calendarId, item,
+        auto fields = TemporalCalendar::prepareCalendarFields(globalObject, calendarId, item,
             Vector { FieldName::Day, FieldName::Hour, FieldName::Microsecond, FieldName::Millisecond, FieldName::Minute, FieldName::Month, FieldName::MonthCode, FieldName::Nanosecond, FieldName::Offset, FieldName::Second, FieldName::TimeZone, FieldName::Year }, Vector { FieldName::TimeZone });
         RETURN_IF_EXCEPTION(scope, { });
-        ASSERT(timeZoneOptional);
-        timeZone = timeZoneOptional.value();
-        offsetString = optionalOffset;
-        if (!optionalOffset)
+        ASSERT(fields.timeZone);
+        timeZone = fields.timeZone.value();
+        offsetString = fields.offsetString;
+        if (!offsetString)
             offsetBehavior = TemporalOffsetBehavior::Wall;
         if (options) {
             disambiguation = getTemporalDisambiguationOption(globalObject, options.value());
@@ -784,10 +768,8 @@ TemporalZonedDateTime* TemporalZonedDateTime::from(JSGlobalObject* globalObject,
             overflow = toTemporalOverflow(globalObject, options.value());
             RETURN_IF_EXCEPTION(scope, { });
         }
-        auto result = TemporalCalendar::interpretTemporalDateTimeFields(globalObject, calendarId, optionalYear,
-            optionalMonth, optionalMonthCode, optionalDay, optionalHour.value_or(0),
-            optionalMinute.value_or(0), optionalSecond.value_or(0), optionalMillisecond.value_or(0),
-            optionalMicrosecond.value_or(0), optionalNanosecond.value_or(0), overflow);
+        auto result = TemporalCalendar::interpretTemporalDateTimeFields(globalObject, calendarId,
+            fields, overflow);
         RETURN_IF_EXCEPTION(scope, { });
         isoDate = result.date();
         time = result.time();

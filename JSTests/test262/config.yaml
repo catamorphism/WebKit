@@ -61,8 +61,6 @@ skip:
 
      # Depends on Calendar support
      ## depends on "gregory" calendar support (validating or canonicalizing "era" property)
-    - test/intl402/Temporal/Duration/prototype/round/relativeto-infinity-throws-rangeerror.js
-    - test/intl402/Temporal/Duration/prototype/total/relativeto-infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainDate/compare/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainDate/from/canonicalize-era-codes.js
     - test/intl402/Temporal/PlainDate/from/infinity-throws-rangeerror.js
@@ -71,12 +69,7 @@ skip:
     - test/intl402/Temporal/PlainDate/prototype/since/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainDate/prototype/until/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainDate/prototype/with/gregorian-mutually-exclusive-fields.js
-    - test/intl402/Temporal/PlainDateTime/compare/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainDateTime/from/canonicalize-era-codes.js
-    - test/intl402/Temporal/PlainDateTime/from/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/PlainDateTime/prototype/equals/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/PlainDateTime/prototype/since/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/PlainDateTime/prototype/until/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainMonthDay/from/fields-missing-properties.js
     - test/intl402/Temporal/PlainMonthDay/prototype/equals/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainMonthDay/prototype/toPlainDate/infinity-throws-rangeerror.js
@@ -91,13 +84,9 @@ skip:
     - test/intl402/Temporal/PlainYearMonth/prototype/since/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainYearMonth/prototype/until/infinity-throws-rangeerror.js
     - test/intl402/Temporal/PlainYearMonth/prototype/with/minimum-valid-year-month.js
-    - test/intl402/Temporal/ZonedDateTime/compare/infinity-throws-rangeerror.js
     - test/intl402/Temporal/ZonedDateTime/construct-non-utc-non-iso.js
     - test/intl402/Temporal/ZonedDateTime/from/canonicalize-era-codes.js
     - test/intl402/Temporal/ZonedDateTime/from/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/equals/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/since/infinity-throws-rangeerror.js
-    - test/intl402/Temporal/ZonedDateTime/prototype/until/infinity-throws-rangeerror.js
      ## depends on "japanese" calendar support (eras)
     - test/intl402/Temporal/PlainDate/from/remapping-era.js
     - test/intl402/Temporal/PlainDate/prototype/with/cross-era-boundary.js

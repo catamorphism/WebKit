@@ -42,9 +42,31 @@ struct YearWeekRecord {
 // https://tc39.es/proposal-temporal/#sec-temporal-calendar-date-records
 // (Modified to only include fields that are currently used)
 struct CalendarDateRecord {
+    String monthCode;
+    int32_t year;
+    int32_t month;
+    int32_t day;
     int32_t dayOfWeek;
     int32_t dayOfYear;
     int32_t daysInYear;
+};
+
+// https://tc39.es/proposal-temporal/#sec-temporal-calendar-fields-records
+struct CalendarFieldsRecord {
+    std::optional<String> era;
+    std::optional<double> eraYear;
+    std::optional<double> year;
+    std::optional<int32_t> month;
+    std::optional<String> monthCode;
+    std::optional<int32_t> day;
+    int32_t hour = 0;
+    int32_t minute = 0;
+    int32_t second = 0;
+    int32_t millisecond = 0;
+    int32_t microsecond = 0;
+    int32_t nanosecond = 0;
+    std::optional<String> offsetString;
+    std::optional<ISO8601::TimeZone> timeZone;
 };
 
 class TemporalCalendar final : public JSNonFinalObject {
@@ -68,18 +90,15 @@ public:
     static CalendarID parseTemporalCalendarString(JSGlobalObject*, StringView);
     static std::variant<TemporalCalendar*, CalendarID>
         toTemporalCalendarIdentifier(JSGlobalObject*, JSValue);
-    // static CalendarID getTemporalCalendarIdentifierWithISODefault(JSGlobalObject*, JSValue);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, JSObject*, TemporalDateFormat, std::variant<JSObject*, TemporalOverflow>, TemporalOverflow&);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, TemporalDateFormat, double year, double month, double day, TemporalOverflow);
+    static CalendarFieldsRecord isoDateToFields(JSGlobalObject*, CalendarID, ISO8601::PlainDate, TemporalDateFormat);
     static ISO8601::PlainDate monthDayFromFields(JSGlobalObject*, std::optional<double>, double, double, TemporalOverflow);
-    static std::tuple<std::optional<double>, std::optional<double>, std::optional<String>, std::optional<double>,
-        std::optional<double>, std::optional<double>, std::optional<double>, std::optional<double>,
-        std::optional<double>, std::optional<double>, std::optional<String>, std::optional<ISO8601::TimeZone>>
-        prepareCalendarFields(JSGlobalObject*, CalendarID, JSObject*, Vector<FieldName>,
+    static CalendarFieldsRecord prepareCalendarFields(JSGlobalObject*, CalendarID, JSObject*, Vector<FieldName>,
             std::optional<Vector<FieldName>>);
+    static CalendarFieldsRecord calendarMergeFields(CalendarID, CalendarFieldsRecord, CalendarFieldsRecord);
     static ISO8601::PlainDateTime interpretTemporalDateTimeFields(JSGlobalObject*,
-        CalendarID, std::optional<double>, std::optional<double>, std::optional<String>, std::optional<double>,
-        double, double, double, double, double, double, TemporalOverflow);
+        CalendarID, CalendarFieldsRecord, TemporalOverflow);
     static ISO8601::Duration differenceTemporalPlainYearMonth(JSGlobalObject*,
         bool, const ISO8601::PlainYearMonth&, const ISO8601::PlainYearMonth&,
         unsigned, TemporalUnit, TemporalUnit, RoundingMode);

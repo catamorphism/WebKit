@@ -273,27 +273,18 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
         else
             calendar = std::get<CalendarID>(calendarOrCalendarID);
         RETURN_IF_EXCEPTION(scope, { });
-        auto fields =  Vector { FieldName::Day, FieldName::Hour, FieldName::Microsecond,
+        auto fields =  Vector { FieldName::Day,
+            FieldName::Hour, FieldName::Microsecond,
             FieldName::Millisecond, FieldName::Minute, FieldName::Month, FieldName::MonthCode,
             FieldName::Nanosecond, FieldName::Offset, FieldName::Second, FieldName::TimeZone,
             FieldName::Year };
-        auto [optionalYear, optionalMonth, optionalMonthCode, optionalDay, optionalHour, optionalMinute,
-            optionalSecond, optionalMillisecond, optionalMicrosecond, optionalNanosecond, offsetString1,
-            optionalTimeZone] = TemporalCalendar::prepareCalendarFields(globalObject,
+        auto fieldsRecord = TemporalCalendar::prepareCalendarFields(globalObject,
                 calendar.value(), obj, fields, std::nullopt);
         RETURN_IF_EXCEPTION(scope, { });
-        timeZone = optionalTimeZone;
-        offsetString = offsetString1;
-        auto hour = optionalHour.value_or(0);
-        auto minute = optionalMinute.value_or(0);
-        auto second = optionalSecond.value_or(0);
-        auto millisecond = optionalMillisecond.value_or(0);
-        auto microsecond = optionalMicrosecond.value_or(0);
-        auto nanosecond = optionalNanosecond.value_or(0);
-
+        timeZone = fieldsRecord.timeZone;
+        offsetString = fieldsRecord.offsetString;
         auto result = TemporalCalendar::interpretTemporalDateTimeFields(globalObject, calendar.value(),
-            optionalYear, optionalMonth, optionalMonthCode, optionalDay, hour, minute, second,
-            millisecond, microsecond, nanosecond, TemporalOverflow::Constrain);
+            fieldsRecord, TemporalOverflow::Constrain);
         RETURN_IF_EXCEPTION(scope, { });
         if (!offsetString)
             offsetBehavior = TemporalOffsetBehavior::Wall;

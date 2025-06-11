@@ -191,6 +191,8 @@ enum class TemporalFractionalSecondDigits : uint8_t {
 };
 
 enum class FieldName : uint8_t {
+    Era,
+    EraYear,
     Year,
     Month,
     MonthCode,
