@@ -108,9 +108,13 @@ const Vector<String>& intlAvailableCalendars();
 extern CalendarID iso8601CalendarIDStorage;
 extern CalendarID gregoryCalendarIDStorage;
 extern CalendarID japaneseCalendarIDStorage;
+extern CalendarID hebrewCalendarIDStorage;
+extern CalendarID chineseCalendarIDStorage;
 CalendarID iso8601CalendarIDSlow();
 CalendarID gregoryCalendarIDSlow();
 CalendarID japaneseCalendarIDSlow();
+CalendarID hebrewCalendarIDSlow();
+CalendarID chineseCalendarIDSlow();
 
 inline CalendarID iso8601CalendarID()
 {
@@ -133,6 +137,22 @@ inline CalendarID japaneseCalendarID()
     unsigned value = japaneseCalendarIDStorage;
     if (value == std::numeric_limits<CalendarID>::max())
         return japaneseCalendarIDSlow();
+    return value;
+}
+
+inline CalendarID hebrewCalendarID()
+{
+    unsigned value = hebrewCalendarIDStorage;
+    if (value == std::numeric_limits<CalendarID>::max())
+        return hebrewCalendarIDSlow();
+    return value;
+}
+
+inline CalendarID chineseCalendarID()
+{
+    unsigned value = chineseCalendarIDStorage;
+    if (value == std::numeric_limits<CalendarID>::max())
+        return chineseCalendarIDSlow();
     return value;
 }
 

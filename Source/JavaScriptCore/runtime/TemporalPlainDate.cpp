@@ -253,21 +253,30 @@ TemporalPlainDate* TemporalPlainDate::from(JSGlobalObject* globalObject, JSValue
 
         auto calendar = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, itemValue);
         RETURN_IF_EXCEPTION(scope, { });
-
-        std::variant<JSObject*, TemporalOverflow> optionsOrOverflow = TemporalOverflow::Constrain;
-        if (optionsValue) {
-            optionsOrOverflow = intlGetOptionsObject(globalObject, optionsValue.value());
-            RETURN_IF_EXCEPTION(scope, { });
-        }
-        auto overflow = TemporalOverflow::Constrain;
-        auto plainDate = TemporalCalendar::isoDateFromFields(globalObject, asObject(itemValue), TemporalDateFormat::Date, optionsOrOverflow, overflow);
+        Vector<FieldName> fieldList({ FieldName::Day, FieldName::Month, FieldName::MonthCode, FieldName::Year });
+        auto calendarID = std::holds_alternative<TemporalCalendar*>(calendar)
+            ? std::get<TemporalCalendar*>(calendar)->identifier()
+            : std::get<CalendarID>(calendar);
+        auto fields = TemporalCalendar::prepareCalendarFields(globalObject, calendarID, asObject(itemValue),
+            fieldList, { });
         RETURN_IF_EXCEPTION(scope, { });
+
+        auto overflow = TemporalOverflow::Constrain;
+        if (optionsValue) {
+            auto options = intlGetOptionsObject(globalObject, optionsValue.value());
+            RETURN_IF_EXCEPTION(scope, { });
+            overflow = toTemporalOverflow(globalObject, options);
+        }
+
+        auto isoDate = TemporalCalendar::calendarDateFromFields(globalObject, calendarID, fields, overflow);
+        RETURN_IF_EXCEPTION(scope, { });
+
         if (std::holds_alternative<TemporalCalendar*>(calendar)) {
-            return TemporalPlainDate::create(vm, globalObject->plainDateStructure(), WTFMove(plainDate),
+            return TemporalPlainDate::create(vm, globalObject->plainDateStructure(), WTFMove(isoDate),
                  std::get<TemporalCalendar*>(calendar));
         }
-        return TemporalPlainDate::create(vm, globalObject->plainDateStructure(), WTFMove(plainDate),
-            std::get<CalendarID>(calendar));
+        return TemporalPlainDate::create(vm, globalObject->plainDateStructure(), WTFMove(isoDate),
+            calendarID);
     }
 
     if (!itemValue.isString()) {

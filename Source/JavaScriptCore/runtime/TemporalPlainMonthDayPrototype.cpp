@@ -179,25 +179,20 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainMonthDayPrototypeFuncToPlainDate, (JSGloba
     if (!itemValue.isObject())
         return throwVMTypeError(globalObject, scope, "Temporal.PlainMonthDay.prototype.toPlainDate: item is not an object"_s);
 
-    auto thisMonth = monthDay->month();
-    auto thisDay = monthDay->day();
-    auto [itemYear, itemMonth, itemDay] = TemporalPlainDate::toPartialDate(globalObject, asObject(itemValue));
+    auto calendarID = monthDay->calendar()->identifier();
+    auto fields = TemporalCalendar::isoDateToFields(globalObject, calendarID, monthDay->plainMonthDay().isoPlainDate(), TemporalDateFormat::MonthDay);
+    RETURN_IF_EXCEPTION(scope, { });
+    Vector<FieldName> fieldNames({ FieldName::Year });
+    auto inputFields = TemporalCalendar::prepareCalendarFields(globalObject, calendarID,
+        asObject(itemValue), fieldNames, { });
+    RETURN_IF_EXCEPTION(scope, { });
+    auto mergedFields = TemporalCalendar::calendarMergeFields(calendarID, fields, inputFields);
+    auto isoDate = TemporalCalendar::calendarDateFromFields(globalObject, calendarID, mergedFields,
+        TemporalOverflow::Constrain);
     RETURN_IF_EXCEPTION(scope, { });
 
-    if (!itemYear) {
-        throwTypeError(globalObject, scope, "Temporal.PlainMonthDay.prototype.toPlainDate: item does not have a year field"_s);
-        return { };
-    }
-
-    auto plainDateOptional =
-        TemporalPlainDate::regulateISODate(itemYear.value(), thisMonth, thisDay, TemporalOverflow::Constrain);
-    if (!plainDateOptional) {
-        throwRangeError(globalObject, scope, "Temporal.PlainMonthDay.prototype.toPlainDate: date is invalid"_s);
-        return { };
-    }
-
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject,
-        globalObject->plainDateStructure(), WTFMove(plainDateOptional.value()), monthDay->calendar())));
+        globalObject->plainDateStructure(), WTFMove(isoDate), monthDay->calendar())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.prototype.tolocalestring

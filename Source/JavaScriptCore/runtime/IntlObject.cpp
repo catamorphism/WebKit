@@ -1648,6 +1648,8 @@ const Vector<String>& intlAvailableCalendars()
 CalendarID iso8601CalendarIDStorage { std::numeric_limits<CalendarID>::max() };
 CalendarID gregoryCalendarIDStorage { std::numeric_limits<CalendarID>::max() };
 CalendarID japaneseCalendarIDStorage { std::numeric_limits<CalendarID>::max() };
+CalendarID hebrewCalendarIDStorage { std::numeric_limits<CalendarID>::max() };
+CalendarID chineseCalendarIDStorage { std::numeric_limits<CalendarID>::max() };
 CalendarID iso8601CalendarIDSlow()
 {
     static std::once_flag initializeOnce;
@@ -1694,6 +1696,38 @@ CalendarID gregoryCalendarIDSlow()
         RELEASE_ASSERT_NOT_REACHED();
     });
     return gregoryCalendarIDStorage;
+}
+
+CalendarID hebrewCalendarIDSlow()
+{
+    static std::once_flag initializeOnce;
+    std::call_once(initializeOnce, [&] {
+        const auto& calendars = intlAvailableCalendars();
+        for (unsigned index = 0; index < calendars.size(); ++index) {
+            if (calendars[index] == "hebrew"_s) {
+                hebrewCalendarIDStorage = index;
+                return;
+            }
+        }
+        RELEASE_ASSERT_NOT_REACHED();
+    });
+    return hebrewCalendarIDStorage;
+}
+
+CalendarID chineseCalendarIDSlow()
+{
+    static std::once_flag initializeOnce;
+    std::call_once(initializeOnce, [&] {
+        const auto& calendars = intlAvailableCalendars();
+        for (unsigned index = 0; index < calendars.size(); ++index) {
+            if (calendars[index] == "chinese"_s) {
+                chineseCalendarIDStorage = index;
+                return;
+            }
+        }
+        RELEASE_ASSERT_NOT_REACHED();
+    });
+    return chineseCalendarIDStorage;
 }
 
 // https://tc39.es/proposal-intl-enumeration/#sec-availablecalendars

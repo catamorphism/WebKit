@@ -191,6 +191,49 @@ String TemporalPlainMonthDay::toString(JSGlobalObject* globalObject, std::option
         calendar(), showCalendar));
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal-calendarmonthdaytoisoreferencedate
+static ISO8601::PlainDate calendarMonthDayToISOReferenceDate(JSGlobalObject* globalObject,
+    CalendarID calendar, CalendarFieldsRecord fields, TemporalOverflow overflow)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    if (calendar == iso8601CalendarID() || calendar == gregoryCalendarID()) {
+        ASSERT(fields.month && fields.day);
+        auto referenceISOYear = 1972;
+        auto year = fields.year.value_or(referenceISOYear);
+        auto result = TemporalPlainDate::regulateISODate(year, fields.month.value(),
+            fields.day.value(), overflow);
+        if (!result) {
+            throwRangeError(globalObject, scope, "reference date out of range"_s);
+            return { };
+        }
+        return TemporalPlainDate::createISODateRecord(referenceISOYear,
+            result->month(), result->day());
+    }
+    throwRangeError(globalObject, scope, "non-ISO8601 calendars not supported yet for month-day"_s);
+    return { };
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-calendarmonthdayfromfields
+static ISO8601::PlainDate calendarMonthDayFromFields(JSGlobalObject* globalObject,
+    CalendarID calendar, CalendarFieldsRecord fields, TemporalOverflow overflow)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    TemporalCalendar::calendarResolveFields(globalObject, calendar, fields,
+        TemporalDateFormat::MonthDay);
+    RETURN_IF_EXCEPTION(scope, { });
+    auto result = calendarMonthDayToISOReferenceDate(globalObject, calendar, fields, overflow);
+    RETURN_IF_EXCEPTION(scope, { });
+    if (!isoDateWithinLimits(result)) {
+        throwRangeError(globalObject, scope, "reference date from month-day is out of range"_s);
+        return { };
+    }
+    return result;
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.from
 // https://tc39.es/proposal-temporal/#sec-temporal-totemporalmonthday
 TemporalPlainMonthDay* TemporalPlainMonthDay::from(JSGlobalObject* globalObject, JSValue itemValue, std::optional<JSValue> optionsValue)
@@ -235,17 +278,27 @@ TemporalPlainMonthDay* TemporalPlainMonthDay::from(JSGlobalObject* globalObject,
         auto calendar = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, itemValue);
         RETURN_IF_EXCEPTION(scope, { });
 
-        std::variant<JSObject*, TemporalOverflow> optionsOrOverflow = TemporalOverflow::Constrain;
-        if (options)
-            optionsOrOverflow = options.value();
-        auto overflow = TemporalOverflow::Constrain;
-        auto plainMonthDay = TemporalCalendar::isoDateFromFields(globalObject, asObject(itemValue), TemporalDateFormat::MonthDay, optionsOrOverflow, overflow);
+        Vector<FieldName> fieldList({ FieldName::Day, FieldName::Month, FieldName::MonthCode, FieldName::Year });
+
+        auto calendarID = std::holds_alternative<TemporalCalendar*>(calendar)
+            ? (std::get<TemporalCalendar*>(calendar))->identifier() : std::get<CalendarID>(calendar);
+        auto fields = TemporalCalendar::prepareCalendarFields(globalObject, calendarID,
+            asObject(itemValue), fieldList, { });
         RETURN_IF_EXCEPTION(scope, { });
 
-        auto plainDate = ISO8601::PlainDate(1972, plainMonthDay.month(), plainMonthDay.day());
+        std::variant<JSObject*, TemporalOverflow> optionsOrOverflow = TemporalOverflow::Constrain;
+        auto overflow = TemporalOverflow::Constrain;
+        if (options) {
+            overflow = toTemporalOverflow(globalObject, optionsValue.value());
+            RETURN_IF_EXCEPTION(scope, { });
+        }
+
+        auto isoDate = calendarMonthDayFromFields(globalObject, calendarID, fields, overflow);
+        RETURN_IF_EXCEPTION(scope, { });
+
         if (std::holds_alternative<TemporalCalendar*>(calendar))
-            return TemporalPlainMonthDay::create(vm, globalObject->plainMonthDayStructure(), WTFMove(plainDate), std::get<TemporalCalendar*>(calendar));
-        return TemporalPlainMonthDay::create(vm, globalObject->plainMonthDayStructure(), WTFMove(plainDate), std::get<CalendarID>(calendar));
+            return TemporalPlainMonthDay::create(vm, globalObject->plainMonthDayStructure(), WTFMove(isoDate), std::get<TemporalCalendar*>(calendar));
+        return TemporalPlainMonthDay::create(vm, globalObject->plainMonthDayStructure(), WTFMove(isoDate), std::get<CalendarID>(calendar));
     }
 
     throwTypeError(globalObject, scope, "can only convert to PlainMonthDay from object or string values"_s);

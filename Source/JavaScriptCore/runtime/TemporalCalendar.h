@@ -97,6 +97,10 @@ public:
     static CalendarFieldsRecord prepareCalendarFields(JSGlobalObject*, CalendarID, JSObject*, Vector<FieldName>,
             std::optional<Vector<FieldName>>);
     static CalendarFieldsRecord calendarMergeFields(CalendarID, CalendarFieldsRecord, CalendarFieldsRecord);
+    static ISO8601::PlainDate calendarDateFromFields(JSGlobalObject*, CalendarID,
+        CalendarFieldsRecord, TemporalOverflow);
+    static void calendarResolveFields(JSGlobalObject*, CalendarID, CalendarFieldsRecord,
+        TemporalDateFormat);
     static ISO8601::PlainDateTime interpretTemporalDateTimeFields(JSGlobalObject*,
         CalendarID, CalendarFieldsRecord, TemporalOverflow);
     static ISO8601::Duration differenceTemporalPlainYearMonth(JSGlobalObject*,
@@ -113,6 +117,8 @@ public:
     static String formatCalendarAnnotation(JSGlobalObject*, JSObject*, TemporalShowCalendar);
     static ISO8601::PlainDateTime getISOPartsFromEpoch(ISO8601::ExactTime);
     static YearWeekRecord calendarDateWeekOfYear(JSGlobalObject*, const ISO8601::PlainDate&);
+    static ISO8601::PlainDate calendarDateToISO(JSGlobalObject*, CalendarID, CalendarFieldsRecord,
+        TemporalOverflow);
 
     CalendarID identifier() const { return m_identifier; }
     static bool isISO8601(JSObject* cal) {

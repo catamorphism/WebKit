@@ -500,7 +500,7 @@ static CalendarDateRecord calendarISOToDate(JSGlobalObject* globalObject, Calend
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    if (calendar != iso8601CalendarID()) {
+    if (calendar != iso8601CalendarID() && calendar != gregoryCalendarID()) {
         throwRangeError(globalObject, scope, "non-ISO-8601 calendar not supported yet"_s);
         return { };
     }
@@ -523,10 +523,6 @@ CalendarFieldsRecord TemporalCalendar::isoDateToFields(JSGlobalObject* globalObj
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    if (calendar != iso8601CalendarID()) {
-        throwRangeError(globalObject, scope, "non-ISO-8601 calendar not supported yet"_s);
-        return { };
-    }
     CalendarFieldsRecord fields;
     auto calendarDate = calendarISOToDate(globalObject, calendar, isoDate);
     RETURN_IF_EXCEPTION(scope, { });
@@ -834,13 +830,21 @@ TemporalCalendar::prepareCalendarFields(JSGlobalObject* globalObject, CalendarID
     return result;
 }
 
+static bool calendarIsLunisolar(CalendarID calendar)
+{
+    return (calendar == hebrewCalendarID() || calendar == chineseCalendarID());
+}
+
 // https://tc39.es/proposal-temporal/#sec-temporal-calendarresolvefields
-static void calendarResolveFields(JSGlobalObject* globalObject, CalendarID calendar, CalendarFieldsRecord fields, TemporalDateFormat format)
+void TemporalCalendar::calendarResolveFields(JSGlobalObject* globalObject, CalendarID calendar,
+    CalendarFieldsRecord fields, TemporalDateFormat format)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    if (calendar == iso8601CalendarID()) {
+    if (calendar == iso8601CalendarID()
+        || calendar == gregoryCalendarID()
+        || calendarIsLunisolar(calendar)) {
         if ((format == TemporalDateFormat::Date || format == TemporalDateFormat::YearMonth) && !fields.year) {
             throwTypeError(globalObject, scope, "year property missing in Temporal.ZonedDateTime.from"_s);
             return;
@@ -878,7 +882,7 @@ static void calendarResolveFields(JSGlobalObject* globalObject, CalendarID calen
         fields.month = monthCodeInteger;
         return;
     }
-    throwRangeError(globalObject, scope, "non-ISO8601 calendars not supported yet"_s);
+    throwRangeError(globalObject, scope, "calendar not supported yet"_s);
     return;
 }
 
@@ -1007,13 +1011,13 @@ CalendarFieldsRecord TemporalCalendar::calendarMergeFields(CalendarID calendar,
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-calendardatetoiso
-static ISO8601::PlainDate calendarDateToISO(JSGlobalObject* globalObject, CalendarID calendar,
+ISO8601::PlainDate TemporalCalendar::calendarDateToISO(JSGlobalObject* globalObject, CalendarID calendar,
     CalendarFieldsRecord fields, TemporalOverflow overflow)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    if (calendar == iso8601CalendarID()) {
+    if (calendar == iso8601CalendarID() || calendar == gregoryCalendarID()) {
         ASSERT(fields.year && fields.month && fields.day);
         auto result = TemporalPlainDate::regulateISODate(fields.year.value(),
             fields.month.value(), fields.day.value(), overflow);
@@ -1028,7 +1032,7 @@ static ISO8601::PlainDate calendarDateToISO(JSGlobalObject* globalObject, Calend
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-calendardatefromfields
-static ISO8601::PlainDate calendarDateFromFields(JSGlobalObject* globalObject,
+ISO8601::PlainDate TemporalCalendar::calendarDateFromFields(JSGlobalObject* globalObject,
     CalendarID calendar, CalendarFieldsRecord fields, TemporalOverflow overflow)
 {
     VM& vm = globalObject->vm();
