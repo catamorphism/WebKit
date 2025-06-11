@@ -842,6 +842,13 @@ void TemporalCalendar::calendarResolveFields(JSGlobalObject* globalObject, Calen
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
+    if (hasEras(calendar)) {
+        if ((fields.era && !fields.eraYear) || (!fields.era && fields.eraYear)) {
+            throwTypeError(globalObject, scope, "must supply both era and eraYear"_s);
+            return;
+        }
+    }
+
     if (calendar == iso8601CalendarID()
         || calendar == gregoryCalendarID()
         || calendarIsLunisolar(calendar)) {
