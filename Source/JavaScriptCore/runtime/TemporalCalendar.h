@@ -117,8 +117,7 @@ public:
     static String formatCalendarAnnotation(JSGlobalObject*, JSObject*, TemporalShowCalendar);
     static ISO8601::PlainDateTime getISOPartsFromEpoch(ISO8601::ExactTime);
     static YearWeekRecord calendarDateWeekOfYear(JSGlobalObject*, const ISO8601::PlainDate&);
-    static ISO8601::PlainDate calendarDateToISO(JSGlobalObject*, CalendarID, CalendarFieldsRecord,
-        TemporalOverflow);
+    static ISO8601::PlainDate calendarDateToISO(JSGlobalObject*, CalendarID, CalendarFieldsRecord, TemporalOverflow);
 
     CalendarID identifier() const { return m_identifier; }
     static bool isISO8601(JSObject* cal) {

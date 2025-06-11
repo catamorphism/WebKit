@@ -296,9 +296,9 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncWithCalendar, (JSGlob
 
     if (std::holds_alternative<TemporalCalendar*>(calendar))
         return JSValue::encode(TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(),
-            plainDateTime->plainDate(), plainDateTime->plainTime(), std::get<TemporalCalendar*>(calendar)));
+            plainDateTime->plainDate(), plainDateTime->plainTime(), std::get<TemporalCalendar*>(calendar), std::nullopt, std::nullopt));
     return JSValue::encode(TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(),
-        plainDateTime->plainDate(), plainDateTime->plainTime(), std::get<CalendarID>(calendar)));
+        plainDateTime->plainDate(), plainDateTime->plainTime(), std::get<CalendarID>(calendar), std::nullopt, std::nullopt));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindatetime.prototype.withplaintime
@@ -320,7 +320,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncWithPlainTime, (JSGlo
 
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject,
         globalObject->plainDateTimeStructure(), plainDateTime->plainDate(),
-        plainTime ? plainTime->plainTime() : ISO8601::PlainTime(), plainDateTime->calendar())));
+        plainTime ? plainTime->plainTime() : ISO8601::PlainTime(), plainDateTime->calendar(), plainDateTime->era(), plainDateTime->eraYear())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindatetime.prototype.round
@@ -478,12 +478,12 @@ JSC_DEFINE_CUSTOM_GETTER(temporalPlainDateTimePrototypeGetterCalendarId, (JSGlob
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    auto* plainDate = jsDynamicCast<TemporalPlainDateTime*>(JSValue::decode(thisValue));
-    if (!plainDate)
+    auto* plainDateTime = jsDynamicCast<TemporalPlainDateTime*>(JSValue::decode(thisValue));
+    if (!plainDateTime)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDateTime.prototype.calendarId called on value that's not a PlainDateTime"_s);
 
-    // TODO: when calendars are supported, get the string ID of the calendar
-    return JSValue::encode(jsString(vm, String::fromLatin1("iso8601")));
+    return JSValue::encode(jsString(vm,
+        TemporalCalendar::calendarIdToString(plainDateTime->calendar()->identifier())));
 }
 
 JSC_DEFINE_CUSTOM_GETTER(temporalPlainDateTimePrototypeGetterEra, (JSGlobalObject* globalObject, EncodedJSValue thisValue, PropertyName))
@@ -495,7 +495,11 @@ JSC_DEFINE_CUSTOM_GETTER(temporalPlainDateTimePrototypeGetterEra, (JSGlobalObjec
     if (!plainDateTime)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDateTime.prototype.era called on value that's not a PlainDateTime"_s);
 
-    // TODO: non-ISO8601 calendars
+    if (plainDateTime->calendar()->identifier() == gregoryCalendarID()) {
+        auto era = plainDateTime->era();
+        ASSERT(era);
+        return JSValue::encode(jsString(vm, era.value()));
+    }
     return JSValue::encode(jsUndefined());
 }
 
@@ -508,7 +512,11 @@ JSC_DEFINE_CUSTOM_GETTER(temporalPlainDateTimePrototypeGetterEraYear, (JSGlobalO
     if (!plainDateTime)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDateTime.prototype.eraYear called on value that's not a PlainDateTime"_s);
 
-    // TODO: non-ISO8601 calendars
+    if (plainDateTime->calendar()->identifier() == gregoryCalendarID()) {
+        auto eraYear = plainDateTime->eraYear();
+        ASSERT(eraYear);
+        return JSValue::encode(jsNumber(eraYear.value()));
+    }
     return JSValue::encode(jsUndefined());
 }
 

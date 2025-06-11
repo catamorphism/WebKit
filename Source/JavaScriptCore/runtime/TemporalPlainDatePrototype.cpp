@@ -356,12 +356,12 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDatePrototypeFuncToPlainDateTime, (JSGloba
 
     JSValue itemValue = callFrame->argument(0); 
     if (itemValue.isUndefined())
-        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), { }, plainDate->calendar())));
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), { }, plainDate->calendar(), plainDate->era(), plainDate->eraYear())));
 
     auto* plainTime = TemporalPlainTime::from(globalObject, itemValue, std::nullopt);
     RETURN_IF_EXCEPTION(scope, { });
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), plainTime->plainTime(), plainDate->calendar())));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), plainTime->plainTime(), plainDate->calendar(), plainDate->era(), plainDate->eraYear())));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindate.prototype.tozoneddatetime

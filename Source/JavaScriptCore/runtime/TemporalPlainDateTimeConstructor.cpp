@@ -111,11 +111,11 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainDateTime, (JSGlobalObject* global
             auto calendar = TemporalCalendar::canonicalizeCalendar(globalObject, calendarString);
             RETURN_IF_EXCEPTION(scope, { });
             RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject,
-                structure, WTFMove(duration), calendar)));
+                structure, WTFMove(duration), calendar, std::nullopt, std::nullopt)));
         }
     }
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject,
-        structure, WTFMove(duration), iso8601CalendarID())));
+        structure, WTFMove(duration), iso8601CalendarID(), std::nullopt, std::nullopt)));
 }
 
 JSC_DEFINE_HOST_FUNCTION(callTemporalPlainDateTime, (JSGlobalObject* globalObject, CallFrame*))
@@ -143,7 +143,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimeConstructorFuncFrom, (JSGlobalObje
 
         TemporalPlainDateTime* pdt = jsCast<TemporalPlainDateTime*>(itemValue);
         RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(),
-            pdt->plainDate(), pdt->plainTime(), pdt->calendar())));
+            pdt->plainDate(), pdt->plainTime(), pdt->calendar(), pdt->era(), pdt->eraYear())));
     }
 
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::from(globalObject, itemValue, callFrame->argument(1))));

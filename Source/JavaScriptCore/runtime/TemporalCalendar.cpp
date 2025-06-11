@@ -473,7 +473,8 @@ ISO8601::PlainDate TemporalCalendar::isoDateFromFields(JSGlobalObject* globalObj
         day = std::min<unsigned>(day, ISO8601::daysInMonth(year, month));
     }
 
-    auto plainDate = TemporalPlainDate::toPlainDate(globalObject, ISO8601::Duration(year, month, 0, day, 0, 0, 0, 0, 0, 0));
+    auto plainDate = TemporalPlainDate::toPlainDate(globalObject,
+        ISO8601::Duration(year, month, 0, day, 0, 0, 0, 0, 0, 0));
     RETURN_IF_EXCEPTION(scope, { });
 
     bool valid = true;
@@ -849,6 +850,12 @@ void TemporalCalendar::calendarResolveFields(JSGlobalObject* globalObject, Calen
         }
     }
 
+    if (hasEras(calendar) && !fields.year) {
+        if (fields.era && fields.eraYear) {
+            fields.year = 0;
+        }
+    }
+
     if (calendar == iso8601CalendarID()
         || calendar == gregoryCalendarID()
         || calendarIsLunisolar(calendar)) {
@@ -1041,21 +1048,15 @@ CalendarFieldsRecord TemporalCalendar::calendarMergeFields(CalendarID calendar,
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-calendardatetoiso
-ISO8601::PlainDate TemporalCalendar::calendarDateToISO(JSGlobalObject* globalObject, CalendarID calendar,
-    CalendarFieldsRecord fields, TemporalOverflow overflow)
+ISO8601::PlainDate TemporalCalendar::calendarDateToISO(JSGlobalObject* globalObject,
+    CalendarID calendar, CalendarFieldsRecord fields, TemporalOverflow overflow)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
     if (calendar == iso8601CalendarID() || calendar == gregoryCalendarID()) {
-        std::optional<double> year;
-        if (fields.year) {
-            year = fields.year.value();
-        } else if (fields.era && fields.eraYear) {
-            year = 0;
-        }
-        ASSERT(year && fields.month && fields.day);
-        auto result = TemporalPlainDate::regulateISODate(year.value(),
+        ASSERT(fields.year && fields.month && fields.day);
+        auto result = TemporalPlainDate::regulateISODate(fields.year.value(),
             fields.month.value(), fields.day.value(), overflow);
         if (!result) {
             throwRangeError(globalObject, scope, "invalid date in calendarDateToISO"_s);
@@ -1063,7 +1064,8 @@ ISO8601::PlainDate TemporalCalendar::calendarDateToISO(JSGlobalObject* globalObj
         }
         return result.value();
     }
-    throwRangeError(globalObject, scope, "non-ISO8601 calendars not supported yet"_s);
+
+    throwRangeError(globalObject, scope, "calendarDateToISO: calendar not supported yet"_s);
     return { };
 }
 

@@ -412,7 +412,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalZonedDateTimePrototypeFuncToPlainDateTime, (JSG
         zonedDateTime->timeZone(), zonedDateTime->exactTime());
     RETURN_IF_EXCEPTION(scope, { });
 
-    return JSValue::encode(TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(), isoDateTime.date(), isoDateTime.time(), zonedDateTime->calendar()));
+    return JSValue::encode(TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(), isoDateTime.date(), isoDateTime.time(), zonedDateTime->calendar(), std::nullopt, std::nullopt));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.zoneddatetime.prototype.tostring

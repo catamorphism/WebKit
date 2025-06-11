@@ -113,7 +113,8 @@ void TemporalPlainDate::visitChildrenImpl(JSCell* cell, Visitor& visitor)
 
 DEFINE_VISIT_CHILDREN(TemporalPlainDate);
 
-ISO8601::PlainDate TemporalPlainDate::toPlainDate(JSGlobalObject* globalObject, const ISO8601::Duration& duration)
+ISO8601::PlainDate TemporalPlainDate::toPlainDate(JSGlobalObject* globalObject,
+    const ISO8601::Duration& duration)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
