@@ -198,6 +198,13 @@ static ISO8601::PlainDate calendarMonthDayToISOReferenceDate(JSGlobalObject* glo
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
+    if (calendar == gregoryCalendarID()) {
+        if (fields.month && !fields.year) {
+            throwTypeError(globalObject, scope, "when month is present, year (or era and eraYear) are required"_s);
+            return { };
+        }
+    }
+
     if (calendar == iso8601CalendarID() || calendar == gregoryCalendarID()) {
         ASSERT(fields.month && fields.day);
         auto referenceISOYear = 1972;
@@ -211,6 +218,7 @@ static ISO8601::PlainDate calendarMonthDayToISOReferenceDate(JSGlobalObject* glo
         return TemporalPlainDate::createISODateRecord(referenceISOYear,
             result->month(), result->day());
     }
+
     throwRangeError(globalObject, scope, "non-ISO8601 calendars not supported yet for month-day"_s);
     return { };
 }
