@@ -346,21 +346,28 @@ ISO8601::PlainDate TemporalPlainMonthDay::with(JSGlobalObject* globalObject, JSO
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    rejectObjectWithCalendarOrTimeZone(globalObject, temporalMonthDayLike);
+    if (!isPartialTemporalObject(globalObject, temporalMonthDayLike)) {
+        RETURN_IF_EXCEPTION(scope, { });
+        throwTypeError(globalObject, scope, "missing fields in object argument to with"_s);
+        return { };
+    }
     RETURN_IF_EXCEPTION(scope, { });
 
-    if (!TemporalCalendar::isISO8601(calendar())) {
-        throwRangeError(globalObject, scope, "unimplemented: with non-ISO8601 calendar"_s);
+    CalendarID calendarId = calendar()->identifier();
+    if (calendarId != iso8601CalendarID() && calendarId != gregoryCalendarID()) {
+        throwRangeError(globalObject, scope, "with: calendar not implemented yet"_s);
         return { };
     }
 
-    auto [optionalYear, optionalMonth, optionalDay] =
-        TemporalPlainDate::toPartialDate(globalObject, temporalMonthDayLike);
+    auto fields = TemporalCalendar::isoDateToFields(globalObject, calendarId, plainMonthDay().isoPlainDate(),
+        TemporalDateFormat::MonthDay);
     RETURN_IF_EXCEPTION(scope, { });
-    if (!optionalYear && !optionalMonth && !optionalDay) {
-        throwTypeError(globalObject, scope, "Object must contain at least one Temporal date property"_s);
-        return { };
-    }
+
+    Vector<FieldName> fieldList({ FieldName::Day, FieldName::Month, FieldName::MonthCode, FieldName::Year});
+    auto partialMonthDay = TemporalCalendar::prepareCalendarFields(globalObject, calendarId,
+        temporalMonthDayLike, fieldList, { });
+    RETURN_IF_EXCEPTION(scope, { });
+    fields = TemporalCalendar::calendarMergeFields(calendarId, fields, partialMonthDay);
 
     JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
     RETURN_IF_EXCEPTION(scope, { });
@@ -368,10 +375,10 @@ ISO8601::PlainDate TemporalPlainMonthDay::with(JSGlobalObject* globalObject, JSO
     TemporalOverflow overflow = toTemporalOverflow(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
 
-    double m = optionalMonth.value_or(month());
-    double d = optionalDay.value_or(day());
-    RELEASE_AND_RETURN(scope, TemporalCalendar::monthDayFromFields(globalObject,
-        std::nullopt, m, d, overflow));
+    auto isoDate = calendarMonthDayFromFields(globalObject, calendarId, fields, overflow);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    return isoDate;
 }
 
 String TemporalPlainMonthDay::monthCode() const
