@@ -72,7 +72,7 @@ TemporalPlainDate::TemporalPlainDate(VM& vm, Structure* structure, ISO8601::Plai
     m_calendar.set(vm, this, calendar);
 
     if (era || eraYear)
-        ASSERT(TemporalCalendar::hasEras(m_calendarId));
+        ASSERT(calendar->hasEras());
 }
 
 TemporalPlainDate::TemporalPlainDate(VM& vm, Structure* structure, ISO8601::PlainDate&& plainDate, CalendarID calendarId, std::optional<String> era, std::optional<double> eraYear)
@@ -422,7 +422,7 @@ TemporalPlainDate::with(JSGlobalObject* globalObject, JSObject* temporalDateLike
     RETURN_IF_EXCEPTION(scope, { });
 
     auto calendarID = thisCalendar->identifier();
-    auto fields = TemporalCalendar::isoDateToFields(globalObject, calendarID, plainDate(),
+    auto fields = thisCalendar->isoDateToFields(globalObject, plainDate(),
         TemporalDateFormat::Date);
     RETURN_IF_EXCEPTION(scope, { });
     Vector<FieldName> fieldList({ FieldName::Day, FieldName::Month, FieldName::MonthCode, FieldName::Year });

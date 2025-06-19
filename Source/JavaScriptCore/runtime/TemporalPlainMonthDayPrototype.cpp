@@ -180,7 +180,8 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainMonthDayPrototypeFuncToPlainDate, (JSGloba
         return throwVMTypeError(globalObject, scope, "Temporal.PlainMonthDay.prototype.toPlainDate: item is not an object"_s);
 
     auto calendarID = monthDay->calendar()->identifier();
-    auto fields = TemporalCalendar::isoDateToFields(globalObject, calendarID, monthDay->plainMonthDay().isoPlainDate(), TemporalDateFormat::MonthDay);
+    auto fields = monthDay->calendar()->isoDateToFields(globalObject,
+        monthDay->plainMonthDay().isoPlainDate(), TemporalDateFormat::MonthDay);
     RETURN_IF_EXCEPTION(scope, { });
     Vector<FieldName> fieldNames({ FieldName::Year });
     auto inputFields = TemporalCalendar::prepareCalendarFields(globalObject, calendarID,

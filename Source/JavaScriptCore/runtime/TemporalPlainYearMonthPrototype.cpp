@@ -330,8 +330,8 @@ JSC_DEFINE_CUSTOM_GETTER(temporalPlainYearMonthPrototypeGetterCalendarId, (JSGlo
     if (!yearMonth)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainYearMonth.prototype.calendar called on value that's not a PlainYearMonth"_s);
 
-    // TODO: when calendars are supported, get the string ID of the calendar
-    return JSValue::encode(jsString(vm, String::fromLatin1("iso8601")));
+    return JSValue::encode(jsString(vm,
+        TemporalCalendar::calendarIdToString(yearMonth->calendar()->identifier())));
 }
 
 JSC_DEFINE_CUSTOM_GETTER(temporalPlainYearMonthPrototypeGetterEra, (JSGlobalObject* globalObject, EncodedJSValue thisValue, PropertyName))
@@ -343,8 +343,11 @@ JSC_DEFINE_CUSTOM_GETTER(temporalPlainYearMonthPrototypeGetterEra, (JSGlobalObje
     if (!yearMonth)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainYearMonth.prototype.era called on value that's not a PlainYearMonth"_s);
 
-    // TODO: non-ISO8601 calendars
-    return JSValue::encode(jsUndefined());
+    auto era = yearMonth->calendar()->calendarISOToDate(globalObject,
+        yearMonth->plainYearMonth().isoPlainDate()).era;
+    RETURN_IF_EXCEPTION(scope, { });
+
+    return JSValue::encode(era ? jsString(vm, era.value()) : jsUndefined());
 }
 
 JSC_DEFINE_CUSTOM_GETTER(temporalPlainYearMonthPrototypeGetterEraYear, (JSGlobalObject* globalObject, EncodedJSValue thisValue, PropertyName))
@@ -356,8 +359,11 @@ JSC_DEFINE_CUSTOM_GETTER(temporalPlainYearMonthPrototypeGetterEraYear, (JSGlobal
     if (!yearMonth)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainYearMonth.prototype.eraYear called on value that's not a PlainYearMonth"_s);
 
-    // TODO: non-ISO8601 calendars
-    return JSValue::encode(jsUndefined());
+    auto eraYear = yearMonth->calendar()->calendarISOToDate(globalObject,
+        yearMonth->plainYearMonth().isoPlainDate()).eraYear;
+    RETURN_IF_EXCEPTION(scope, { });
+
+    return JSValue::encode(eraYear ? jsNumber(eraYear.value()) : jsUndefined());
 }
 
 JSC_DEFINE_CUSTOM_GETTER(temporalPlainYearMonthPrototypeGetterYear, (JSGlobalObject* globalObject, EncodedJSValue thisValue, PropertyName))

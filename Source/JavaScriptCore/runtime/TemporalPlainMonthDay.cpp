@@ -233,7 +233,8 @@ static ISO8601::PlainDate calendarMonthDayFromFields(JSGlobalObject* globalObjec
     TemporalCalendar::calendarResolveFields(globalObject, calendar, fields,
         TemporalDateFormat::MonthDay);
     RETURN_IF_EXCEPTION(scope, { });
-    auto result = calendarMonthDayToISOReferenceDate(globalObject, calendar, fields, overflow);
+    auto result = calendarMonthDayToISOReferenceDate(globalObject, calendar,
+        fields, overflow);
     RETURN_IF_EXCEPTION(scope, { });
     if (!isoDateWithinLimits(result)) {
         throwRangeError(globalObject, scope, "reference date from month-day is out of range"_s);
@@ -359,7 +360,7 @@ ISO8601::PlainDate TemporalPlainMonthDay::with(JSGlobalObject* globalObject, JSO
         return { };
     }
 
-    auto fields = TemporalCalendar::isoDateToFields(globalObject, calendarId, plainMonthDay().isoPlainDate(),
+    auto fields = calendar()->isoDateToFields(globalObject, plainMonthDay().isoPlainDate(),
         TemporalDateFormat::MonthDay);
     RETURN_IF_EXCEPTION(scope, { });
 

@@ -378,7 +378,7 @@ TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject,
     RETURN_IF_EXCEPTION(scope, { });
     auto isoDate = isoDateTime.date();
     auto isoTime = isoDateTime.time();
-    auto fields = TemporalCalendar::isoDateToFields(globalObject, thisCalendar, isoDate, TemporalDateFormat::Date);
+    auto fields = calendar()->isoDateToFields(globalObject, isoDate, TemporalDateFormat::Date);
     RETURN_IF_EXCEPTION(scope, { });
     fields.hour = isoTime.hour();
     fields.minute = isoTime.minute();

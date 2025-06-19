@@ -178,20 +178,21 @@ String TemporalPlainYearMonth::toString(JSGlobalObject* globalObject, JSValue op
 
 // https://tc39.es/proposal-temporal/#sec-temporal-calendaryearmonthfromfields
 static ISO8601::PlainDate calendarYearMonthFromFields(JSGlobalObject* globalObject,
-    CalendarID calendar, CalendarFieldsRecord fields, TemporalOverflow overflow)
+    CalendarID id, CalendarFieldsRecord fields, TemporalOverflow overflow)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    if (calendar != iso8601CalendarID() && calendar != gregoryCalendarID()) {
+    if (id != iso8601CalendarID() && id != gregoryCalendarID()) {
         throwRangeError(globalObject, scope, "calendar not supported yet for year-month"_s);
         return { };
     }
-    TemporalCalendar::calendarResolveFields(globalObject, calendar, fields, TemporalDateFormat::YearMonth);
+    TemporalCalendar::calendarResolveFields(globalObject, id, fields,
+        TemporalDateFormat::YearMonth);
     RETURN_IF_EXCEPTION(scope, { });
     auto firstDayIndex = 1;
     fields.day = firstDayIndex;
-    auto result = TemporalCalendar::calendarDateToISO(globalObject, calendar, fields, overflow);
+    auto result = TemporalCalendar::calendarDateToISO(globalObject, id, fields, overflow);
     RETURN_IF_EXCEPTION(scope, { });
     if (!ISO8601::isYearMonthWithinLimits(result.year(), result.month())) {
         throwRangeError(globalObject, scope, "reference date out of range for year-month"_s);

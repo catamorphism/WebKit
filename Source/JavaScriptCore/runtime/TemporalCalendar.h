@@ -49,6 +49,8 @@ struct CalendarDateRecord {
     int32_t dayOfWeek;
     int32_t dayOfYear;
     int32_t daysInYear;
+    std::optional<int32_t> eraYear;
+    std::optional<String> era;
 };
 
 // https://tc39.es/proposal-temporal/#sec-temporal-calendar-fields-records
@@ -84,6 +86,8 @@ public:
 
     DECLARE_INFO;
 
+    // Most methods are static methods that take a calendar ID, because
+    // calendars are lazily constructed
     static JSObject* toTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
     static std::variant<TemporalCalendar*, CalendarID>
         getTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
@@ -92,7 +96,7 @@ public:
         toTemporalCalendarIdentifier(JSGlobalObject*, JSValue);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, JSObject*, TemporalDateFormat, std::variant<JSObject*, TemporalOverflow>, TemporalOverflow&);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, TemporalDateFormat, double year, double month, double day, TemporalOverflow);
-    static CalendarFieldsRecord isoDateToFields(JSGlobalObject*, CalendarID, ISO8601::PlainDate, TemporalDateFormat);
+    CalendarFieldsRecord isoDateToFields(JSGlobalObject*, ISO8601::PlainDate, TemporalDateFormat);
     static ISO8601::PlainDate monthDayFromFields(JSGlobalObject*, std::optional<double>, double, double, TemporalOverflow);
     static CalendarFieldsRecord prepareCalendarFields(JSGlobalObject*, CalendarID, JSObject*, Vector<FieldName>,
             std::optional<Vector<FieldName>>);
@@ -117,7 +121,10 @@ public:
     static String formatCalendarAnnotation(JSGlobalObject*, JSObject*, TemporalShowCalendar);
     static ISO8601::PlainDateTime getISOPartsFromEpoch(ISO8601::ExactTime);
     static YearWeekRecord calendarDateWeekOfYear(JSGlobalObject*, const ISO8601::PlainDate&);
-    static ISO8601::PlainDate calendarDateToISO(JSGlobalObject*, CalendarID, CalendarFieldsRecord, TemporalOverflow);
+    static ISO8601::PlainDate calendarDateToISO(JSGlobalObject*, CalendarID,
+        CalendarFieldsRecord, TemporalOverflow);
+    CalendarDateRecord calendarISOToDate(JSGlobalObject*, ISO8601::PlainDate);
+
 
     CalendarID identifier() const { return m_identifier; }
     static bool isISO8601(JSObject* cal) {
@@ -125,6 +132,8 @@ public:
             return jsCast<TemporalCalendar*>(cal)->identifier() == iso8601CalendarID();
         return false;
     }
+
+    bool hasEras() const { return hasEras(identifier()); }
     static bool hasEras(CalendarID calendarID);
 
     static std::optional<CalendarID> isBuiltinCalendar(StringView);

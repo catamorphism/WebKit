@@ -495,13 +495,65 @@ ISO8601::PlainDate TemporalCalendar::isoDateFromFields(JSGlobalObject* globalObj
     return plainDate;
 }
 
-static CalendarDateRecord calendarISOToDate(JSGlobalObject* globalObject, CalendarID calendar,
+static int32_t compareCalendarDates(const CalendarDateRecord& date1, ISO8601::PlainDate date2)
+{
+    if (date1.year != date2.year())
+        return (date1.year - date2.year());
+    if (date1.month != date2.month())
+        return (date1.month - date2.month());
+    if (date1.day != date2.day())
+        return (date1.day - date2.day());
+    return 0;
+}
+
+static std::tuple<double, String>
+eraFromYearGregorian(JSGlobalObject* globalObject, const CalendarDateRecord& calendarDate)
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto year = calendarDate.year;
+    auto eraYear = 0;
+    // year = 1, month = 1, day = 1 is the anchor epoch for Gregory
+    auto comparison = compareCalendarDates(calendarDate, ISO8601::PlainDate(1, 1, 1));
+    if (comparison >= 0) {
+        eraYear = year; // era is CE
+        return std::tuple(eraYear, "ce"_s);
+    }
+    // era is BCE
+    if (year > 0) {
+        throwRangeError(globalObject, scope, "Signed year is invalid for era BCE"_s);
+        return { };
+    }
+    eraYear = 1 - year;
+    return std::tuple(eraYear, "bce"_s);
+}
+
+static void completeEraYearGregorian(JSGlobalObject* globalObject,
+    CalendarDateRecord& calendarDate)
+{
+    auto [ eraYear, era ] = eraFromYearGregorian(globalObject, calendarDate);
+    calendarDate.era = era;
+    calendarDate.eraYear = eraYear;
+}
+
+static void completeYearFromEraYearGregorian(CalendarFieldsRecord& fields)
+{
+    ASSERT(fields.era && fields.eraYear);
+    if (fields.era == "ce"_s || fields.era == "ad"_s)
+        fields.year = fields.eraYear.value();
+    else
+        fields.year = 1 - fields.eraYear.value();
+}
+
+CalendarDateRecord TemporalCalendar::calendarISOToDate(JSGlobalObject* globalObject,
     ISO8601::PlainDate isoDate)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    if (calendar != iso8601CalendarID() && calendar != gregoryCalendarID()) {
+    CalendarID id = identifier();
+    if (id != iso8601CalendarID() && id != gregoryCalendarID()) {
         throwRangeError(globalObject, scope, "non-ISO-8601 calendar not supported yet"_s);
         return { };
     }
@@ -514,18 +566,24 @@ static CalendarDateRecord calendarISOToDate(JSGlobalObject* globalObject, Calend
     result.year = isoDate.year();
     result.month = isoDate.month();
     result.day = isoDate.day();
+
+    if (id == gregoryCalendarID()) {
+        completeEraYearGregorian(globalObject, result);
+        RETURN_IF_EXCEPTION(scope, { });
+    }
+
     return result;
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-isodatetofields
-CalendarFieldsRecord TemporalCalendar::isoDateToFields(JSGlobalObject* globalObject, CalendarID calendar,
+CalendarFieldsRecord TemporalCalendar::isoDateToFields(JSGlobalObject* globalObject,
     ISO8601::PlainDate isoDate, TemporalDateFormat type)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
     CalendarFieldsRecord fields;
-    auto calendarDate = calendarISOToDate(globalObject, calendar, isoDate);
+    auto calendarDate = calendarISOToDate(globalObject, isoDate);
     RETURN_IF_EXCEPTION(scope, { });
 
     fields.monthCode = calendarDate.monthCode;
@@ -837,28 +895,28 @@ static bool calendarIsLunisolar(CalendarID calendar)
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-calendarresolvefields
-void TemporalCalendar::calendarResolveFields(JSGlobalObject* globalObject, CalendarID calendar,
+void TemporalCalendar::calendarResolveFields(JSGlobalObject* globalObject, CalendarID id,
     CalendarFieldsRecord& fields, TemporalDateFormat format)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    if (hasEras(calendar)) {
+    if (hasEras(id)) {
         if ((fields.era && !fields.eraYear) || (!fields.era && fields.eraYear)) {
             throwTypeError(globalObject, scope, "must supply both era and eraYear"_s);
             return;
         }
     }
 
-    if (hasEras(calendar) && !fields.year) {
+    if (id == gregoryCalendarID() && !fields.year) {
         if (fields.era && fields.eraYear) {
-            fields.year = 0;
+            completeYearFromEraYearGregorian(fields);
         }
     }
 
-    if (calendar == iso8601CalendarID()
-        || calendar == gregoryCalendarID()
-        || calendarIsLunisolar(calendar)) {
+    if (id == iso8601CalendarID()
+        || id == gregoryCalendarID()
+        || calendarIsLunisolar(id)) {
         if ((format == TemporalDateFormat::Date || format == TemporalDateFormat::YearMonth) && !fields.year && !(fields.era && fields.eraYear)) {
             throwTypeError(globalObject, scope, "year property missing in Temporal.ZonedDateTime.from"_s);
             return;
@@ -1364,7 +1422,8 @@ static CalendarDateRecord isoToDate(const ISO8601::PlainDate& isoDate)
     auto monthNumberPart = pad('0', 2, isoDate.month());
     auto monthCode = makeString("M"_s, monthNumberPart);
 
-    return { monthCode, year, month, day, dayOfWeek, dayOfYear, daysInYear };
+    return { monthCode, year, month, day, dayOfWeek, dayOfYear, daysInYear,
+        std::nullopt, std::nullopt };
 }
 
 static int32_t weekNumber(int32_t firstDayOfWeek, int32_t minimalDaysInFirstWeek,
@@ -1389,7 +1448,8 @@ YearWeekRecord TemporalCalendar::calendarDateWeekOfYear(JSGlobalObject* globalOb
     auto scope = DECLARE_THROW_SCOPE(vm);
 
     double yearOfWeek = isoDate.year();
-    auto [ monthCode, year, month, day, dayOfWeek, dayOfYear, daysInYear ] = isoToDate(isoDate);
+    auto [ monthCode, year, month, day, dayOfWeek, dayOfYear, daysInYear,
+           eraYearOptional, eraOptional ] = isoToDate(isoDate);
     auto firstDayOfWeek = 1;
     auto minimalDaysInWeek = 4;
 
