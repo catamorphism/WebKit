@@ -400,33 +400,44 @@ std::array<std::optional<double>, numberOfTemporalPlainDateUnits> TemporalPlainD
     return { year, month, day };
 }
 
-ISO8601::PlainDate TemporalPlainDate::with(JSGlobalObject* globalObject, JSObject* temporalDateLike, JSValue optionsValue)
+std::tuple<ISO8601::PlainDate, std::optional<String>, std::optional<double>>
+TemporalPlainDate::with(JSGlobalObject* globalObject, JSObject* temporalDateLike, JSValue optionsValue)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    rejectObjectWithCalendarOrTimeZone(globalObject, temporalDateLike);
-    RETURN_IF_EXCEPTION(scope, { });
+    auto thisCalendar = calendar();
 
-    if (!TemporalCalendar::isISO8601(calendar())) {
-        throwRangeError(globalObject, scope, "unimplemented: with non-ISO8601 calendar"_s);
+    if (!TemporalCalendar::isISO8601(thisCalendar) && (thisCalendar->identifier() != gregoryCalendarID())) {
+        throwRangeError(globalObject, scope, "calendar not implemented yet in TemporalPlainDate.with"_s);
         return { };
     }
 
-    auto [optionalYear, optionalMonth, optionalDay] = toPartialDate(globalObject, temporalDateLike);
-    RETURN_IF_EXCEPTION(scope, { });
-    if (!optionalYear && !optionalMonth && !optionalDay) {
-        throwTypeError(globalObject, scope, "Object must contain at least one Temporal date property"_s);
+    if (!isPartialTemporalObject(globalObject, temporalDateLike)) {
+        RETURN_IF_EXCEPTION(scope, { });
+        throwTypeError(globalObject, scope, "bad argument in TemporalPlainDate.with"_s);
         return { };
     }
+    RETURN_IF_EXCEPTION(scope, { });
+
+    auto calendarID = thisCalendar->identifier();
+    auto fields = TemporalCalendar::isoDateToFields(globalObject, calendarID, plainDate(),
+        TemporalDateFormat::Date);
+    RETURN_IF_EXCEPTION(scope, { });
+    Vector<FieldName> fieldList({ FieldName::Day, FieldName::Month, FieldName::MonthCode, FieldName::Year });
+    auto partialDate = TemporalCalendar::prepareCalendarFields(globalObject, calendarID,
+        temporalDateLike, fieldList, { });
+    RETURN_IF_EXCEPTION(scope, { });
+
+    fields = TemporalCalendar::calendarMergeFields(calendarID, fields, partialDate);
 
     TemporalOverflow overflow = toTemporalOverflow(globalObject, optionsValue);
     RETURN_IF_EXCEPTION(scope, { });
 
-    double y = optionalYear.value_or(year());
-    double m = optionalMonth.value_or(month());
-    double d = optionalDay.value_or(day());
-    RELEASE_AND_RETURN(scope, TemporalCalendar::isoDateFromFields(globalObject, TemporalDateFormat::Date, y, m, d, overflow));
+    auto isoDate = TemporalCalendar::calendarDateFromFields(globalObject, calendarID, fields, overflow);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    RELEASE_AND_RETURN(scope, std::tuple(isoDate, fields.era, fields.eraYear));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-differencetemporalplaindate

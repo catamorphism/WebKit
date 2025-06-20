@@ -68,7 +68,8 @@ public:
     JSC_TEMPORAL_PLAIN_DATE_UNITS(JSC_DEFINE_TEMPORAL_PLAIN_DATE_FIELD);
 #undef JSC_DEFINE_TEMPORAL_PLAIN_DATE_FIELD
 
-    ISO8601::PlainDate with(JSGlobalObject*, JSObject* temporalDateLike, JSValue options);
+    std::tuple<ISO8601::PlainDate, std::optional<String>, std::optional<double>>
+    with(JSGlobalObject*, JSObject* temporalDateLike, JSValue options);
 
     String monthCode() const;
     uint8_t dayOfWeek() const;

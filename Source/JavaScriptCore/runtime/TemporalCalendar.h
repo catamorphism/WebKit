@@ -99,7 +99,7 @@ public:
     static CalendarFieldsRecord calendarMergeFields(CalendarID, CalendarFieldsRecord, CalendarFieldsRecord);
     static ISO8601::PlainDate calendarDateFromFields(JSGlobalObject*, CalendarID,
         CalendarFieldsRecord, TemporalOverflow);
-    static void calendarResolveFields(JSGlobalObject*, CalendarID, CalendarFieldsRecord,
+    static void calendarResolveFields(JSGlobalObject*, CalendarID, CalendarFieldsRecord&,
         TemporalDateFormat);
     static ISO8601::PlainDateTime interpretTemporalDateTimeFields(JSGlobalObject*,
         CalendarID, CalendarFieldsRecord, TemporalOverflow);

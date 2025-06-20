@@ -837,7 +837,7 @@ static bool calendarIsLunisolar(CalendarID calendar)
 
 // https://tc39.es/proposal-temporal/#sec-temporal-calendarresolvefields
 void TemporalCalendar::calendarResolveFields(JSGlobalObject* globalObject, CalendarID calendar,
-    CalendarFieldsRecord fields, TemporalDateFormat format)
+    CalendarFieldsRecord& fields, TemporalDateFormat format)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -852,7 +852,7 @@ void TemporalCalendar::calendarResolveFields(JSGlobalObject* globalObject, Calen
     if (calendar == iso8601CalendarID()
         || calendar == gregoryCalendarID()
         || calendarIsLunisolar(calendar)) {
-        if ((format == TemporalDateFormat::Date || format == TemporalDateFormat::YearMonth) && !fields.year) {
+        if ((format == TemporalDateFormat::Date || format == TemporalDateFormat::YearMonth) && !fields.year && !(fields.era && fields.eraYear)) {
             throwTypeError(globalObject, scope, "year property missing in Temporal.ZonedDateTime.from"_s);
             return;
         }
@@ -1014,6 +1014,29 @@ CalendarFieldsRecord TemporalCalendar::calendarMergeFields(CalendarID calendar,
     else
         merged.timeZone = fields.timeZone;
 
+    if (!merged.era && !merged.eraYear && merged.year) {
+        if (calendar == gregoryCalendarID()) {
+            if (merged.year.value() < 0)
+                merged.era = "gregory-inverse"_s;
+            else
+                merged.era = "gregory"_s;
+        }
+    }
+
+    if (!merged.eraYear && merged.year) {
+        if (calendar == gregoryCalendarID()) {
+            ASSERT(merged.era);
+            if (merged.era == "gregory-inverse"_s) {
+                if (merged.year.value() < 0)
+                    merged.eraYear = (merged.year.value() * -1) + 1;
+                else
+                    merged.eraYear = merged.year.value() * -1;
+            } else {
+                merged.eraYear = merged.year;
+            }
+        }
+    }
+
     return merged;
 }
 
@@ -1025,8 +1048,14 @@ ISO8601::PlainDate TemporalCalendar::calendarDateToISO(JSGlobalObject* globalObj
     auto scope = DECLARE_THROW_SCOPE(vm);
 
     if (calendar == iso8601CalendarID() || calendar == gregoryCalendarID()) {
-        ASSERT(fields.year && fields.month && fields.day);
-        auto result = TemporalPlainDate::regulateISODate(fields.year.value(),
+        std::optional<double> year;
+        if (fields.year) {
+            year = fields.year.value();
+        } else if (fields.era && fields.eraYear) {
+            year = 0;
+        }
+        ASSERT(year && fields.month && fields.day);
+        auto result = TemporalPlainDate::regulateISODate(year.value(),
             fields.month.value(), fields.day.value(), overflow);
         if (!result) {
             throwRangeError(globalObject, scope, "invalid date in calendarDateToISO"_s);

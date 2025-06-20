@@ -61,7 +61,6 @@ skip:
 
      # Depends on Calendar support
      ## depends on "gregory" calendar support (validating or canonicalizing "era" property)
-    - test/intl402/Temporal/PlainDate/prototype/with/gregorian-mutually-exclusive-fields.js
     - test/intl402/Temporal/PlainDateTime/from/canonicalize-era-codes.js
     - test/intl402/Temporal/PlainMonthDay/from/fields-missing-properties.js
     - test/intl402/Temporal/PlainMonthDay/prototype/with/fields-missing-properties.js

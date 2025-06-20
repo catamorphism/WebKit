@@ -128,8 +128,16 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainDate, (JSGlobalObject* globalObje
            RETURN_IF_EXCEPTION(scope, { });
        }
     }
+
+    std::optional<String> era;
+    std::optional<double> eraYear;
+    if (calendar == gregoryCalendarID()) {
+        era = "ce"_s;
+        eraYear = duration.years();
+    }
+
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject, structure,
-        WTFMove(duration), calendar, std::nullopt, std::nullopt)));
+        WTFMove(duration), calendar, era, eraYear)));
  }
 
 JSC_DEFINE_HOST_FUNCTION(callTemporalPlainDate, (JSGlobalObject* globalObject, CallFrame*))
