@@ -81,27 +81,15 @@ test/built-ins/Temporal/Duration/compare/relativeto-string-invalid.js:
 test/built-ins/Temporal/Duration/compare/relativeto-string-limits.js:
   default: 'Test262Error: "-271821-04-19T23:00-01:00[-01:00]" is outside the representable range for a relativeTo parameter Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: "-271821-04-19T23:00-01:00[-01:00]" is outside the representable range for a relativeTo parameter Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/Duration/compare/relativeto-string.js:
-  default: 'RangeError: Cannot compare a duration of years, months, or weeks without a relativeTo option'
-  strict mode: 'RangeError: Cannot compare a duration of years, months, or weeks without a relativeTo option'
-test/built-ins/Temporal/Duration/compare/throws-when-target-zoned-date-time-outside-valid-limits.js:
-  default: "TypeError: undefined is not a constructor (evaluating 'new Temporal.ZonedDateTime(864n * 10n**19n, \"UTC\")')"
-  strict mode: "TypeError: undefined is not a constructor (evaluating 'new Temporal.ZonedDateTime(864n * 10n**19n, \"UTC\")')"
+test/built-ins/Temporal/Duration/prototype/round/accepts-datetime-strings-for-relative-to.js:
+  default: 'Error: FIXME: years, months, or weeks rounding with relativeTo not implemented yet'
+  strict mode: 'Error: FIXME: years, months, or weeks rounding with relativeTo not implemented yet'
 test/built-ins/Temporal/Duration/prototype/round/balances-days-up-to-both-years-and-months.js:
   default: 'Error: FIXME: years, months, or weeks rounding with relativeTo not implemented yet'
   strict mode: 'Error: FIXME: years, months, or weeks rounding with relativeTo not implemented yet'
 test/built-ins/Temporal/Duration/prototype/round/balances-up-to-next-unit-after-rounding.js:
   default: 'RangeError: Cannot round a duration of years, months, or weeks without a relativeTo option'
   strict mode: 'RangeError: Cannot round a duration of years, months, or weeks without a relativeTo option'
-test/built-ins/Temporal/Duration/prototype/round/balances-up-to-weeks.js:
-  default: 'RangeError: Cannot round a duration of years, months, or weeks without a relativeTo option'
-  strict mode: 'RangeError: Cannot round a duration of years, months, or weeks without a relativeTo option'
-test/built-ins/Temporal/Duration/prototype/round/blank-duration.js:
-  default: 'Error: FIXME: years, months, or weeks rounding with relativeTo not implemented yet'
-  strict mode: 'Error: FIXME: years, months, or weeks rounding with relativeTo not implemented yet'
-test/built-ins/Temporal/Duration/prototype/round/case-where-relativeto-affects-rounding-mode-half-even.js:
-  default: 'Test262Error: halfEven rounding is upward with ZonedDateTime relativeTo: hours result: Expected SameValue(«8», «16») to be true'
-  strict mode: 'Test262Error: halfEven rounding is upward with ZonedDateTime relativeTo: hours result: Expected SameValue(«8», «16») to be true'
 test/built-ins/Temporal/Duration/prototype/round/does-not-accept-non-string-primitives-for-relative-to.js:
   default: 'Test262Error: Expected a TypeError but got a Error'
   strict mode: 'Test262Error: Expected a TypeError but got a Error'
@@ -117,12 +105,15 @@ test/built-ins/Temporal/Duration/prototype/round/half-expand-is-default.js:
 test/built-ins/Temporal/Duration/prototype/round/largestunit-correct-rebalancing.js:
   default: 'RangeError: Cannot round a duration of years, months, or weeks without a relativeTo option'
   strict mode: 'RangeError: Cannot round a duration of years, months, or weeks without a relativeTo option'
-test/built-ins/Temporal/Duration/prototype/round/next-day-out-of-range.js:
-  default: "TypeError: undefined is not a constructor (evaluating 'new Temporal.ZonedDateTime(86400_0000_0000_000_000_000n, \"UTC\")')"
-  strict mode: "TypeError: undefined is not a constructor (evaluating 'new Temporal.ZonedDateTime(86400_0000_0000_000_000_000n, \"UTC\")')"
 test/built-ins/Temporal/Duration/prototype/round/options-read-before-algorithmic-validation.js:
   default: 'Test262Error: Actual [get options.largestUnit, get options.largestUnit.toString, call options.largestUnit.toString, get options.roundingIncrement, get options.roundingIncrement.valueOf, call options.roundingIncrement.valueOf, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString, get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] and expected [get options.largestUnit, get options.largestUnit.toString, call options.largestUnit.toString, get options.relativeTo, get options.roundingIncrement, get options.roundingIncrement.valueOf, call options.roundingIncrement.valueOf, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString, get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] should have the same contents. all options should be read first'
   strict mode: 'Test262Error: Actual [get options.largestUnit, get options.largestUnit.toString, call options.largestUnit.toString, get options.roundingIncrement, get options.roundingIncrement.valueOf, call options.roundingIncrement.valueOf, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString, get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] and expected [get options.largestUnit, get options.largestUnit.toString, call options.largestUnit.toString, get options.relativeTo, get options.roundingIncrement, get options.roundingIncrement.valueOf, call options.roundingIncrement.valueOf, get options.roundingMode, get options.roundingMode.toString, call options.roundingMode.toString, get options.smallestUnit, get options.smallestUnit.toString, call options.smallestUnit.toString] should have the same contents. all options should be read first'
+test/built-ins/Temporal/Duration/prototype/round/relative-to-required-for-rounding-durations-with-calendar-units.js:
+  default: 'Test262Error: Expected a RangeError but got a Error'
+  strict mode: 'Test262Error: Expected a RangeError but got a Error'
+test/built-ins/Temporal/Duration/prototype/round/relative-to-required-to-round-calendar-units.js:
+  default: 'Test262Error: Expected a RangeError but got a Error'
+  strict mode: 'Test262Error: Expected a RangeError but got a Error'
 test/built-ins/Temporal/Duration/prototype/round/relativeTo-ignores-incorrect-properties.js:
   default: 'RangeError: Cannot round a duration of years, months, or weeks without a relativeTo option'
   strict mode: 'RangeError: Cannot round a duration of years, months, or weeks without a relativeTo option'
@@ -238,12 +229,6 @@ test/built-ins/Temporal/Duration/prototype/total/relativeto-unit-weeks-balances-
   default: 'RangeError: Cannot total a duration of years, months, or weeks without a relativeTo option'
   strict mode: 'RangeError: Cannot total a duration of years, months, or weeks without a relativeTo option'
 test/built-ins/Temporal/Duration/prototype/total/rounding-window.js:
-  default: 'RangeError: Cannot total a duration of years, months, or weeks without a relativeTo option'
-  strict mode: 'RangeError: Cannot total a duration of years, months, or weeks without a relativeTo option'
-test/built-ins/Temporal/Duration/prototype/total/throws-if-target-nanoseconds-outside-valid-limits.js:
-  default: "TypeError: undefined is not a constructor (evaluating 'new Temporal.ZonedDateTime(864n * 10n**19n, \"UTC\")')"
-  strict mode: "TypeError: undefined is not a constructor (evaluating 'new Temporal.ZonedDateTime(864n * 10n**19n, \"UTC\")')"
-test/built-ins/Temporal/Duration/prototype/total/zero-duration.js:
   default: 'RangeError: Cannot total a duration of years, months, or weeks without a relativeTo option'
   strict mode: 'RangeError: Cannot total a duration of years, months, or weeks without a relativeTo option'
 test/built-ins/Temporal/Instant/prototype/toString/options-read-before-algorithmic-validation.js:
