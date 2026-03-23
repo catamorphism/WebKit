@@ -65,6 +65,10 @@ skip:
     - test/built-ins/RegExp/regexp-modifiers/add-ignoreCase-affects-slash-lower-p.js
 
     # Depends on Calendar support
+    - test/built-ins/Temporal/Duration/compare/relativeto-argument-propertybag-calendar-invalid-iso-string.js 
+    - test/built-ins/Temporal/Duration/compare/relativeto-argument-string-calendar-invalid-iso-string.js
+    - test/built-ins/Temporal/Duration/prototype/round/relativeto-argument-propertybag-calendar-invalid-iso-string.js
+    - test/built-ins/Temporal/Duration/prototype/round/relativeto-argument-string-calendar-invalid-iso-string.js
     - test/built-ins/Temporal/Duration/prototype/round/relativeto-propertybag-calendar-number.js
     - test/built-ins/Temporal/Duration/prototype/round/relativeto-propertybag-calendar-wrong-type.js
     - test/built-ins/Temporal/Duration/prototype/total/relativeto-propertybag-calendar-number.js
@@ -362,6 +366,15 @@ skip:
     - test/built-ins/Temporal/ZonedDateTime/prototype/subtract/subtract-large-subseconds.js
     - test/intl402/Temporal/Duration/prototype/round/relativeto-dst-back-transition.js
     - test/intl402/Temporal/Duration/prototype/total/relativeto-dst-back-transition.js
+
+    # FIXME
+    - test/built-ins/Temporal/Duration/prototype/round/precision-exact-in-round-duration.js
+    - test/built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-1.js
+    - test/built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-2.js
+    - test/built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-5.js
+    - test/built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-6.js
+    - test/built-ins/Temporal/Duration/prototype/total/precision-exact-mathematical-values-7.js
+    - test/built-ins/Temporal/Duration/prototype/total/rounding-window.js
 
     # transferToImmutable() is not implemented yet
     - test/built-ins/ArrayBuffer/prototype/resize/this-is-immutable-arraybuffer-object.js

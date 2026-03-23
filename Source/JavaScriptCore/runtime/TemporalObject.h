@@ -163,11 +163,6 @@ struct ParsedMonthCode {
     bool isLeapMonth;
 };
 
-static inline bool isAbsentUnit(Variant<TemporalAuto, std::optional<TemporalUnit>> unit)
-{
-    return std::holds_alternative<std::optional<TemporalUnit>>(unit) && !std::get<std::optional<TemporalUnit>>(unit);
-}
-
 enum class TemporalShowCalendar : uint8_t {
     Auto,
     Never,
@@ -239,13 +234,12 @@ WTF::String ellipsizeAt(unsigned maxLength, const WTF::String&);
 PropertyName temporalUnitPluralPropertyName(VM&, TemporalUnit);
 PropertyName temporalUnitSingularPropertyName(VM&, TemporalUnit);
 std::optional<TemporalUnit> temporalUnitType(StringView);
-Variant<TemporalAuto, std::optional<TemporalUnit>>
-getTemporalUnitValuedOption(JSGlobalObject*, JSObject*, PropertyName);
-void validateTemporalUnitValue(JSGlobalObject*, Variant<TemporalAuto, std::optional<TemporalUnit>>, UnitGroup, AllowedUnit, StringView);
+// void validateTemporalUnitValue(JSGlobalObject*, Variant<TemporalAuto, std::optional<TemporalUnit>>, UnitGroup, AllowedUnit, StringView);
 std::tuple<TemporalUnit, TemporalUnit, RoundingMode, double> extractDifferenceOptions(JSGlobalObject*, JSValue, UnitGroup, TemporalUnit, TemporalUnit);
 std::optional<TemporalUnit> validateSmallestUnit(JSGlobalObject*, std::optional<String>, std::initializer_list<TemporalUnit>);
-std::optional<TemporalLargestUnit> temporalLargestUnit(JSGlobalObject*, JSObject* options, std::initializer_list<TemporalUnit> disallowedUnits, std::optional<TemporalUnit> autoValue);
-std::optional<TemporalUnit> temporalSmallestUnit(JSGlobalObject*, Variant<JSObject*, TemporalUnit>, std::initializer_list<TemporalUnit>);
+std::optional<TemporalLargestUnit> validateLargestUnit(JSGlobalObject*, std::optional<String>, std::initializer_list<TemporalUnit>, std::optional<TemporalUnit> autoValue);
+std::optional<String> temporalLargestUnit(JSGlobalObject*, JSObject* options);
+std::optional<String> temporalSmallestUnit(JSGlobalObject*, JSObject*);
 std::tuple<TemporalUnit, TemporalUnit, RoundingMode, double> extractDifferenceOptions(JSGlobalObject*, JSValue, UnitGroup, TemporalUnit defaultSmallestUnit, TemporalUnit defaultLargestUnit);
 TemporalShowCalendar getTemporalShowCalendarNameOption(JSGlobalObject*, JSObject*);
 TemporalShowOffset getTemporalShowOffsetOption(JSGlobalObject*, JSObject*);
@@ -266,12 +260,12 @@ std::optional<unsigned> maximumRoundingIncrement(TemporalUnit);
 double temporalRoundingIncrement(JSGlobalObject*, JSObject* options);
 double roundNumberToIncrement(double, double increment, RoundingMode);
 double doubleNumberOption(JSGlobalObject*, JSObject*, PropertyName, double);
-double temporalRoundingIncrement(JSGlobalObject*, double, std::optional<double>, bool);
 void validateTemporalRoundingIncrement(JSGlobalObject*, double, std::optional<double>, Inclusivity);
 double roundNumberToIncrementDouble(double, double increment, RoundingMode);
 Int128 roundNumberToIncrementInt128(Int128, Int128, RoundingMode);
 Int128 roundNumberToIncrementAsIfPositive(Int128, Int128, RoundingMode);
 double applyUnsignedRoundingMode(double, double, double, UnsignedRoundingMode);
+double applyUnsignedRoundingMode2(double, double, int32_t, bool, UnsignedRoundingMode);
 void rejectObjectWithCalendarOrTimeZone(JSGlobalObject*, JSObject*);
 bool isPartialTemporalObject(JSGlobalObject*, JSObject* value);
 
@@ -352,6 +346,11 @@ enum class TemporalOffsetBehavior : uint8_t {
 enum class TemporalMatchBehavior : bool {
     Exactly,
     Minutes,
+};
+
+enum class TemporalNudgeWindowShift : bool {
+    Shift,
+    NoShift,
 };
 
 } // namespace JSC

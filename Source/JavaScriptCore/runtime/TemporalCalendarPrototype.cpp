@@ -174,24 +174,14 @@ JSC_DEFINE_HOST_FUNCTION(temporalCalendarPrototypeFuncDateUntil, (JSGlobalObject
     JSObject* options = intlGetOptionsObject(globalObject, callFrame->argument(2));
     RETURN_IF_EXCEPTION(scope, { });
 
-    auto largest = getTemporalUnitValuedOption(globalObject, options, vm.propertyNames->largestUnit);
-
+    std::optional<String> largestString = temporalLargestUnit(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
+    std::optional<TemporalLargestUnit> largest = validateLargestUnit(globalObject, largestString, { TemporalUnit::Hour, TemporalUnit::Minute, TemporalUnit::Second, TemporalUnit::Millisecond, TemporalUnit::Microsecond, TemporalUnit::Nanosecond }, std::nullopt);
+    RETURN_IF_EXCEPTION(scope, { });
+
     TemporalUnit largestUnit = TemporalUnit::Day;
-    if (std::holds_alternative<std::optional<TemporalUnit>>(largest)) {
-        auto largestUnitOptional = std::get<std::optional<TemporalUnit>>(largest);
-        if (largestUnitOptional)
-            largestUnit = largestUnitOptional.value();
-    }
-
-    auto disallowedUnits = { TemporalUnit::Hour, TemporalUnit::Minute, TemporalUnit::Second, TemporalUnit::Millisecond, TemporalUnit::Microsecond, TemporalUnit::Nanosecond };
-    if (disallowedUnits.size() && std::ranges::find(disallowedUnits, largestUnit) != disallowedUnits.end())
-        return throwVMRangeError(globalObject, scope, "largestUnit is a disallowed unit"_s);
-
-    if (largest) {
-        ASSERT(std::holds_alternative<TemporalUnit>(largest.value()));
+    if (largest && std::holds_alternative<TemporalUnit>(largest.value()))
         largestUnit = std::get<TemporalUnit>(largest.value());
-    }
 
     auto result = TemporalCalendar::calendarDateUntil(date1->plainDate(), date2->plainDate(), largestUnit);
 

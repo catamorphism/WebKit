@@ -238,7 +238,7 @@ TemporalZonedDateTime* TemporalZonedDateTime::round(JSGlobalObject* globalObject
         RETURN_IF_EXCEPTION(scope, { });
         auto smallestUnitOptionalString = temporalSmallestUnit(globalObject, roundTo);
         RETURN_IF_EXCEPTION(scope, { });
-        smallestUnitOptional = validateSmallestUnit(globalObject, smallestUnitOptionalString,  { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week });
+        smallestUnitOptional = validateSmallestUnit(globalObject, smallestUnitOptionalString, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week });
 
     } else {
         auto smallestUnit = roundToValue.toWTFString(globalObject);
@@ -389,7 +389,7 @@ TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject,
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-addzoneddatetime
-static inline ISO8601::ExactTime addZonedDateTime(JSGlobalObject* globalObject, ISO8601::ExactTime epochNanoseconds, ISO8601::TimeZone timeZone, TemporalCalendar* calendar, ISO8601::InternalDuration duration, TemporalOverflow overflow)
+ISO8601::ExactTime TemporalZonedDateTime::addZonedDateTime(JSGlobalObject* globalObject, ISO8601::ExactTime epochNanoseconds, ISO8601::TimeZone timeZone, TemporalCalendar* calendar, ISO8601::InternalDuration duration, TemporalOverflow overflow)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -486,14 +486,7 @@ static ISO8601::InternalDuration differenceZonedDateTime(JSGlobalObject* globalO
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-differencezoneddatetimewithrounding
-<<<<<<< HEAD
-static ISO8601::InternalDuration differenceZonedDateTimeWithRounding(JSGlobalObject* globalObject, ISO8601::ExactTime ns1, ISO8601::ExactTime ns2, ISO8601::TimeZone timeZone, TemporalCalendar* calendar, TemporalUnit largestUnit, unsigned roundingIncrement, TemporalUnit smallestUnit, RoundingMode roundingMode)
-=======
-ISO8601::InternalDuration TemporalZonedDateTime::differenceZonedDateTimeWithRounding(
-    JSGlobalObject* globalObject, ISO8601::ExactTime ns1, ISO8601::ExactTime ns2,
-    ISO8601::TimeZone timeZone, TemporalCalendar* calendar, TemporalUnit largestUnit,
-    double roundingIncrement, TemporalUnit smallestUnit, RoundingMode roundingMode)
->>>>>>> 543062e13818 (Implement relativeTo option)
+ISO8601::InternalDuration TemporalZonedDateTime::differenceZonedDateTimeWithRounding(JSGlobalObject* globalObject, ISO8601::ExactTime ns1, ISO8601::ExactTime ns2, ISO8601::TimeZone timeZone, TemporalCalendar* calendar, TemporalUnit largestUnit, unsigned roundingIncrement, TemporalUnit smallestUnit, RoundingMode roundingMode)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -512,7 +505,7 @@ ISO8601::InternalDuration TemporalZonedDateTime::differenceZonedDateTimeWithRoun
     auto dateTime = TemporalTimeZone::getISODateTimeFor(globalObject, timeZone, ns1);
     RETURN_IF_EXCEPTION(scope, { });
     RELEASE_AND_RETURN(scope, TemporalDuration::roundRelativeDuration(globalObject,
-        difference, ns2.epochNanoseconds(), dateTime, timeZone,
+        difference, ns1.epochNanoseconds(), ns2.epochNanoseconds(), dateTime, timeZone,
         largestUnit, roundingIncrement, smallestUnit, roundingMode));
 }
 
@@ -526,17 +519,16 @@ double TemporalZonedDateTime::differenceZonedDateTimeWithTotal(JSGlobalObject* g
 
     if (unit >= TemporalUnit::Day) {
         auto difference = ns2.epochNanoseconds() - ns1.epochNanoseconds();
-        RELEASE_AND_RETURN(scope,
-            TemporalDuration::totalTimeDuration(globalObject, difference, unit));
+        return TemporalDuration::totalTimeDuration(difference, unit);
     }
     // FIXME: non-iso8601 calendars
     TemporalCalendar* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(),
         iso8601CalendarID());
     auto difference = differenceZonedDateTime(globalObject, ns1, ns2, timeZone, calendar, unit);
     RETURN_IF_EXCEPTION(scope, 0);
-    auto dateTime = TemporalTimeZone::getISODateTimeFor(timeZone, ns1);
+    auto dateTime = TemporalTimeZone::getISODateTimeFor(globalObject, timeZone, ns1);
     RELEASE_AND_RETURN(scope, TemporalDuration::totalRelativeDuration(globalObject,
-        difference, ns2.epochNanoseconds(), dateTime, timeZone, unit));
+        difference, ns1.epochNanoseconds(), ns2.epochNanoseconds(), dateTime, timeZone, unit));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-differencetemporalzoneddatetime

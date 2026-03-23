@@ -248,12 +248,16 @@ ISO8601::Duration TemporalInstant::difference(JSGlobalObject* globalObject, Temp
     JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
     RETURN_IF_EXCEPTION(scope, { });
 
-    auto smallest = temporalSmallestUnit(globalObject, options, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day });
+    std::optional<String> smallestAsString = temporalSmallestUnit(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
-    TemporalUnit smallestUnit = smallest.value_or(TemporalUnit::Nanosecond);
+    std::optional<TemporalUnit> smallestUnitOptional = validateSmallestUnit(globalObject, smallestAsString, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day });
+    RETURN_IF_EXCEPTION(scope, { });
+    TemporalUnit smallestUnit = smallestUnitOptional.value_or(TemporalUnit::Nanosecond);
 
     TemporalUnit defaultLargestUnit = std::min(smallestUnit, TemporalUnit::Second);
-    auto largest = temporalLargestUnit(globalObject, options, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day }, defaultLargestUnit);
+    std::optional<String> largestAsString = temporalLargestUnit(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+    std::optional<TemporalLargestUnit> largest = validateLargestUnit(globalObject, largestAsString, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day }, defaultLargestUnit);
     RETURN_IF_EXCEPTION(scope, { });
     TemporalUnit largestUnit = defaultLargestUnit;
     if (largest) {
@@ -261,7 +265,7 @@ ISO8601::Duration TemporalInstant::difference(JSGlobalObject* globalObject, Temp
         largestUnit = std::get<TemporalUnit>(largest.value());
     }
 
-    if (smallest && largest && smallest < largestUnit) {
+    if (smallestUnit < largestUnit) {
         throwRangeError(globalObject, scope, "smallestUnit must be smaller than largestUnit"_s);
         return { };
     }
@@ -273,8 +277,9 @@ ISO8601::Duration TemporalInstant::difference(JSGlobalObject* globalObject, Temp
     ASSERT(maxIncrement && *maxIncrement <= 1000); // unbounded increments are impossible with Temporal.Instant
     double incrementDouble = doubleNumberOption(globalObject, options, vm.propertyNames->roundingIncrement, 1);
     RETURN_IF_EXCEPTION(scope, { });
-    unsigned increment = temporalRoundingIncrement(globalObject, incrementDouble, maxIncrement, false);
+    validateTemporalRoundingIncrement(globalObject, incrementDouble, maxIncrement, Inclusivity::Exclusive);
     RETURN_IF_EXCEPTION(scope, { });
+    unsigned increment = static_cast<unsigned>(incrementDouble);
 
     ISO8601::InternalDuration internalDuration = exactTime().difference(globalObject, other->exactTime(), increment, smallestUnit, roundingMode);
     RETURN_IF_EXCEPTION(scope, { });
@@ -357,9 +362,9 @@ ISO8601::ExactTime TemporalInstant::round(JSGlobalObject* globalObject, JSValue 
     RETURN_IF_EXCEPTION(scope, { });
 
     if (!smallest) {
-        auto smallestUnitMaybeAuto = getTemporalUnitValuedOption(globalObject, options, vm.propertyNames->smallestUnit);
-        ASSERT(std::holds_alternative<std::optional<TemporalUnit>>(smallestUnitMaybeAuto));
-        smallest = std::get<std::optional<TemporalUnit>>(smallestUnitMaybeAuto);
+        std::optional<String> smallestUnitAsString = temporalSmallestUnit(globalObject, options);
+        RETURN_IF_EXCEPTION(scope, { });
+        smallest = validateSmallestUnit(globalObject, smallestUnitAsString, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day });
         RETURN_IF_EXCEPTION(scope, { });
     }
 
@@ -369,9 +374,7 @@ ISO8601::ExactTime TemporalInstant::round(JSGlobalObject* globalObject, JSValue 
     }
 
     TemporalUnit smallestUnit = smallest.value();
-    validateTemporalUnitValue(globalObject, smallestUnit, UnitGroup::Time, AllowedUnit::None, "smallestUnit"_s);
-    RETURN_IF_EXCEPTION(scope, { });
-
+ 
     validateTemporalRoundingIncrement(globalObject, roundingIncrement, maximumIncrement(smallestUnit), Inclusivity::Inclusive);
     RETURN_IF_EXCEPTION(scope, { });
 

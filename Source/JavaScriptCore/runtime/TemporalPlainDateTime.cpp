@@ -396,10 +396,9 @@ TemporalPlainDateTime* TemporalPlainDateTime::round(JSGlobalObject* globalObject
     RETURN_IF_EXCEPTION(scope, { });
 
     if (!smallest) {
-        auto smallestUnitMaybeAuto = getTemporalUnitValuedOption(globalObject, options, vm.propertyNames->smallestUnit);
+        std::optional<String> smallestUnitString = temporalSmallestUnit(globalObject, options);
         RETURN_IF_EXCEPTION(scope, { });
-        ASSERT(std::holds_alternative<std::optional<TemporalUnit>>(smallestUnitMaybeAuto));
-        smallest = std::get<std::optional<TemporalUnit>>(smallestUnitMaybeAuto);
+        smallest = validateSmallestUnit(globalObject, smallestUnitString, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week });
         if (!smallest) {
             throwRangeError(globalObject, scope, "Cannot round without a smallestUnit option"_s);
             return { };
@@ -407,10 +406,6 @@ TemporalPlainDateTime* TemporalPlainDateTime::round(JSGlobalObject* globalObject
     }
 
     auto smallestUnit = smallest.value();
-
-    validateTemporalUnitValue(globalObject, smallestUnit, UnitGroup::Time, AllowedUnit::Day, "smallestUnit"_s);
-    RETURN_IF_EXCEPTION(scope, { });
-
     unsigned maximum = 1;
     Inclusivity isInclusive = Inclusivity::Inclusive;
     if (smallestUnit != TemporalUnit::Day) {
@@ -522,9 +517,10 @@ double TemporalPlainDateTime::differencePlainDateTimeWithTotal(
     RETURN_IF_EXCEPTION(scope, 0);
     if (unit == TemporalUnit::Nanosecond)
         return diff.time();
+    auto originEpochNs = getUTCEpochNanoseconds(isoDateTime1);
     auto destEpochNs = getUTCEpochNanoseconds(isoDateTime2);
     RELEASE_AND_RETURN(scope, TemporalDuration::totalRelativeDuration(globalObject,
-        diff, destEpochNs, isoDateTime1, std::nullopt, unit));
+        diff, originEpochNs, destEpochNs, isoDateTime1, std::nullopt, unit));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-differenceplaindatetimewithrounding
@@ -546,9 +542,10 @@ ISO8601::InternalDuration TemporalPlainDateTime::differencePlainDateTimeWithRoun
     RETURN_IF_EXCEPTION(scope, { });
     if (smallestUnit == TemporalUnit::Nanosecond && roundingIncrement == 1)
         return diff;
+    auto originEpochNs = getUTCEpochNanoseconds(isoDateTime1);
     auto destEpochNs = getUTCEpochNanoseconds(isoDateTime2);
     RELEASE_AND_RETURN(scope, TemporalDuration::roundRelativeDuration(globalObject,
-        diff, destEpochNs, isoDateTime1, std::nullopt,
+        diff, originEpochNs, destEpochNs, isoDateTime1, std::nullopt,
         largestUnit, roundingIncrement, smallestUnit, roundingMode));
 }
 

@@ -76,7 +76,7 @@ public:
         TemporalOverflow);
     static ISO8601::InternalDuration differenceZonedDateTimeWithRounding(
         JSGlobalObject*, ISO8601::ExactTime, ISO8601::ExactTime, ISO8601::TimeZone,
-        TemporalCalendar*, TemporalUnit, double, TemporalUnit, RoundingMode);
+        TemporalCalendar*, TemporalUnit, unsigned, TemporalUnit, RoundingMode);
     static double differenceZonedDateTimeWithTotal(
         JSGlobalObject*, ISO8601::ExactTime, ISO8601::ExactTime, ISO8601::TimeZone,
         TemporalUnit);

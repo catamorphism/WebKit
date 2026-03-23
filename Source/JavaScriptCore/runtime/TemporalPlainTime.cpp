@@ -289,18 +289,16 @@ ISO8601::PlainTime TemporalPlainTime::round(JSGlobalObject* globalObject, JSValu
     auto roundingMode = temporalRoundingMode(globalObject, options, RoundingMode::HalfExpand);
     RETURN_IF_EXCEPTION(scope, { });
     if (!smallest) {
-        auto smallestMaybeAuto = getTemporalUnitValuedOption(globalObject, options, vm.propertyNames->smallestUnit);
+        std::optional<String> smallestAsString = temporalSmallestUnit(globalObject, options);
         RETURN_IF_EXCEPTION(scope, { });
-        ASSERT(std::holds_alternative<std::optional<TemporalUnit>>(smallestMaybeAuto));
-        smallest = std::get<std::optional<TemporalUnit>>(smallestMaybeAuto);
+        smallest = validateSmallestUnit(globalObject, smallestAsString, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week, TemporalUnit::Day });
+        RETURN_IF_EXCEPTION(scope, { });
     }
     if (!smallest) [[unlikely]] {
         throwRangeError(globalObject, scope, "smallestUnit is required for rounding"_s);
         return { };
     }
     auto smallestUnit = smallest.value();
-    validateTemporalUnitValue(globalObject, smallestUnit, UnitGroup::Time, AllowedUnit::None, "smallestUnit"_s);
-    RETURN_IF_EXCEPTION(scope, { });
     auto maximum = maximumRoundingIncrement(smallestUnit);
     validateTemporalRoundingIncrement(globalObject, roundingIncrement, maximum, Inclusivity::Exclusive);
     RETURN_IF_EXCEPTION(scope, { });

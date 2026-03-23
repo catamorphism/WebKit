@@ -500,6 +500,7 @@ String temporalYearMonthToString(PlainYearMonth, StringView);
 String temporalMonthDayToString(PlainMonthDay, StringView);
 String monthCode(uint32_t);
 
+int32_t dateDurationSign(const Duration&);
 bool isValidDuration(const Duration&);
 void checkISODaysRange(JSGlobalObject*, ISO8601::PlainDate);
 
