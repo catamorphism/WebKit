@@ -90,9 +90,6 @@ test/built-ins/Temporal/PlainDate/prototype/toString/order-of-operations.js:
 test/built-ins/Temporal/PlainDate/prototype/until/argument-string-calendar-invalid-iso-string.js:
   default: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/PlainDateTime/argument-convert.js:
-  default: 'Test262Error: year undefined Expected a RangeError to be thrown but no exception was thrown at all'
-  strict mode: 'Test262Error: year undefined Expected a RangeError to be thrown but no exception was thrown at all'
 test/built-ins/Temporal/PlainDateTime/calendar-case-insensitive.js:
   default: 'Test262Error: calendar ID is capital dotted I is not lowercased Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: calendar ID is capital dotted I is not lowercased Expected a RangeError to be thrown but no exception was thrown at all'

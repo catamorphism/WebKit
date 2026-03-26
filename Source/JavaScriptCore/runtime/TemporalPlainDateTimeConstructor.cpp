@@ -93,7 +93,10 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainDateTime, (JSGlobalObject* global
     auto count = std::min<size_t>(callFrame->argumentCount(), numberOfTemporalPlainDateUnits + numberOfTemporalPlainTimeUnits);
     for (unsigned i = 0; i < count; i++) {
         unsigned durationIndex = i >= static_cast<unsigned>(TemporalUnit::Week) ? i + 1 : i;
-        duration[durationIndex] = callFrame->uncheckedArgument(i).toIntegerOrInfinity(globalObject);
+        if (durationIndex < numberOfTemporalPlainDateUnits)
+            duration[durationIndex] = callFrame->uncheckedArgument(i).toIntegerWithTruncation(globalObject);
+        else
+            duration[durationIndex] = callFrame->uncheckedArgument(i).toIntegerOrInfinity(globalObject);
         RETURN_IF_EXCEPTION(scope, { });
         if (!std::isfinite(duration[durationIndex]))
             return throwVMRangeError(globalObject, scope, "Temporal.PlainDateTime properties must be finite"_s);
