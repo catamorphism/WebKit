@@ -120,24 +120,12 @@ test/built-ins/Temporal/PlainMonthDay/from/argument-string-calendar-case-insensi
 test/built-ins/Temporal/PlainYearMonth/from/argument-string-calendar-case-insensitive.js:
   default: 'RangeError: YYYY-MM format is only valid with iso8601 calendar'
   strict mode: 'RangeError: YYYY-MM format is only valid with iso8601 calendar'
-test/built-ins/Temporal/PlainYearMonth/prototype/add/argument-lower-units.js:
-  default: 'Test262Error: adding a unit lower than months should throw, no options Expected a RangeError to be thrown but no exception was thrown at all'
-  strict mode: 'Test262Error: adding a unit lower than months should throw, no options Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/PlainYearMonth/prototype/add/options-read-before-algorithmic-validation.js:
-  default: 'Test262Error: exception thrown when attempting to add too-low unit Expected a RangeError to be thrown but no exception was thrown at all'
-  strict mode: 'Test262Error: exception thrown when attempting to add too-low unit Expected a RangeError to be thrown but no exception was thrown at all'
 test/built-ins/Temporal/PlainYearMonth/prototype/add/overflow.js:
   default: 'RangeError: date time is out of range of ECMAScript representation'
   strict mode: 'RangeError: date time is out of range of ECMAScript representation'
 test/built-ins/Temporal/PlainYearMonth/prototype/add/subtract-from-last-representable-month.js:
   default: 'RangeError: date time is out of range of ECMAScript representation'
   strict mode: 'RangeError: date time is out of range of ECMAScript representation'
-test/built-ins/Temporal/PlainYearMonth/prototype/subtract/argument-lower-units.js:
-  default: 'Test262Error: subtracting a unit lower than months should throw, no options Expected a RangeError to be thrown but no exception was thrown at all'
-  strict mode: 'Test262Error: subtracting a unit lower than months should throw, no options Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/PlainYearMonth/prototype/subtract/options-read-before-algorithmic-validation.js:
-  default: 'Test262Error: exception thrown when attempting to add too-low unit Expected a RangeError to be thrown but no exception was thrown at all'
-  strict mode: 'Test262Error: exception thrown when attempting to add too-low unit Expected a RangeError to be thrown but no exception was thrown at all'
 test/built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow.js:
   default: 'RangeError: date time is out of range of ECMAScript representation'
   strict mode: 'RangeError: date time is out of range of ECMAScript representation'

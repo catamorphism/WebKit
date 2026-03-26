@@ -114,9 +114,12 @@ ISO8601::PlainYearMonth TemporalPlainYearMonth::addDurationToYearMonth(JSGlobalO
         date = TemporalCalendar::balanceISODate(globalObject, static_cast<Int128>(y), static_cast<Int128>(m), static_cast<Int128>(d));
     } else
         date = intermediateDate;
-    auto durationToAdd = TemporalDuration::toDateDurationRecordWithoutTime(globalObject, duration);
-    RETURN_IF_EXCEPTION(scope, { });
-    auto addedDate = TemporalCalendar::isoDateAdd(globalObject, date, durationToAdd, overflow);
+    auto durationToAdd = TemporalDuration::toInternalDuration(duration);
+    if (durationToAdd.dateDuration().weeks() || durationToAdd.dateDuration().days() || durationToAdd.time()) {
+        throwRangeError(globalObject, scope, "only years and months can be added to Temporal.PlainYearMonth"_s);
+        return { };
+    }
+    auto addedDate = TemporalCalendar::isoDateAdd(globalObject, date, durationToAdd.dateDuration(), overflow);
     RETURN_IF_EXCEPTION(scope, { });
     return ISO8601::PlainYearMonth(addedDate.year(), addedDate.month());
 }
