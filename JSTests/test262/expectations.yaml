@@ -66,9 +66,6 @@ test/built-ins/Temporal/PlainDate/compare/argument-string-calendar-invalid-iso-s
 test/built-ins/Temporal/PlainDate/from/argument-string-calendar-invalid-iso-string.js:
   default: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/PlainDate/from/month-code-wrong-type.js:
-  default: 'Test262Error: month code 5 should be rejected Expected a TypeError but got a RangeError'
-  strict mode: 'Test262Error: month code 5 should be rejected Expected a TypeError but got a RangeError'
 test/built-ins/Temporal/PlainDate/prototype/equals/argument-string-calendar-invalid-iso-string.js:
   default: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
@@ -135,9 +132,6 @@ test/built-ins/Temporal/PlainTime/argument-convert.js:
 test/built-ins/Temporal/PlainYearMonth/from/argument-string-calendar-case-insensitive.js:
   default: 'RangeError: YYYY-MM format is only valid with iso8601 calendar'
   strict mode: 'RangeError: YYYY-MM format is only valid with iso8601 calendar'
-test/built-ins/Temporal/PlainYearMonth/from/month-code-wrong-type.js:
-  default: 'Test262Error: month code 5 should be rejected Expected a TypeError but got a RangeError'
-  strict mode: 'Test262Error: month code 5 should be rejected Expected a TypeError but got a RangeError'
 test/built-ins/Temporal/PlainYearMonth/prototype/add/argument-lower-units.js:
   default: 'Test262Error: adding a unit lower than months should throw, no options Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: adding a unit lower than months should throw, no options Expected a RangeError to be thrown but no exception was thrown at all'

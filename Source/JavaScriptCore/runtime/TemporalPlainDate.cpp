@@ -324,7 +324,7 @@ TemporalPlainDate::mergeDateTimeFields(JSGlobalObject* globalObject, JSObject* t
 
     if (monthCodePresent) {
         if (!otherMonth) [[unlikely]] {
-            throwRangeError(globalObject, scope, "Invalid monthCode property"_s);
+            throwTypeError(globalObject, scope, "Invalid monthCode property"_s);
             return { };
         }
         if (!month)

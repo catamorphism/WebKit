@@ -430,11 +430,16 @@ ISO8601::PlainDate TemporalCalendar::isoDateFromFields(JSGlobalObject* globalObj
         }
     } else {
         monthCodePresent = true;
-        auto monthCodeString = monthCodeProperty.toWTFString(globalObject);
+        auto monthCodePrimitive = monthCodeProperty.toPrimitive(globalObject, PreferString);
+        RETURN_IF_EXCEPTION(scope, { });
+        if (!monthCodePrimitive.isString()) {
+            throwTypeError(globalObject, scope, "month code must be a string");
+            return { };
+        }
+        auto monthCodeString = monthCodePrimitive.toWTFString(globalObject);
         RETURN_IF_EXCEPTION(scope, { });
 
         otherMonth = ISO8601::parseMonthCode(monthCodeString);
-
         if (!otherMonth) [[unlikely]] {
             throwRangeError(globalObject, scope, "Invalid monthCode property"_s);
             return { };
