@@ -117,9 +117,6 @@ test/built-ins/Temporal/PlainDateTime/prototype/eraYear/prop-desc.js:
 test/built-ins/Temporal/PlainMonthDay/from/argument-string-calendar-case-insensitive.js:
   default: 'RangeError: Temporal.PlainMonthDay.from: invalid date string 11-18[+01:00][u-ca=ISO8601]'
   strict mode: 'RangeError: Temporal.PlainMonthDay.from: invalid date string 11-18[+01:00][u-ca=ISO8601]'
-test/built-ins/Temporal/PlainTime/argument-convert.js:
-  default: 'Test262Error: hour string Expected a RangeError to be thrown but no exception was thrown at all'
-  strict mode: 'Test262Error: hour string Expected a RangeError to be thrown but no exception was thrown at all'
 test/built-ins/Temporal/PlainYearMonth/from/argument-string-calendar-case-insensitive.js:
   default: 'RangeError: YYYY-MM format is only valid with iso8601 calendar'
   strict mode: 'RangeError: YYYY-MM format is only valid with iso8601 calendar'
