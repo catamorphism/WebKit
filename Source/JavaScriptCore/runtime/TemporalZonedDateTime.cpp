@@ -371,7 +371,7 @@ TemporalZonedDateTime* TemporalZonedDateTime::with(JSGlobalObject* globalObject,
     microsecond = optionalMicrosecond.value_or(microsecond);
     nanosecond = optionalNanosecond.value_or(nanosecond);
     if (optionalOffset) {
-        auto offsetNanosecondsOptional = ISO8601::parseUTCOffset(optionalOffset.value(), false);
+        auto offsetNanosecondsOptional = ISO8601::parseUTCOffset(optionalOffset.value(), true);
         if (!offsetNanosecondsOptional) {
             throwRangeError(globalObject, scope, "invalid offset string in Temporal.ZonedDateTime.with"_s);
             return { };
