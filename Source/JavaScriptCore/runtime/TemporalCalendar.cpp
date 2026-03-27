@@ -574,11 +574,11 @@ ISO8601::PlainDate TemporalCalendar::monthDayFromFields(JSGlobalObject* globalOb
     RETURN_IF_EXCEPTION(scope, { });
     int32_t year = referenceYear.value_or(1972);
     auto result = TemporalPlainDate::regulateISODate(year, month, day, overflow);
-    if (!result || !ISO8601::isDateTimeWithinLimits(result->year(), result->month(), result->day(), 12, 0, 0, 0, 0, 0)) [[unlikely]] {
+    if (!result) [[unlikely]] {
         throwRangeError(globalObject, scope, "monthDayFromFields: date is out of range of ECMAScript representation"_s);
         return { };
     }
-    return ISO8601::PlainDate(1972, result->month(), result->day());
+    return TemporalPlainDate::createISODateRecord(1972, result->month(), result->day());
 }
 
 // There are two overloads of this function, one that takes doubles and one that takes Int128.
