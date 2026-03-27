@@ -286,8 +286,7 @@ shouldBe(negSubseconds.total("seconds"), -2.998998999);
     shouldBe(instance.total({ unit: "days", relativeTo }), 367);
 }
 
-// At present, toLocaleString has the same behavior as toJSON or argumentless toString.
-for (const method of ['toString', 'toJSON', 'toLocaleString']) {    
+for (const method of ['toString', 'toJSON']) {
     shouldBe(Temporal.Duration.prototype[method].length, 0);
     shouldThrow(() => Temporal.Duration.prototype[method].call({}), TypeError);
 
@@ -304,6 +303,12 @@ for (const method of ['toString', 'toJSON', 'toLocaleString']) {
     shouldBe(new Temporal.Duration(0,0,0,0,0,0,0,1,1001)[method](), 'PT0.002001S');
     shouldBe(new Temporal.Duration(0,0,0,0,0,0,0,0,1,1001)[method](), 'PT0.000002001S');
     shouldBe(new Temporal.Duration(0,0,0,0,0,0,1,1001,1001,1001)[method](), 'PT2.002002001S');
+}
+
+{
+    shouldBe(zero.toLocaleString(undefined, undefined), '');
+    shouldBe(pos.toLocaleString(undefined, undefined), '1 yr, 2 mths, 3 wks, 4 days, 5 hr, 6 min, 7 sec, 8 ms, 9 μs, 10 ns');
+    shouldBe(neg.toLocaleString(undefined, undefined), '-1 yr, 2 mths, 3 wks, 4 days, 5 hr, 6 min, 7 sec, 8 ms, 9 μs, 10 ns');
 }
 
 shouldBe(pos.toString({}), pos.toString());

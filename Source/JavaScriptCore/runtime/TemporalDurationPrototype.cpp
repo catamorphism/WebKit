@@ -27,6 +27,7 @@
 #include "config.h"
 #include "TemporalDurationPrototype.h"
 
+#include "IntlDurationFormat.h"
 #include "JSCInlines.h"
 #include "TemporalDuration.h"
 
@@ -248,7 +249,6 @@ JSC_DEFINE_HOST_FUNCTION(temporalDurationPrototypeFuncToJSON, (JSGlobalObject* g
     RELEASE_AND_RETURN(scope, JSValue::encode(jsString(vm, duration->toString(globalObject))));
 }
 
-// This will be part of the ECMA-402 Intl.DurationFormat proposal; until then, we just follow ECMA-262 in mimicking toJSON.
 JSC_DEFINE_HOST_FUNCTION(temporalDurationPrototypeFuncToLocaleString, (JSGlobalObject* globalObject, CallFrame* callFrame))
 {
     VM& vm = globalObject->vm();
@@ -258,7 +258,15 @@ JSC_DEFINE_HOST_FUNCTION(temporalDurationPrototypeFuncToLocaleString, (JSGlobalO
     if (!duration)
         return throwVMTypeError(globalObject, scope, "Temporal.Duration.prototype.toLocaleString called on value that's not a Duration"_s);
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(jsString(vm, duration->toString(globalObject))));
+    IntlDurationFormat* durationFormat = IntlDurationFormat::create(vm, globalObject->durationFormatStructure());
+    ASSERT(durationFormat);
+    durationFormat->initializeDurationFormat(globalObject, callFrame->argument(0), callFrame->argument(1));
+    RETURN_IF_EXCEPTION(scope, { });
+
+    ISO8601::Duration isoDuration = duration->toLimitedDuration(globalObject, duration, { });
+    RETURN_IF_EXCEPTION(scope, { });
+
+    RELEASE_AND_RETURN(scope, JSValue::encode(durationFormat->format(globalObject, isoDuration)));
 }
 
 JSC_DEFINE_HOST_FUNCTION(temporalDurationPrototypeFuncValueOf, (JSGlobalObject* globalObject, CallFrame*))
