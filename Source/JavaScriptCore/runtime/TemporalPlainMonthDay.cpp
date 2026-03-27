@@ -188,7 +188,7 @@ TemporalPlainMonthDay* TemporalPlainMonthDay::from(JSGlobalObject* globalObject,
     auto dateTime = ISO8601::parseCalendarDateTime(string, TemporalDateFormat::MonthDay);
     if (dateTime) {
         auto [plainDate, plainTimeOptional, timeZoneOptional, calendarOptional] = WTF::move(dateTime.value());
-        if (calendarOptional && StringView(calendarOptional.value()) != String::fromLatin1("iso8601")) [[unlikely]] {
+        if (calendarOptional && !equalIgnoringASCIICase(StringView(calendarOptional.value()), String::fromLatin1("iso8601"))) [[unlikely]] {
             throwRangeError(globalObject, scope,
                 "MM-DD format is only valid with iso8601 calendar"_s);
             return { };

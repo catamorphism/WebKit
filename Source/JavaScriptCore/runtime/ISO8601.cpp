@@ -994,7 +994,7 @@ static std::optional<TimeZoneAnnotation> parseTimeZoneAnnotation(StringParsingBu
 }
 
 template<typename CharacterType>
-static std::optional<TimeZoneRecord> parseTimeZone(StringParsingBuffer<CharacterType>& buffer)
+static std::optional<TimeZoneRecord> parseTimeZone(StringParsingBuffer<CharacterType>& buffer, bool requireBrackets)
 {
     if (buffer.atEnd())
         return std::nullopt;
@@ -1003,38 +1003,44 @@ static std::optional<TimeZoneRecord> parseTimeZone(StringParsingBuffer<Character
     // https://tc39.es/proposal-temporal/#prod-UTCDesignator
     case 'z':
     case 'Z': {
-        buffer.advance();
-        if (!buffer.atEnd() && *buffer == '[' && canBeTimeZone(buffer, *buffer)) {
-            auto timeZoneAnnotation = parseTimeZoneAnnotation(buffer);
-            if (!timeZoneAnnotation)
-                return std::nullopt;
-            return TimeZoneRecord { true, std::nullopt, timeZoneAnnotation };
+        if (!requireBrackets) {
+            buffer.advance();
+            if (!buffer.atEnd() && *buffer == '[' && canBeTimeZone(buffer, *buffer)) {
+                auto timeZoneAnnotation = parseTimeZoneAnnotation(buffer);
+                if (!timeZoneAnnotation)
+                    return std::nullopt;
+                return TimeZoneRecord { true, std::nullopt, timeZoneAnnotation };
+            }
+            return TimeZoneRecord { true, std::nullopt, std::nullopt };
         }
-        return TimeZoneRecord { true, std::nullopt, std::nullopt };
+        break;
     }
     // TimeZoneUTCOffsetSign
     // https://tc39.es/proposal-temporal/#prod-TimeZoneUTCOffsetSign
     case '+':
     case '-': {
-        // Accept sub-minute precision in offset
-        StringParsingBuffer<CharacterType> bufferCopy = buffer;
-        int32_t lengthRemaining = buffer.lengthRemaining();
-        auto offset = parseUTCOffset(buffer, true);
-        auto numOffsetChars = lengthRemaining - buffer.lengthRemaining();
-        Vector<Latin1Character> chars;
-        for (uint32_t i = 0; i < numOffsetChars; i++) {
-            chars.append(*bufferCopy);
-            bufferCopy.advance();
-        }
-        if (!offset)
-            return std::nullopt;
-        if (!buffer.atEnd() && *buffer == '[' && canBeTimeZone(buffer, *buffer)) {
-            auto timeZoneAnnotation = parseTimeZoneAnnotation(buffer);
-            if (!timeZoneAnnotation)
+        if (!requireBrackets) {
+            // Accept sub-minute precision in offset
+            StringParsingBuffer<CharacterType> bufferCopy = buffer;
+            int32_t lengthRemaining = buffer.lengthRemaining();
+            auto offset = parseUTCOffset(buffer, true);
+            auto numOffsetChars = lengthRemaining - buffer.lengthRemaining();
+            Vector<Latin1Character> chars;
+            for (uint32_t i = 0; i < numOffsetChars; i++) {
+                chars.append(*bufferCopy);
+                bufferCopy.advance();
+            }
+            if (!offset)
                 return std::nullopt;
-            return TimeZoneRecord { false, TimeZoneOffset { chars, offset.value() }, timeZoneAnnotation };
+            if (!buffer.atEnd() && *buffer == '[' && canBeTimeZone(buffer, *buffer)) {
+                auto timeZoneAnnotation = parseTimeZoneAnnotation(buffer);
+                if (!timeZoneAnnotation)
+                    return std::nullopt;
+                return TimeZoneRecord { false, TimeZoneOffset { chars, offset.value() }, timeZoneAnnotation };
+            }
+            return TimeZoneRecord { false, TimeZoneOffset { chars, offset.value() }, std::nullopt };
         }
-        return TimeZoneRecord { false, TimeZoneOffset { chars, offset.value() }, std::nullopt };
+        break;
     }
     // TimeZoneBracketedAnnotation
     // https://tc39.es/proposal-temporal/#prod-TimeZoneBracketedAnnotation
@@ -1045,14 +1051,15 @@ static std::optional<TimeZoneRecord> parseTimeZone(StringParsingBuffer<Character
         return TimeZoneRecord { false, std::nullopt, timeZoneAnnotation };
     }
     default:
-        return std::nullopt;
+        break;
     }
+    return std::nullopt;
 }
 
-std::optional<TimeZoneRecord> parseTimeZone(StringView string)
+std::optional<TimeZoneRecord> parseTimeZone(StringView string, bool requireBrackets)
 {
-    return readCharactersForParsing(string, [](auto buffer) -> std::optional<TimeZoneRecord> {
-        auto result = parseTimeZone(buffer);
+    return readCharactersForParsing(string, [requireBrackets](auto buffer) -> std::optional<TimeZoneRecord> {
+        auto result = parseTimeZone(buffer, requireBrackets);
         if (!buffer.atEnd()) [[unlikely]]
             return std::nullopt;
         return result;
@@ -1231,7 +1238,7 @@ static std::optional<std::tuple<PlainTime, std::optional<TimeZoneRecord>>> parse
     if (buffer.atEnd())
         return std::tuple { WTF::move(plainTime.value()), std::nullopt };
     if (canBeTimeZone(buffer, *buffer)) {
-        auto timeZone = parseTimeZone(buffer);
+        auto timeZone = parseTimeZone(buffer, false);
         if (!timeZone)
             return std::nullopt;
         return std::tuple { WTF::move(plainTime.value()), WTF::move(timeZone) };
@@ -1446,8 +1453,10 @@ static std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::option
         return std::tuple { WTF::move(plainDate.value()), WTF::move(plainTime), WTF::move(timeZone) };
     }
 
-    if (canBeTimeZone(buffer, *buffer))
-        return std::nullopt;
+    if (canBeTimeZone(buffer, *buffer)) {
+        auto timeZone = parseTimeZone(buffer, true);
+        return std::tuple { WTF::move(plainDate.value()), std::nullopt, timeZone };
+    }
 
     return std::tuple { WTF::move(plainDate.value()), std::nullopt, std::nullopt };
 }
@@ -1485,7 +1494,7 @@ static std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::option
 
     if (!timeZoneOptional) {
         if (canBeTimeZoneAnnotation(buffer, *buffer))
-            timeZoneOptional = parseTimeZone(buffer);
+            timeZoneOptional = parseTimeZone(buffer, false);
     }
 
     if (buffer.atEnd())
@@ -1536,7 +1545,7 @@ static std::optional<std::tuple<PlainTime, std::optional<TimeZoneRecord>, std::o
 
     std::optional<TimeZoneRecord> timeZoneOptional;
     if (canBeTimeZone(buffer, *buffer)) {
-        auto timeZone = parseTimeZone(buffer);
+        auto timeZone = parseTimeZone(buffer, false);
         if (!timeZone)
             return std::nullopt;
         timeZoneOptional = WTF::move(timeZone);
