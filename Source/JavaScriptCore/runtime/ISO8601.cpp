@@ -1506,9 +1506,10 @@ static std::optional<std::tuple<PlainDate, std::optional<PlainTime>, std::option
     std::optional<CalendarID> calendarOptional;
     if (canBeRFC9557Annotation(buffer)) {
         auto calendar = parseCalendar(buffer);
-        if (!calendar || calendar->size() < 1)
+        if (!calendar)
             return std::nullopt;
-        calendarOptional = WTF::move(calendar.value()[0]);
+        if (calendar->size() > 0) // Ignore non-calendar annotations
+            calendarOptional = WTF::move(calendar.value()[0]);
     }
 
     return std::tuple { WTF::move(plainDate.value()), WTF::move(plainTimeOptional), WTF::move(timeZoneOptional), WTF::move(calendarOptional) };
