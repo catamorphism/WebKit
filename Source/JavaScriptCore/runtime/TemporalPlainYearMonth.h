@@ -93,29 +93,16 @@ ISO8601::PlainYearMonth TemporalPlainYearMonth::addDurationToYearMonth(JSGlobalO
 
     if constexpr (op == AddOrSubtract::Subtract)
         duration = -duration;
-    auto sign = TemporalDuration::sign(duration);
     auto year = yearMonth.year();
     auto month = yearMonth.month();
     auto constexpr day = 1;
-    auto intermediateDate = ISO8601::PlainDate(year, month, day);
-    if (!ISO8601::isDateTimeWithinLimits(year, month, day, 0, 0, 0, 0, 0, 0)) [[unlikely]] {
-        throwRangeError(globalObject, scope, "date out of range in add or subtract"_s);
+    auto date = ISO8601::PlainDate(year, month, day);
+    if (!ISO8601::isDateTimeWithinLimits(year, month, day, 12, 0, 0, 0, 0, 0)) [[unlikely]] {
+        throwRangeError(globalObject, scope, "year/month is outside of supported range"_s);
         return { };
     }
-    ISO8601::PlainDate date;
-    if (sign < 0) {
-        auto oneMonthDuration = ISO8601::Duration { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
-        auto nextMonth = TemporalCalendar::isoDateAdd(globalObject,
-            intermediateDate, oneMonthDuration, TemporalOverflow::Constrain);
-        RETURN_IF_EXCEPTION(scope, { });
-        int32_t y = nextMonth.year();
-        uint8_t m = nextMonth.month();
-        uint8_t d = nextMonth.day() - 1;
-        date = TemporalCalendar::balanceISODate(globalObject, static_cast<Int128>(y), static_cast<Int128>(m), static_cast<Int128>(d));
-    } else
-        date = intermediateDate;
     auto durationToAdd = TemporalDuration::toInternalDuration(duration);
-    if (durationToAdd.dateDuration().weeks() || durationToAdd.dateDuration().days() || durationToAdd.time()) {
+    if (durationToAdd.dateDuration().weeks() || durationToAdd.dateDuration().days() || durationToAdd.time()) [[unlikely]] {
         throwRangeError(globalObject, scope, "only years and months can be added to Temporal.PlainYearMonth"_s);
         return { };
     }

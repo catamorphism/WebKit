@@ -120,18 +120,6 @@ test/built-ins/Temporal/PlainMonthDay/from/argument-string-calendar-case-insensi
 test/built-ins/Temporal/PlainYearMonth/from/argument-string-calendar-case-insensitive.js:
   default: 'RangeError: YYYY-MM format is only valid with iso8601 calendar'
   strict mode: 'RangeError: YYYY-MM format is only valid with iso8601 calendar'
-test/built-ins/Temporal/PlainYearMonth/prototype/add/overflow.js:
-  default: 'RangeError: date time is out of range of ECMAScript representation'
-  strict mode: 'RangeError: date time is out of range of ECMAScript representation'
-test/built-ins/Temporal/PlainYearMonth/prototype/add/subtract-from-last-representable-month.js:
-  default: 'RangeError: date time is out of range of ECMAScript representation'
-  strict mode: 'RangeError: date time is out of range of ECMAScript representation'
-test/built-ins/Temporal/PlainYearMonth/prototype/subtract/overflow.js:
-  default: 'RangeError: date time is out of range of ECMAScript representation'
-  strict mode: 'RangeError: date time is out of range of ECMAScript representation'
-test/built-ins/Temporal/PlainYearMonth/prototype/subtract/subtract-from-last-representable-month.js:
-  default: 'RangeError: date time is out of range of ECMAScript representation'
-  strict mode: 'RangeError: date time is out of range of ECMAScript representation'
 test/built-ins/TypedArray/prototype/includes/index-compared-against-initial-length-out-of-bounds.js:
   default: 'Test262Error: Expected SameValue(«true», «false») to be true'
   strict mode: 'Test262Error: Expected SameValue(«true», «false») to be true'
