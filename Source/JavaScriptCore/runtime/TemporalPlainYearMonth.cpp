@@ -182,7 +182,7 @@ TemporalPlainYearMonth* TemporalPlainYearMonth::from(JSGlobalObject* globalObjec
     auto dateTime = ISO8601::parseCalendarDateTime(string, TemporalDateFormat::YearMonth);
     if (dateTime) [[likely]] {
         auto [plainDate, plainTimeOptional, timeZoneOptional, calendarOptional] = WTF::move(dateTime.value());
-        if (calendarOptional && !equal(calendarOptional.value().span(), "iso8601"_span8)) [[unlikely]] {
+        if (calendarOptional && !equalIgnoringASCIICase(calendarOptional.value().span(), "iso8601"_span8)) [[unlikely]] {
             throwRangeError(globalObject, scope,
                 "YYYY-MM format is only valid with iso8601 calendar"_s);
             return { };
