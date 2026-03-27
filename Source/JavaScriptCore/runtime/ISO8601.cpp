@@ -1342,14 +1342,17 @@ static std::optional<PlainDate> parseDate(StringParsingBuffer<CharacterType>& bu
                 return std::nullopt;
             buffer.advanceBy(6);
         } else {
-            if (buffer.lengthRemaining() < 4)
-                return std::nullopt;
-            for (unsigned index = 0; index < 4; ++index) {
-                if (!isASCIIDigit(buffer[index]))
-                return std::nullopt;
+            if (buffer.lengthRemaining() >= 5) {
+                for (unsigned index = 0; index < 4; ++index) {
+                    if (!isASCIIDigit(buffer[index]))
+                        return std::nullopt;
+                }
+                // A year must be followed by a - or month
+                if (buffer[4] == '-' || isASCIIDigit(buffer[4])) {
+                    year = parseDecimalInt32(std::span { buffer.position(), 4 });
+                    buffer.advanceBy(4);
+                }
             }
-            year = parseDecimalInt32(std::span { buffer.position(), 4 });
-            buffer.advanceBy(4);
         }
 
         if (buffer.atEnd())
