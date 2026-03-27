@@ -941,6 +941,7 @@ NudgeWindow TemporalDuration::computeNudgeWindow(JSGlobalObject* globalObject, i
             startEpochNs = ISO8601::getUTCEpochNanoseconds(startDateTime);
         else
             startEpochNs = TemporalTimeZone::getEpochNanosecondsFor(globalObject, timeZoneOptional.value(), startDateTime, TemporalDisambiguation::Compatible).epochNanoseconds();
+        RETURN_IF_EXCEPTION(scope, { });
     }
 
     auto end = TemporalCalendar::isoDateAdd(globalObject, isoDate, endDuration, TemporalOverflow::Constrain);
@@ -1150,6 +1151,7 @@ ISO8601::InternalDuration TemporalDuration::bubbleRelativeDuration(JSGlobalObjec
                 RETURN_IF_EXCEPTION(scope, { });
             }
             auto end = TemporalCalendar::isoDateAdd(globalObject, isoDate, endDuration, TemporalOverflow::Constrain);
+            RETURN_IF_EXCEPTION(scope, { });
             auto endDateTime = TemporalPlainDateTime::combineISODateAndTimeRecord(end, isoTime);
             Int128 endEpochNs = 0;
             if (!timeZone)
