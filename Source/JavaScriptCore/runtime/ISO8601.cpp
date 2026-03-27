@@ -1386,7 +1386,7 @@ static std::optional<PlainDate> parseDate(StringParsingBuffer<CharacterType>& bu
     } else
         return std::nullopt;
 
-    if (format == TemporalDateFormat::YearMonth && (buffer.atEnd() || canBeRFC9557Annotation(buffer))) {
+    if (format == TemporalDateFormat::YearMonth && (buffer.atEnd() || canBeRFC9557Annotation(buffer) || canBeTimeZoneAnnotation(buffer, *buffer))) {
         if (!isYearWithinLimits(year)) [[unlikely]]
             year = outOfRangeYear;
         return PlainDate(year, month, 1);
