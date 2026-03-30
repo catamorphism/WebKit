@@ -622,3 +622,19 @@ skip:
 
     # Wrong time zone canonicalization?
     - test/intl402/Temporal/ZonedDateTime/links.js
+
+    # Bugs/inconsistencies in ICU 79 vs. ICU 74 -- yet to be determined
+    - test/intl402/DateTimeFormat/prototype/format/temporal-objects-not-overlapping-options.js
+    - test/intl402/DateTimeFormat/prototype/formatRange/temporal-objects-not-overlapping-options.js
+    - test/intl402/DateTimeFormat/prototype/format/temporal-objects-no-time-clip.js 
+    - test/intl402/DateTimeFormat/prototype/format/temporal-objects-no-time-clip-weekday.js
+    - test/intl402/DateTimeFormat/prototype/formatRange/temporal-objects-no-time-clip.js 
+    - test/intl402/DateTimeFormat/prototype/formatRange/temporal-objects-no-time-clip-weekday.js
+    - test/intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-objects-no-time-clip.js
+    - test/intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-objects-no-time-clip-weekday.js
+    - test/intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-no-time-clip.js  
+    - test/intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-no-time-clip-weekday.js 
+    - test/intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-objects-not-overlapping-options.js
+    - test/intl402/DateTimeFormat/prototype/formatToParts/temporal-objects-not-overlapping-options.js
+    - test/intl402/Temporal/PlainMonthDay/prototype/toLocaleString/lone-options-accepted.js
+    - test/intl402/Temporal/PlainYearMonth/prototype/toLocaleString/lone-options-accepted.js
