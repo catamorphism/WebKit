@@ -104,7 +104,7 @@ static std::optional<CalendarID> parseTemporalCalendarString(JSGlobalObject* glo
     return std::nullopt;
 }
 
-JSObject* TemporalCalendar::toTemporalCalendarWithISODefault(JSGlobalObject* globalObject, JSValue temporalCalendarLike)
+TemporalCalendar* TemporalCalendar::toTemporalCalendarWithISODefault(JSGlobalObject* globalObject, JSValue temporalCalendarLike)
 {
     if (temporalCalendarLike.isUndefined())
         return TemporalCalendar::create(globalObject->vm(), globalObject->calendarStructure(), iso8601CalendarID());
@@ -156,7 +156,7 @@ CalendarID TemporalCalendar::toTemporalCalendarIdentifier(JSGlobalObject* global
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-gettemporalcalendarslotvaluewithisodefault
-JSObject* TemporalCalendar::getTemporalCalendarWithISODefault(JSGlobalObject* globalObject, JSValue itemValue)
+TemporalCalendar* TemporalCalendar::getTemporalCalendarWithISODefault(JSGlobalObject* globalObject, JSValue itemValue)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -169,6 +169,9 @@ JSObject* TemporalCalendar::getTemporalCalendarWithISODefault(JSGlobalObject* gl
 
     if (itemValue.inherits<TemporalPlainTime>())
         return jsCast<TemporalPlainTime*>(itemValue)->calendar();
+
+    if (itemValue.inherits<TemporalZonedDateTime>())
+        return jsCast<TemporalZonedDateTime*>(itemValue)->calendar();
 
     JSValue calendar = itemValue.get(globalObject, vm.propertyNames->calendar);
     RETURN_IF_EXCEPTION(scope, { });
@@ -295,7 +298,7 @@ String TemporalCalendar::formatCalendarAnnotation(TemporalShowCalendar showCalen
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-totemporalcalendar
-JSObject* TemporalCalendar::from(JSGlobalObject* globalObject, JSValue calendarLike)
+TemporalCalendar* TemporalCalendar::from(JSGlobalObject* globalObject, JSValue calendarLike)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -322,19 +325,16 @@ JSObject* TemporalCalendar::from(JSGlobalObject* globalObject, JSValue calendarL
         JSObject* calendarLikeObject = jsCast<JSObject*>(calendarLike);
         bool hasProperty = calendarLikeObject->hasProperty(globalObject, vm.propertyNames->calendar);
         RETURN_IF_EXCEPTION(scope, { });
-        if (!hasProperty)
-            return jsCast<JSObject*>(calendarLike);
+        if (!hasProperty) {
+            if (calendarLike.inherits<TemporalCalendar>())
+                return jsCast<TemporalCalendar*>(calendarLike);
+            throwRangeError(globalObject, scope, "invalid Calendar"_s);
+            return { };
+        }
 
         calendarLike = calendarLikeObject->get(globalObject, vm.propertyNames->calendar);
-        if (calendarLike.isObject()) {
-            bool hasProperty = jsCast<JSObject*>(calendarLike)->hasProperty(globalObject, vm.propertyNames->calendar);
-            RETURN_IF_EXCEPTION(scope, { });
-            if (!hasProperty)
-                return jsCast<JSObject*>(calendarLike);
-        }
-    }
-
-    if (!calendarLike.isString()) {
+        RETURN_IF_EXCEPTION(scope, { });
+    } else if (!calendarLike.isString()) {
         throwTypeError(globalObject, scope, "calendar must be a string"_s);
         return { };
     }

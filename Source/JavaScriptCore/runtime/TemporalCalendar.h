@@ -63,8 +63,8 @@ public:
 
     DECLARE_INFO;
 
-    static JSObject* toTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
-    static JSObject* getTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
+    static TemporalCalendar* toTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
+    static TemporalCalendar* getTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
     static void calendarResolveFields(JSGlobalObject*, std::optional<int32_t>, unsigned, std::optional<ParsedMonthCode>, TemporalDateFormat);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, JSObject*, TemporalDateFormat, JSValue, TemporalOverflow&);
     static ISO8601::PlainDate isoDateFromFields(JSGlobalObject*, TemporalDateFormat, int32_t, unsigned, unsigned, std::optional<ParsedMonthCode>, TemporalOverflow);
@@ -97,7 +97,7 @@ public:
 
     static std::optional<CalendarID> isBuiltinCalendar(StringView);
 
-    static JSObject* from(JSGlobalObject*, JSValue);
+    static TemporalCalendar* from(JSGlobalObject*, JSValue);
 
     bool equals(JSGlobalObject*, TemporalCalendar*);
 

@@ -1051,6 +1051,9 @@ static std::optional<TimeZoneRecord> parseTimeZone(StringParsingBuffer<Character
 template<typename CharacterType>
 static std::optional<CalendarID> parseCalendarIdentifier(StringParsingBuffer<CharacterType>& buffer, uint32_t nameLength)
 {
+    if (!nameLength)
+        return std::nullopt;
+
     auto isValidComponent = [&](unsigned start, unsigned end) {
         unsigned componentLength = end - start;
         if (componentLength < minCalendarLength)

@@ -56,13 +56,10 @@ skip:
     - test/built-ins/RegExp/regexp-modifiers/add-ignoreCase-affects-slash-lower-p.js
 
     # Depends on Calendar support
-    - test/built-ins/Temporal/Duration/compare/relativeto-argument-propertybag-calendar-invalid-iso-string.js
     - test/built-ins/Temporal/Duration/compare/relativeto-argument-string-calendar-invalid-iso-string.js
-    - test/built-ins/Temporal/Duration/prototype/round/relativeto-argument-propertybag-calendar-invalid-iso-string.js
     - test/built-ins/Temporal/Duration/prototype/round/relativeto-argument-string-calendar-invalid-iso-string.js
     - test/built-ins/Temporal/Duration/prototype/round/relativeto-propertybag-calendar-number.js
     - test/built-ins/Temporal/Duration/prototype/round/relativeto-propertybag-calendar-wrong-type.js
-    - test/built-ins/Temporal/Duration/prototype/total/relativeto-argument-propertybag-calendar-invalid-iso-string.js
     - test/built-ins/Temporal/Duration/prototype/total/relativeto-argument-string-calendar-invalid-iso-string.js
     - test/built-ins/Temporal/Duration/prototype/total/relativeto-propertybag-calendar-number.js
     - test/built-ins/Temporal/Duration/prototype/total/relativeto-propertybag-calendar-wrong-type.js
