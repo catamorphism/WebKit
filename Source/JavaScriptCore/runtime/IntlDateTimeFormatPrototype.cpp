@@ -423,6 +423,43 @@ static inline bool sameTemporalType(JSValue x, JSValue y)
     return true;
 }
 
+// https://tc39.es/proposal-temporal/#sec-temporal-sametemporaltype
+static inline bool sameTemporalCalendar(JSValue x, JSValue y)
+{
+    ASSERT(sameTemporalType(x, y));
+    TemporalPlainDate* plainDate1 = jsDynamicCast<TemporalPlainDate*>(x);
+    if (plainDate1) {
+        TemporalPlainDate* plainDate2 = jsDynamicCast<TemporalPlainDate*>(y);
+        ASSERT(plainDate2);
+        return plainDate1->calendar()->identifier() == plainDate2->calendar()->identifier();
+    }
+    TemporalPlainDateTime* plainDateTime1 = jsDynamicCast<TemporalPlainDateTime*>(x);
+    if (plainDateTime1) {
+        TemporalPlainDateTime* plainDateTime2 = jsDynamicCast<TemporalPlainDateTime*>(y);
+        ASSERT(plainDateTime2);
+        return plainDateTime1->calendar()->identifier() == plainDateTime2->calendar()->identifier();
+    }
+    TemporalZonedDateTime* zonedDateTime1 = jsDynamicCast<TemporalZonedDateTime*>(x);
+    if (zonedDateTime1) {
+        TemporalZonedDateTime* zonedDateTime2 = jsDynamicCast<TemporalZonedDateTime*>(y);
+        ASSERT(zonedDateTime2);
+        return zonedDateTime1->calendar()->identifier() == zonedDateTime2->calendar()->identifier();
+    }
+    TemporalPlainYearMonth* plainYearMonth1 = jsDynamicCast<TemporalPlainYearMonth*>(x);
+    if (plainYearMonth1) {
+        TemporalPlainYearMonth* plainYearMonth2 = jsDynamicCast<TemporalPlainYearMonth*>(y);
+        ASSERT(plainYearMonth2);
+        return plainYearMonth1->calendar()->identifier() == plainYearMonth2->calendar()->identifier();
+    }
+    TemporalPlainMonthDay* plainMonthDay1 = jsDynamicCast<TemporalPlainMonthDay*>(x);
+    if (plainMonthDay1) {
+        TemporalPlainMonthDay* plainMonthDay2 = jsDynamicCast<TemporalPlainMonthDay*>(y);
+        ASSERT(plainMonthDay2);
+        return plainMonthDay1->calendar()->identifier() == plainMonthDay2->calendar()->identifier();
+    }
+    return true;
+}
+
 // https://tc39.es/proposal-temporal/#sec-todatetimeformattable
 static JSValue toDateTimeFormattable(JSGlobalObject* globalObject, JSValue value)
 {
@@ -456,6 +493,11 @@ JSC_DEFINE_HOST_FUNCTION(intlDateTimeFormatPrototypeFuncFormatRange, (JSGlobalOb
     if (isTemporalObject(x) || isTemporalObject(y)) {
         if (!sameTemporalType(x, y)) {
             throwTypeError(globalObject, scope,
+                "formatRange: Temporal objects have different types"_s);
+            return { };
+        }
+        if (!sameTemporalCalendar(x, y)) {
+            throwRangeError(globalObject, scope,
                 "formatRange: Temporal objects have different types"_s);
             return { };
         }
@@ -496,6 +538,11 @@ JSC_DEFINE_HOST_FUNCTION(intlDateTimeFormatPrototypeFuncFormatRangeToParts, (JSG
     if (isTemporalObject(x) || isTemporalObject(y)) {
         if (!sameTemporalType(x, y)) {
             throwTypeError(globalObject, scope,
+                "formatRangeToParts: Temporal objects have different types"_s);
+            return { };
+        }
+        if (!sameTemporalCalendar(x, y)) {
+            throwRangeError(globalObject, scope,
                 "formatRangeToParts: Temporal objects have different types"_s);
             return { };
         }

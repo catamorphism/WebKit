@@ -177,12 +177,6 @@ test/built-ins/Uint8Array/prototype/setFromBase64/trailing-garbage-empty.js:
 test/built-ins/Uint8Array/prototype/setFromBase64/trailing-garbage.js:
   default: 'SyntaxError: Uint8Array.prototype.setFromBase64 requires a valid base64 string'
   strict mode: 'SyntaxError: Uint8Array.prototype.setFromBase64 requires a valid base64 string'
-test/intl402/DateTimeFormat/prototype/formatRange/temporal-objects-throws-with-different-calendars.js:
-  default: 'Test262Error: Expected a RangeError but got a TypeError'
-  strict mode: 'Test262Error: Expected a RangeError but got a TypeError'
-test/intl402/DateTimeFormat/prototype/formatRangeToParts/temporal-objects-throws-with-different-calendars.js:
-  default: 'Test262Error: Expected a RangeError but got a TypeError'
-  strict mode: 'Test262Error: Expected a RangeError but got a TypeError'
 test/harness/verifyProperty-value-error.js:
   default: 'Error: The error thrown did not define the specified message'
   strict mode: 'Error: The error thrown did not define the specified message'
