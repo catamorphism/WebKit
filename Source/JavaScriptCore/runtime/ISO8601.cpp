@@ -220,14 +220,6 @@ parseTimeZoneName(JSGlobalObject* globalObject, StringView string)
 */
 }
 
-std::optional<String> getTimeZoneNameFromId(TimeZoneID id)
-{
-    const auto& timeZones = intlAvailableTimeZones(TimeZoneKind::All);
-    if (id >= timeZones.size())
-        return std::nullopt;
-    return timeZones[id];
-}
-
 template<typename CharType>
 static int32_t parseDecimalInt32(std::span<const CharType> characters)
 {
@@ -1815,7 +1807,7 @@ uint8_t daysInMonth(uint8_t month)
     return daysInMonths[isLeapYear][month - 1];
 }
 
-String formatTimeZone(TimeZone tz, bool intlDateTimeFormat)
+String formatTimeZone(VM& vm, TimeZone tz, bool intlDateTimeFormat)
 {
     auto displayName = tz.getDisplayName();
     if (displayName)
@@ -1828,7 +1820,7 @@ String formatTimeZone(TimeZone tz, bool intlDateTimeFormat)
     }
     if (tz.isOffset())
         return formatUTCOffsetNanoseconds(tz.offsetNanoseconds(), intlDateTimeFormat);
-    auto timeZoneName = getTimeZoneNameFromId(tz.asID());
+    auto timeZoneName = vm.timeZoneCache.getTimeZoneNameFromID(tz.asID());
     ASSERT(timeZoneName);
     return timeZoneName.value();
 }
@@ -2342,47 +2334,14 @@ Int128 getNamedTimeZoneOffsetNanoseconds(JSGlobalObject* globalObject,
     TimeZoneID timeZoneIdentifier, ExactTime epochNanoseconds)
 {
     VM& vm = globalObject->vm();
-    auto scope = DECLARE_THROW_SCOPE(vm);
 
     if (timeZoneIdentifier == utcTimeZoneID())
         return 0;
-    // TODO: cache this
-    std::optional<String> timeZoneString = getTimeZoneNameFromId(timeZoneIdentifier);
-    if (!timeZoneString) {
-        throwRangeError(globalObject, scope, "bad time zone ID in getNamedTimeZoneOffsetNanoseconds"_s);
-        return 0;
-    }
-    // copied from JSDateMath.cpp
-    UErrorCode status = U_ZERO_ERROR;
-    auto timeZoneName = timeZoneString->charactersWithNullTermination();
-    if (!timeZoneName) {
-        throwRangeError(globalObject, scope, "internal error getting time zone data"_s);
-        return 0;
-    }
-    UCalendar* calendar = ucal_open(timeZoneName->span().data(), -1, "", UCAL_DEFAULT, &status);
-    ASSERT_UNUSED(status, U_SUCCESS(status));
     // https://tc39.es/proposal-temporal/#sec-get-temporal.zoneddatetime.prototype.epochmilliseconds
     // Let ms be floor(ℝ(ns) / 10**6).
-    ucal_setMillis(calendar, epochNanoseconds.floorEpochMilliseconds(), &status);
-    ASSERT_UNUSED(status, U_SUCCESS(status));
-
-    int32_t rawOffset = 0;
-    int32_t dstOffset = 0;
-
-    rawOffset = ucal_get(calendar, UCAL_ZONE_OFFSET, &status);
-    if (U_FAILURE(status)) {
-        throwRangeError(globalObject, scope, "error looking up time zone data"_s);
-        return 0;
-    }
-    dstOffset = ucal_get(calendar, UCAL_DST_OFFSET, &status);
-    if (U_FAILURE(status)) {
-        throwRangeError(globalObject, scope, "error looking up time zone data"_s);
-        return 0;
-    }
-
-    ucal_close(calendar);
-
-    return (static_cast<Int128>(rawOffset + dstOffset) * 1'000'000);
+    Int128 epochMilliseconds = epochNanoseconds.floorEpochMilliseconds();
+    Int128 offsetMilliseconds = vm.timeZoneCache.getNamedTimeZoneOffsetMilliseconds(globalObject, timeZoneIdentifier, epochMilliseconds);
+    return offsetMilliseconds * 1'000'000;
 }
 
 // https://tc39.es/proposal-temporal/#sec-getutcepochnanoseconds

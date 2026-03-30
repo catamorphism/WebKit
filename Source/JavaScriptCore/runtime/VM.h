@@ -60,6 +60,7 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
 #include <JavaScriptCore/StringSplitCache.h>
 #include <JavaScriptCore/Strong.h>
 #include <JavaScriptCore/SubspaceAccess.h>
+#include <JavaScriptCore/TimeZoneCache.h>
 #include <JavaScriptCore/ThunkGenerator.h>
 #include <JavaScriptCore/VMThreadContext.h>
 #include <JavaScriptCore/WasmContext.h>
@@ -980,6 +981,7 @@ public:
     UncheckedKeyHashSet<JSObject*> stringRecursionCheckVisitedObjects;
 
     DateCache dateCache;
+    TimeZoneCache timeZoneCache;
 
     std::unique_ptr<Profiler::Database> m_perBytecodeProfiler;
     RefPtr<TypedArrayController> m_typedArrayController;

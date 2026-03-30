@@ -490,7 +490,6 @@ struct RFC9557Annotation {
 // https://tc39.es/proposal-temporal/#sup-isvalidtimezonename
 std::optional<TimeZone> parseTimeZoneName(JSGlobalObject*, StringView);
 std::optional<TimeZoneRecord> parseTimeZone(StringView);
-std::optional<String> getTimeZoneNameFromId(TimeZoneID);
 std::optional<Duration> parseDuration(StringView);
 std::optional<int64_t> parseUTCOffset(StringView, bool parseSubMinutePrecision = true);
 std::optional<int64_t> parseUTCOffsetInMinutes(StringView);
@@ -510,7 +509,7 @@ uint8_t weekOfYear(PlainDate);
 uint8_t daysInMonth(int32_t year, uint8_t month);
 uint8_t daysInMonth(uint8_t month);
 String formatTimeString(char, int64_t, int64_t, int64_t, int64_t, std::optional<TemporalFractionalSecondDigits>, std::optional<bool>);
-String formatTimeZone(TimeZone, bool);
+String formatTimeZone(VM&, TimeZone, bool);
 String formatUTCOffsetNanoseconds(int64_t, bool);
 String temporalTimeToString(PlainTime, std::tuple<Precision, unsigned>);
 String temporalDateToString(PlainDate);

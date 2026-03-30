@@ -522,7 +522,7 @@ JSC_DEFINE_CUSTOM_GETTER(temporalZonedDateTimePrototypeGetterTimeZoneId, (JSGlob
     if (!zdt)
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime.prototype.timeZoneId called on value that's not a ZonedDateTime"_s);
 
-    return JSValue::encode(jsString(vm, ISO8601::formatTimeZone(zdt->timeZone(), false)));
+    return JSValue::encode(jsString(vm, ISO8601::formatTimeZone(vm, zdt->timeZone(), false)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-get-temporal.zoneddatetime.prototype.year

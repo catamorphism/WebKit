@@ -162,12 +162,12 @@ static Vector<Int128> getNamedTimeZoneEpochNanoseconds(JSGlobalObject* globalObj
 
     auto found = earlierOffsetNs == laterOffsetNs ? Vector<Int128> { earlierOffsetNs } : Vector<Int128> { earlierOffsetNs, laterOffsetNs };
 
-    // TODO: cache this
-    std::optional<String> timeZoneString = ISO8601::getTimeZoneNameFromId(timeZoneIdentifier);
+    std::optional<String> timeZoneString = vm.timeZoneCache.getTimeZoneNameFromID(timeZoneIdentifier);
     if (!timeZoneString) {
         throwRangeError(globalObject, scope, "bad time zone ID in getNamedTimeZoneOffsetNanoseconds"_s);
         return { };
     }
+    // TODO: cache this
     // copied from JSDateMath.cpp
     UErrorCode status = U_ZERO_ERROR;
     auto timeZoneName = timeZoneString->charactersWithNullTermination();
@@ -336,7 +336,7 @@ std::optional<ISO8601::ExactTime> TemporalTimeZone::getNamedTimeZonePreviousTran
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    std::optional<String> timeZoneString = ISO8601::getTimeZoneNameFromId(timeZoneIdentifier);
+    std::optional<String> timeZoneString = vm.timeZoneCache.getTimeZoneNameFromID(timeZoneIdentifier);
     if (!timeZoneString) {
         throwRangeError(globalObject, scope, "bad time zone ID in getNamedTimeZonePreviousTransition"_s);
         return { };
@@ -401,7 +401,7 @@ std::optional<ISO8601::ExactTime> TemporalTimeZone::getNamedTimeZoneNextTransiti
      VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    std::optional<String> timeZoneString = ISO8601::getTimeZoneNameFromId(timeZoneIdentifier);
+    std::optional<String> timeZoneString = vm.timeZoneCache.getTimeZoneNameFromID(timeZoneIdentifier);
     if (!timeZoneString) {
         throwRangeError(globalObject, scope, "bad time zone ID in getNamedTimeZonePreviousTransition"_s);
         return { };

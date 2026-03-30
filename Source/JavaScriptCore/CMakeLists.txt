@@ -1386,6 +1386,7 @@ set(JavaScriptCore_PRIVATE_FRAMEWORK_HEADERS
     runtime/TemplateObjectDescriptor.h
     runtime/TestRunnerUtils.h
     runtime/ThrowScope.h
+    runtime/TimeZoneCache.h
     runtime/ToNativeFromValue.h
     runtime/TypeError.h
     runtime/TypeInfoBlob.h

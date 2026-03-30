@@ -1205,7 +1205,7 @@ JSObject* IntlDateTimeFormat::resolvedOptions(JSGlobalObject* globalObject) cons
     options->putDirect(vm, vm.propertyNames->locale, jsNontrivialString(vm, m_locale));
     options->putDirect(vm, vm.propertyNames->calendar, jsNontrivialString(vm, m_calendar));
     options->putDirect(vm, vm.propertyNames->numberingSystem, jsNontrivialString(vm, m_numberingSystem));
-    options->putDirect(vm, vm.propertyNames->timeZone, jsNontrivialString(vm, ISO8601::formatTimeZone(m_timeZone, true)));
+    options->putDirect(vm, vm.propertyNames->timeZone, jsNontrivialString(vm, ISO8601::formatTimeZone(vm, m_timeZone, true)));
 
     if (m_hourCycle != HourCycle::None) {
         options->putDirect(vm, vm.propertyNames->hourCycle, jsNontrivialString(vm, hourCycleString(m_hourCycle)));
@@ -1532,7 +1532,7 @@ JSValue IntlDateTimeFormat::format(JSGlobalObject* globalObject, ExactTime value
                 return { };
             }
             // Set the calendar to reflect the time zone
-            std::optional<String> timeZoneString = ISO8601::formatTimeZone(timeZone.value(), true);
+            std::optional<String> timeZoneString = ISO8601::formatTimeZone(vm, timeZone.value(), true);
             if (!timeZoneString) {
                 throwRangeError(globalObject, scope, "bad time zone ID in IntlDateTimeFormat.format"_s);
                 return { };

@@ -190,8 +190,8 @@ PerfLog::PerfLog()
 #if OS(LINUX)
         // Linux perf command records this mmap operation in perf.data as a metadata to the JIT perf annotations.
         // We do not use this mmap-ed memory region actually.
-        auto* marker = mmap(nullptr, pageSize(), PROT_READ | PROT_EXEC, MAP_PRIVATE, m_file.platformHandle(), 0);
-        RELEASE_ASSERT(marker != MAP_FAILED);
+//        auto* marker = mmap(nullptr, pageSize(), PROT_READ, MAP_PRIVATE, m_file.platformHandle(), 0);
+//        RELEASE_ASSERT(marker != MAP_FAILED);
 #endif
     }
 
