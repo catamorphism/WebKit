@@ -86,7 +86,7 @@ static std::optional<CalendarID> parseTemporalCalendarString(JSGlobalObject* glo
                 if (timeParseResult)
                     calendarParseResult = std::get<2>(timeParseResult.value());
                 else {
-                    calendarParseResult = ISO8601::parseCalendar(string);
+                    calendarParseResult = ISO8601::parseCalendarIdentifier(string);
                     if (!calendarParseResult) [[unlikely]] {
                         throwRangeError(globalObject, scope, "invalid calendar ID"_s);
                         return std::nullopt;

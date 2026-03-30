@@ -48,6 +48,7 @@ static JSC_DECLARE_HOST_FUNCTION(temporalPlainDatePrototypeFuncToPlainYearMonth)
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDatePrototypeFuncAdd);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDatePrototypeFuncSubtract);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDatePrototypeFuncWith);
+static JSC_DECLARE_HOST_FUNCTION(temporalPlainDatePrototypeFuncWithCalendar);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDatePrototypeFuncUntil);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDatePrototypeFuncSince);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDatePrototypeFuncEquals);
@@ -89,6 +90,7 @@ const ClassInfo TemporalPlainDatePrototype::s_info = { "Temporal.PlainDate"_s, &
   add              temporalPlainDatePrototypeFuncAdd                DontEnum|Function 1
   subtract         temporalPlainDatePrototypeFuncSubtract           DontEnum|Function 1
   with             temporalPlainDatePrototypeFuncWith               DontEnum|Function 1
+  withCalendar     temporalPlainDatePrototypeFuncWithCalendar       DontEnum|Function 1
   until            temporalPlainDatePrototypeFuncUntil              DontEnum|Function 1
   since            temporalPlainDatePrototypeFuncSince              DontEnum|Function 1
   equals           temporalPlainDatePrototypeFuncEquals             DontEnum|Function 1
@@ -254,6 +256,24 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDatePrototypeFuncWith, (JSGlobalObject* gl
     RETURN_IF_EXCEPTION(scope, { });
 
     return JSValue::encode(TemporalPlainDate::create(vm, globalObject->plainDateStructure(), WTF::move(result)));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.plaindate.prototype.withcalendar
+JSC_DEFINE_HOST_FUNCTION(temporalPlainDatePrototypeFuncWithCalendar, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* plainDate = jsDynamicCast<TemporalPlainDate*>(callFrame->thisValue());
+    if (!plainDate)
+        return throwVMTypeError(globalObject, scope, "Temporal.PlainDate.prototype.with called on value that's not a PlainDate"_s);
+
+    JSValue calendarLike  = callFrame->argument(0);
+    CalendarID calendarID = TemporalCalendar::toTemporalCalendarIdentifier(globalObject, calendarLike);
+    RETURN_IF_EXCEPTION(scope, { });
+    TemporalCalendar* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), calendarID);
+
+    return JSValue::encode(TemporalPlainDate::create(vm, globalObject->plainDateStructure(), plainDate->plainDate(), WTF::move(calendar)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindate.prototype.until

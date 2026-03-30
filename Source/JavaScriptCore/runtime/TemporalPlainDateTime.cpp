@@ -44,6 +44,14 @@ TemporalPlainDateTime* TemporalPlainDateTime::create(VM& vm, Structure* structur
     return object;
 }
 
+TemporalPlainDateTime* TemporalPlainDateTime::create(VM& vm, Structure* structure, ISO8601::PlainDate&& plainDate, ISO8601::PlainTime&& plainTime, TemporalCalendar* calendar)
+{
+    auto* object = new (NotNull, allocateCell<TemporalPlainDate>(vm)) TemporalPlainDateTime(vm, structure, WTF::move(plainDate), WTF::move(plainTime));
+    object->finishCreation(vm);
+    object->m_calendar.set(vm, object, calendar);
+    return object;
+}
+
 Structure* TemporalPlainDateTime::createStructure(VM& vm, JSGlobalObject* globalObject, JSValue prototype)
 {
     return Structure::create(vm, globalObject, prototype, TypeInfo(ObjectType, StructureFlags), info());

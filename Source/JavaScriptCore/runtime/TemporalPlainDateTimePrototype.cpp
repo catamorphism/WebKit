@@ -45,6 +45,7 @@ static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncSubtract);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncUntil);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncSince);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncWith);
+static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncWithCalendar);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncWithPlainTime);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncRound);
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncEquals);
@@ -93,6 +94,7 @@ const ClassInfo TemporalPlainDateTimePrototype::s_info = { "Temporal.PlainDateTi
   until            temporalPlainDateTimePrototypeFuncUntil              DontEnum|Function 1
   since            temporalPlainDateTimePrototypeFuncSince              DontEnum|Function 1
   with             temporalPlainDateTimePrototypeFuncWith               DontEnum|Function 1
+  withCalendar     temporalPlainDateTimePrototypeFuncWithCalendar       DontEnum|Function 1
   withPlainTime    temporalPlainDateTimePrototypeFuncWithPlainTime      DontEnum|Function 0
   round            temporalPlainDateTimePrototypeFuncRound              DontEnum|Function 1
   equals           temporalPlainDateTimePrototypeFuncEquals             DontEnum|Function 1
@@ -273,6 +275,24 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncWith, (JSGlobalObject
         return throwVMTypeError(globalObject, scope, "First argument to Temporal.PlainDateTime.prototype.with must be an object"_s);
 
     RELEASE_AND_RETURN(scope, JSValue::encode(plainDateTime->with(globalObject, asObject(temporalDateTimeLike), callFrame->argument(1))));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal.plaindatetime.prototype.withcalendar
+JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncWithCalendar, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* plainDateTime = jsDynamicCast<TemporalPlainDateTime*>(callFrame->thisValue());
+    if (!plainDateTime)
+        return throwVMTypeError(globalObject, scope, "Temporal.PlainDateTime.prototype.with called on value that's not a PlainDate"_s);
+
+    JSValue calendarLike  = callFrame->argument(0);
+    CalendarID calendarID = TemporalCalendar::toTemporalCalendarIdentifier(globalObject, calendarLike);
+    RETURN_IF_EXCEPTION(scope, { });
+    TemporalCalendar* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), calendarID);
+
+    return JSValue::encode(TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(), plainDateTime->plainDate(), plainDateTime->plainTime(), WTF::move(calendar)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindatetime.prototype.withplaintime
