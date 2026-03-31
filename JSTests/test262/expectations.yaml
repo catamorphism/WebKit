@@ -69,9 +69,6 @@ test/built-ins/Temporal/PlainDate/prototype/eraYear/branding.js:
 test/built-ins/Temporal/PlainDate/prototype/eraYear/prop-desc.js:
   default: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
   strict mode: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
-test/built-ins/Temporal/PlainDateTime/calendar-case-insensitive.js:
-  default: 'Test262Error: calendar ID is capital dotted I is not lowercased Expected a RangeError to be thrown but no exception was thrown at all'
-  strict mode: 'Test262Error: calendar ID is capital dotted I is not lowercased Expected a RangeError to be thrown but no exception was thrown at all'
 test/built-ins/Temporal/PlainDateTime/calendar-iso-string.js:
   default: 'Test262Error: An ISO string is not a valid calendar ID for constructor parameter Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: An ISO string is not a valid calendar ID for constructor parameter Expected a RangeError to be thrown but no exception was thrown at all'

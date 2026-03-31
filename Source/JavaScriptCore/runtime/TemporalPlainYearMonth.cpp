@@ -112,7 +112,7 @@ String TemporalPlainYearMonth::toString() const
     return ISO8601::temporalYearMonthToString(m_plainYearMonth, ""_s);
 }
 
-String TemporalPlainYearMonth::toString(JSGlobalObject* globalObject, JSValue optionsValue) const
+String TemporalPlainYearMonth::toString(JSGlobalObject* globalObject, JSValue optionsValue)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -123,10 +123,11 @@ String TemporalPlainYearMonth::toString(JSGlobalObject* globalObject, JSValue op
     if (!options) [[likely]]
         return toString();
 
-    String calendarName = toTemporalCalendarName(globalObject, options);
+    TemporalShowCalendar showCalendar = getTemporalShowCalendarNameOption(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
+    String calendarString = calendar()->formatCalendarAnnotation(showCalendar);
 
-    return ISO8601::temporalYearMonthToString(m_plainYearMonth, calendarName);
+    return ISO8601::temporalYearMonthToString(m_plainYearMonth, calendarString);
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainyearmonth.from

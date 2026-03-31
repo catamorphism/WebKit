@@ -66,7 +66,7 @@ public:
 
     String monthCode() const;
 
-    String toString(JSGlobalObject*, JSValue options) const;
+    String toString(JSGlobalObject*, JSValue options);
     String toString() const;
 
     ISO8601::Duration until(JSGlobalObject*, TemporalPlainYearMonth*, JSValue options);

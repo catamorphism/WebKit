@@ -324,7 +324,6 @@ enum class TemporalOverflow : bool {
 
 TemporalOverflow toTemporalOverflow(JSGlobalObject*, JSObject*);
 TemporalOverflow toTemporalOverflow(JSGlobalObject*, JSValue);
-String toTemporalCalendarName(JSGlobalObject*, JSObject*);
 
 enum class TemporalDateFormat : uint8_t {
     Date,

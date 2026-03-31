@@ -1955,7 +1955,7 @@ String temporalTimeToString(PlainTime plainTime, std::tuple<Precision, unsigned>
     return makeString(pad('0', 2, plainTime.hour()), ':', pad('0', 2, plainTime.minute()), ':', pad('0', 2, plainTime.second()), '.', pad('0', paddingLength, emptyString()), fraction);
 }
 
-static String temporalDateToString(int32_t year, int32_t month)
+static String temporalDateToString(int32_t year, int32_t month, StringView calendarString)
 {
     // If we're printing a date, it should be within range
     ASSERT(isYearWithinLimits(year));
@@ -1968,12 +1968,12 @@ static String temporalDateToString(int32_t year, int32_t month)
         year = std::abs(year);
     }
 
-    return makeString(prefix, pad('0', yearDigits, year), '-', pad('0', 2, month));
+    return makeString(prefix, pad('0', yearDigits, year), '-', pad('0', 2, month), calendarString);
 }
 
 static String temporalDateToString(int32_t year, int32_t month, int32_t day, StringView calendarString)
 {
-    auto first = temporalDateToString(year, month);
+    auto first = temporalDateToString(year, month, ""_s);
     return makeString(first, '-', pad('0', 2, day), calendarString);
 }
 
@@ -1987,23 +1987,18 @@ String temporalDateToString(PlainDate plainDate, StringView calendarString)
     return temporalDateToString(plainDate.year(), plainDate.month(), plainDate.day(), calendarString);
 }
 
-String temporalYearMonthToString(PlainYearMonth plainYearMonth, StringView calendarName)
+String temporalYearMonthToString(PlainYearMonth plainYearMonth, StringView calendarString)
 {
-    if (calendarName == "always"_s) {
-        // FIXME: Include the correct calendar ID when calendars are fully implemented.
-        return temporalDateToString(plainYearMonth.isoPlainDate(), "[u-ca=iso8601]"_s);
-    }
-    return temporalDateToString(plainYearMonth.year(), plainYearMonth.month());
+    if (calendarString.length() > 0)
+        return temporalDateToString(plainYearMonth.isoPlainDate(), calendarString);
+    return temporalDateToString(plainYearMonth.year(), plainYearMonth.month(), calendarString);
 }
 
-String temporalMonthDayToString(PlainMonthDay plainMonthDay, StringView calendarName)
+String temporalMonthDayToString(PlainMonthDay plainMonthDay, StringView calendarString)
 {
-    if (calendarName == "always"_s) {
-        // FIXME: print the correct calendar ID when calendars are fully implemented
-        return temporalDateToString(plainMonthDay.isoPlainDate(), "[u-ca=iso8601]"_s);
-    }
-
-    return makeString(pad('0', 2, plainMonthDay.month()), '-', pad('0', 2, plainMonthDay.day()));
+    if (calendarString.length() > 0)
+        return temporalDateToString(plainMonthDay.isoPlainDate(), calendarString);
+   return makeString(pad('0', 2, plainMonthDay.month()), '-', pad('0', 2, plainMonthDay.day()), calendarString);
 }
 
 String monthCode(uint32_t month)

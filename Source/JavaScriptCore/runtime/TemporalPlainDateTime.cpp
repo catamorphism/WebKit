@@ -292,9 +292,11 @@ String TemporalPlainDateTime::toString(JSGlobalObject* globalObject, JSValue opt
     PrecisionData data = secondsStringPrecision(globalObject, smallestUnit, precision);
     RETURN_IF_EXCEPTION(scope, { });
 
+    String calendarString = calendar()->formatCalendarAnnotation(showCalendar);
+
     // No need to make a new object if we were given explicit defaults.
     if (std::get<0>(data.precision) == Precision::Auto && roundingMode == RoundingMode::Trunc)
-        return toString(""_s);
+        return toString(calendarString);
 
     auto duration = TemporalPlainTime::roundTime(m_plainTime, data.increment, data.unit, roundingMode, std::nullopt);
     auto plainTime = TemporalPlainTime::toPlainTime(globalObject, duration);
@@ -316,8 +318,6 @@ String TemporalPlainDateTime::toString(JSGlobalObject* globalObject, JSValue opt
         throwRangeError(globalObject, scope, "Duration out of range after rounding"_s);
         return { };
     }
-
-    String calendarString = calendar()->formatCalendarAnnotation(showCalendar);
 
     return ISO8601::temporalDateTimeToString(plainDate, plainTime, data.precision, calendarString);
 }

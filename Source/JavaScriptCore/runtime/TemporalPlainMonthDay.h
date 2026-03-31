@@ -63,7 +63,7 @@ public:
 
     String monthCode() const;
 
-    String toString(JSGlobalObject*, JSValue options) const;
+    String toString(JSGlobalObject*, JSValue options);
     String toString() const
     {
         return ISO8601::temporalMonthDayToString(m_plainMonthDay, ""_s);

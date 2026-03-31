@@ -112,7 +112,7 @@ TemporalPlainMonthDay* TemporalPlainMonthDay::tryCreateIfValid(JSGlobalObject* g
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.prototype.with
-String TemporalPlainMonthDay::toString(JSGlobalObject* globalObject, JSValue optionsValue) const
+String TemporalPlainMonthDay::toString(JSGlobalObject* globalObject, JSValue optionsValue)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -120,13 +120,14 @@ String TemporalPlainMonthDay::toString(JSGlobalObject* globalObject, JSValue opt
     JSObject* options = intlGetOptionsObject(globalObject, optionsValue);
     RETURN_IF_EXCEPTION(scope, { });
 
-    if (!options)
+    if (!options) [[likely]]
         return toString();
 
-    String calendarName = toTemporalCalendarName(globalObject, options);
+    TemporalShowCalendar showCalendar = getTemporalShowCalendarNameOption(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
+    String calendarString = calendar()->formatCalendarAnnotation(showCalendar);
 
-    return ISO8601::temporalMonthDayToString(m_plainMonthDay, calendarName);
+    return ISO8601::temporalMonthDayToString(m_plainMonthDay, calendarString);
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.from

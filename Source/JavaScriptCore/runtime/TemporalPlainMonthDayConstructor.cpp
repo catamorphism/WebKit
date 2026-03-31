@@ -130,11 +130,14 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainMonthDay, (JSGlobalObject* global
 
     double referenceYear = 1972; // First ISO leap year after the epoch
     if (argumentCount > 3) {
-        auto value = callFrame->uncheckedArgument(3).toIntegerWithTruncation(globalObject);
-        if (!std::isfinite(value))
-            return throwVMRangeError(globalObject, scope, "Temporal.PlainMonthDay reference year must be finite"_s);
-        referenceYear = value;
-        RETURN_IF_EXCEPTION(scope, { });
+        auto value = callFrame->uncheckedArgument(3);
+        if (!value.isUndefined()) {
+            auto doubleValue = value.toIntegerWithTruncation(globalObject);
+            if (!std::isfinite(doubleValue))
+                return throwVMRangeError(globalObject, scope, "Temporal.PlainMonthDay reference year must be finite"_s);
+            referenceYear = doubleValue;
+            RETURN_IF_EXCEPTION(scope, { });
+        }
     }
 
     if (calendarID) {
