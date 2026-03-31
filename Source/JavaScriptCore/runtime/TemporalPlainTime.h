@@ -42,6 +42,7 @@ public:
     }
 
     static TemporalPlainTime* create(VM&, Structure*, ISO8601::PlainTime&&);
+    static TemporalPlainTime* create(VM&, Structure*, ISO8601::PlainTime&&, TemporalCalendar*);
     static TemporalPlainTime* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::Duration&&);
     static Structure* createStructure(VM&, JSGlobalObject*, JSValue);
 

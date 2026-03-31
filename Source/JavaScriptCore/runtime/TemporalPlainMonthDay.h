@@ -42,7 +42,8 @@ public:
     }
 
     static TemporalPlainMonthDay* create(VM&, Structure*, ISO8601::PlainMonthDay&&);
-    static TemporalPlainMonthDay* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&);
+    static TemporalPlainMonthDay* create(VM&, Structure*, ISO8601::PlainMonthDay&&, TemporalCalendar*);
+    static TemporalPlainMonthDay* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, std::optional<TemporalCalendar*>);
     static Structure* createStructure(VM&, JSGlobalObject*, JSValue);
 
     DECLARE_INFO;

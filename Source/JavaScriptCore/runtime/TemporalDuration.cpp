@@ -258,6 +258,7 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
     std::optional<ISO8601::PlainTime> time;
     std::optional<ISO8601::TimeZone> timeZone;
     std::optional<String> offsetString;
+    CalendarID calendarID = iso8601CalendarID();
     if (value.isObject()) {
         auto calendar = TemporalCalendar::getTemporalCalendarWithISODefault(globalObject, value);
         RETURN_IF_EXCEPTION(scope, { });
@@ -296,6 +297,7 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
             offsetBehavior = TemporalOffsetBehavior::Wall;
         isoDate = result.date();
         time = result.time();
+        calendarID = calendar->identifier();
     } else {
         if (!value.isString()) {
             throwTypeError(globalObject, scope, "relativeTo option must be either object or string"_s);
@@ -309,6 +311,12 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
             return { };
         }
         auto [plainDate, optionalPlainTime, optionalTimeZoneRecord, optionalCalendarRecord] = WTF::move(result.value());
+        if (optionalCalendarRecord) {
+            auto result = TemporalCalendar::parseTemporalCalendarString(globalObject, StringView(optionalCalendarRecord.value()));
+            RETURN_IF_EXCEPTION(scope, { });
+            if (result)
+                calendarID = result.value();
+        }
         auto offsetRecord = optionalTimeZoneRecord ? optionalTimeZoneRecord->m_offset : std::nullopt;
         if (offsetRecord)
             offsetString = String(offsetRecord->m_offsetString);
@@ -338,8 +346,12 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
         time = optionalPlainTime;
     }
     if (!timeZone || !time) {
+        if (calendarID) {
+            TemporalCalendar* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), calendarID);
+            RELEASE_AND_RETURN(scope, TemporalPlainDate::tryCreateIfValid(globalObject, globalObject->plainDateStructure(), WTF::move(isoDate), calendar));
+        }
         RELEASE_AND_RETURN(scope, TemporalPlainDate::tryCreateIfValid(globalObject,
-            globalObject->plainDateStructure(), WTF::move(isoDate)));
+            globalObject->plainDateStructure(), WTF::move(isoDate), std::nullopt));
     }
     int64_t offsetNs = 0;
     if (offsetBehavior == TemporalOffsetBehavior::Option) {
@@ -354,8 +366,12 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
         time.value(), offsetBehavior, offsetNs, timeZone.value(), TemporalDisambiguation::Compatible,
         TemporalOffset::Reject, matchBehavior);
     RETURN_IF_EXCEPTION(scope, { });
-    RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject,
-        globalObject->zonedDateTimeStructure(), WTF::move(epochNanoseconds), WTF::move(timeZone.value())));
+    if (calendarID != iso8601CalendarID()) {
+        TemporalCalendar* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), calendarID);
+        RETURN_IF_EXCEPTION(scope, { });
+        RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), WTF::move(epochNanoseconds), WTF::move(timeZone.value()), calendar));
+    }
+    RELEASE_AND_RETURN(scope, TemporalZonedDateTime::tryCreateIfValid(globalObject, globalObject->zonedDateTimeStructure(), WTF::move(epochNanoseconds), WTF::move(timeZone.value())));
 }
 
 // DefaultTemporalLargestUnit ( years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds )

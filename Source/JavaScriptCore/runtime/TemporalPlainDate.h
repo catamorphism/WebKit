@@ -44,8 +44,8 @@ public:
 
     static TemporalPlainDate* create(VM&, Structure*, ISO8601::PlainDate&&);
     static TemporalPlainDate* create(VM&, Structure*, ISO8601::PlainDate&&, TemporalCalendar*);
-    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&);
-    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::Duration&&);
+    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, std::optional<TemporalCalendar*>);
+    static TemporalPlainDate* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::Duration&&, std::optional<TemporalCalendar*>);
     static Structure* createStructure(VM&, JSGlobalObject*, JSValue);
 
     DECLARE_INFO;

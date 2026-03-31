@@ -139,9 +139,14 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainMonthDayPrototypeFuncWith, (JSGlobalObject
     auto result = monthDay->with(globalObject, asObject(temporalMonthDayLike), callFrame->argument(1));
     RETURN_IF_EXCEPTION(scope, { });
 
+    TemporalCalendar* calendar = monthDay->calendar();
+    std::optional<TemporalCalendar*> calendarToUse;
+    if (calendar->identifier() != iso8601CalendarID())
+        calendarToUse = TemporalCalendar::create(vm, globalObject->calendarStructure(), calendar->identifier());
+
     RELEASE_AND_RETURN(scope, JSValue::encode(
         TemporalPlainMonthDay::tryCreateIfValid(
-            globalObject, globalObject->plainMonthDayStructure(), WTF::move(result))));
+            globalObject, globalObject->plainMonthDayStructure(), WTF::move(result), calendarToUse)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.prototype.equals
@@ -193,7 +198,11 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainMonthDayPrototypeFuncToPlainDate, (JSGloba
         return { };
     }
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject, globalObject->plainDateStructure(), WTF::move(plainDateOptional.value()))));
+    if (monthDay->calendar()->identifier() != iso8601CalendarID()) {
+        TemporalCalendar* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), monthDay->calendar()->identifier());
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject, globalObject->plainDateStructure(), WTF::move(plainDateOptional.value()), calendar)));
+    }
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDate::tryCreateIfValid(globalObject, globalObject->plainDateStructure(), WTF::move(plainDateOptional.value()), std::nullopt)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plainmonthday.prototype.tolocalestring

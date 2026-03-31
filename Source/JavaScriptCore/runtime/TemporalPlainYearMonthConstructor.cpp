@@ -113,7 +113,23 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainYearMonth, (JSGlobalObject* globa
     if (argumentCount < 2) [[unlikely]]
         return throwVMRangeError(globalObject, scope, "Temporal.PlainYearMonth requires at least two arguments"_s);
 
-    // Argument 2 is calendar -- ignored for now. FIXME
+    std::optional<CalendarID> calendarID = std::nullopt;
+    if (argumentCount > 2) {
+        auto value = callFrame->uncheckedArgument(2);
+        if (!value.isUndefined()) {
+            if (!value.isString())
+                return throwVMTypeError(globalObject, scope, "Temporal.PlainYearMonth calendar must be a string"_s);
+            auto calendarString = value.toWTFString(globalObject);
+            RETURN_IF_EXCEPTION(scope, { });
+            std::optional<ISO8601::CalendarID> parsedCalendarString = ISO8601::parseCalendarIdentifier(calendarString);
+            if (!parsedCalendarString)
+                return throwVMRangeError(globalObject, scope, "invalid calendar in PlainYearMonth"_s);
+            calendarID = TemporalCalendar::parseTemporalCalendarString(globalObject, StringView(parsedCalendarString.value()));
+            RETURN_IF_EXCEPTION(scope, { });
+            if (!calendarID)
+                return throwVMRangeError(globalObject, scope, "error parsing calendar ID from PlainYearMonth"_s);
+        }
+    }
 
     double referenceDay = 1;
     if (argumentCount > 3) {
@@ -139,7 +155,12 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainYearMonth, (JSGlobalObject* globa
     if (!isInBounds<int32_t>(referenceDay)) [[unlikely]]
         return throwVMRangeError(globalObject, scope, "reference day is out of range"_s);
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainYearMonth::tryCreateIfValid(globalObject, structure, ISO8601::PlainDate(static_cast<int32_t>(isoYear), static_cast<unsigned>(isoMonth), static_cast<unsigned>(referenceDay)))));
+  if (calendarID) {
+      TemporalCalendar* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), calendarID.value());
+      RETURN_IF_EXCEPTION(scope, { });
+      RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainYearMonth::tryCreateIfValid(globalObject, structure, ISO8601::PlainDate(static_cast<int32_t>(isoYear), static_cast<unsigned>(isoMonth), static_cast<unsigned>(referenceDay)), calendar)));
+  }
+  RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainYearMonth::tryCreateIfValid(globalObject, structure, ISO8601::PlainDate(static_cast<int32_t>(isoYear), static_cast<unsigned>(isoMonth), static_cast<unsigned>(referenceDay)), std::nullopt)));
 }
 
 JSC_DEFINE_HOST_FUNCTION(callTemporalPlainYearMonth, (JSGlobalObject* globalObject, CallFrame*))

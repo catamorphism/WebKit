@@ -52,6 +52,14 @@ TemporalZonedDateTime* TemporalZonedDateTime::create(VM& vm, Structure* structur
     return object;
 }
 
+TemporalZonedDateTime* TemporalZonedDateTime::create(VM& vm, Structure* structure, ISO8601::ExactTime&& exactTime, ISO8601::TimeZone&& timeZone, TemporalCalendar* calendar)
+{
+    auto* object = new (NotNull, allocateCell<TemporalZonedDateTime>(vm)) TemporalZonedDateTime(vm, structure, WTF::move(exactTime), WTF::move(timeZone));
+    object->finishCreation(vm);
+    object->m_calendar.set(vm, object, calendar);
+    return object;
+}
+
 Structure* TemporalZonedDateTime::createStructure(VM& vm, JSGlobalObject* globalObject, JSValue prototype)
 {
     return Structure::create(vm, globalObject, prototype, TypeInfo(ObjectType, StructureFlags), info());
@@ -97,6 +105,17 @@ TemporalZonedDateTime* TemporalZonedDateTime::tryCreateIfValid(JSGlobalObject* g
     ASSERT(epochNanoseconds.isValid());
 
     return TemporalZonedDateTime::create(vm, structure, WTF::move(epochNanoseconds), WTF::move(timeZone));
+}
+
+// https://tc39.es/proposal-temporal/#sec-temporal-createtemporalzoneddatetime
+TemporalZonedDateTime* TemporalZonedDateTime::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::ExactTime&& epochNanoseconds, ISO8601::TimeZone&& timeZone, TemporalCalendar* calendar)
+{
+    VM& vm = globalObject->vm();
+
+    ASSERT(epochNanoseconds.isValid());
+    ASSERT(calendar);
+
+    return TemporalZonedDateTime::create(vm, structure, WTF::move(epochNanoseconds), WTF::move(timeZone), calendar);
 }
 
 // https://tc39.es/proposal-temporal/#sec-isoffsettimezoneidentifier

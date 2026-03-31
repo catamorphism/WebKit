@@ -46,6 +46,14 @@ TemporalPlainYearMonth* TemporalPlainYearMonth::create(VM& vm, Structure* struct
     return object;
 }
 
+TemporalPlainYearMonth* TemporalPlainYearMonth::create(VM& vm, Structure* structure, ISO8601::PlainYearMonth&& plainYearMonth, TemporalCalendar* calendar)
+{
+    auto* object = new (NotNull, allocateCell<TemporalPlainYearMonth>(vm)) TemporalPlainYearMonth(vm, structure, WTF::move(plainYearMonth));
+    object->finishCreation(vm);
+    object->m_calendar.set(vm, object, calendar);
+    return object;
+}
+
 Structure* TemporalPlainYearMonth::createStructure(VM& vm, JSGlobalObject* globalObject, JSValue prototype)
 {
     return Structure::create(vm, globalObject, prototype, TypeInfo(ObjectType, StructureFlags), info());
@@ -84,7 +92,7 @@ DEFINE_VISIT_CHILDREN(TemporalPlainYearMonth);
 
 // CreateTemporalYearMonth ( isoDate, calendar [, newTarget ] )
 // https://tc39.es/proposal-temporal/#sec-temporal-createtemporalyearmonth
-TemporalPlainYearMonth* TemporalPlainYearMonth::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::PlainDate&& plainDate)
+TemporalPlainYearMonth* TemporalPlainYearMonth::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::PlainDate&& plainDate, std::optional<TemporalCalendar*> calendar)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -94,6 +102,8 @@ TemporalPlainYearMonth* TemporalPlainYearMonth::tryCreateIfValid(JSGlobalObject*
         return { };
     }
 
+    if (calendar)
+        return TemporalPlainYearMonth::create(vm, structure, ISO8601::PlainYearMonth(WTF::move(plainDate)), calendar.value());
     return TemporalPlainYearMonth::create(vm, structure, ISO8601::PlainYearMonth(WTF::move(plainDate)));
 }
 
@@ -188,7 +198,7 @@ TemporalPlainYearMonth* TemporalPlainYearMonth::from(JSGlobalObject* globalObjec
             return { };
         }
         if (!(timeZoneOptional && timeZoneOptional->m_z)) [[likely]]
-            RELEASE_AND_RETURN(scope, TemporalPlainYearMonth::tryCreateIfValid(globalObject, globalObject->plainYearMonthStructure(), WTF::move(plainDate)));
+            RELEASE_AND_RETURN(scope, TemporalPlainYearMonth::tryCreateIfValid(globalObject, globalObject->plainYearMonthStructure(), WTF::move(plainDate), std::nullopt));
     }
 
     String message = tryMakeString("Temporal.PlainYearMonth.from: invalid date string "_s, string);

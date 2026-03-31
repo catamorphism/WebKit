@@ -98,6 +98,24 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalZonedDateTime, (JSGlobalObject* global
     if (callFrame->argumentCount() < 2) [[unlikely]]
         return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime requires epochNanoseconds and timeZone arguments"_s);
 
+    std::optional<CalendarID> calendarID;
+    if (callFrame->argumentCount() > 2) {
+        auto value = callFrame->uncheckedArgument(2);
+        if (!value.isUndefined()) {
+            if (!value.isString())
+                return throwVMTypeError(globalObject, scope, "Temporal.ZonedDateTime calendar must be a string"_s);
+            auto calendarString = value.toWTFString(globalObject);
+            RETURN_IF_EXCEPTION(scope, { });
+            std::optional<ISO8601::CalendarID> parsedCalendarString = ISO8601::parseCalendarIdentifier(calendarString);
+            if (!parsedCalendarString)
+                return throwVMRangeError(globalObject, scope, "invalid calendar in ZonedDateTime"_s);
+            calendarID = TemporalCalendar::parseTemporalCalendarString(globalObject, StringView(parsedCalendarString.value()));
+            RETURN_IF_EXCEPTION(scope, { });
+            if (!calendarID)
+                return throwVMRangeError(globalObject, scope, "error parsing calendar ID from ZonedDateTime"_s);
+        }
+    }
+
     auto timeZoneVal = callFrame->uncheckedArgument(1);
     if (!timeZoneVal.isString()) [[unlikely]]
         return throwVMTypeError(globalObject, scope, "Second argument to Temporal.ZonedDateTime constructor must be a string"_s);
@@ -113,6 +131,12 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalZonedDateTime, (JSGlobalObject* global
         if (!timeZoneParse) [[unlikely]]
             return throwVMRangeError(globalObject, scope, makeString("Couldn't parse time zone name: "_s, timeZoneString));
         timeZone = timeZoneParse.value();
+    }
+
+    if (calendarID) {
+        TemporalCalendar* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), calendarID.value());
+        RETURN_IF_EXCEPTION(scope, { });
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, structure, WTF::move(exactTime), WTF::move(timeZone), calendar)));
     }
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalZonedDateTime::tryCreateIfValid(globalObject, structure, WTF::move(exactTime), WTF::move(timeZone))));
 }

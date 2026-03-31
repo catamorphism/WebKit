@@ -171,10 +171,13 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDatePrototypeFuncToPlainMonthDay, (JSGloba
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDate.prototype.toPlainMonthDay called on value that's not a PlainDate"_s);
 
     ISO8601::PlainDate dateToUse(1972, temporalDate->plainDate().month(), temporalDate->plainDate().day());
-    // FIXME: support non-iso8601 calendars
+    std::optional<TemporalCalendar*> calendar = std::nullopt; 
+    if (temporalDate->calendar()->identifier() != iso8601CalendarID())
+        calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), temporalDate->calendar()->identifier());
+
     RELEASE_AND_RETURN(scope, JSValue::encode(
         TemporalPlainMonthDay::tryCreateIfValid(
-            globalObject, globalObject->plainMonthDayStructure(), WTF::move(dateToUse))));
+            globalObject, globalObject->plainMonthDayStructure(), WTF::move(dateToUse), calendar)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindate.prototype.toplainyearmonth
@@ -188,10 +191,16 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDatePrototypeFuncToPlainYearMonth, (JSGlob
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDate.prototype.toPlainYearMonth called on value that's not a PlainDate"_s);
 
     ISO8601::PlainDate dateToUse(temporalDate->plainDate().year(), temporalDate->plainDate().month(), 1);
-    // FIXME: support non-iso8601 calendars
+
+    if (temporalDate->calendar()->identifier() != iso8601CalendarID()) {
+        TemporalCalendar* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), temporalDate->calendar()->identifier());
+        RELEASE_AND_RETURN(scope, JSValue::encode(
+           TemporalPlainYearMonth::tryCreateIfValid(
+               globalObject, globalObject->plainYearMonthStructure(), WTF::move(dateToUse), calendar)));
+    }
     RELEASE_AND_RETURN(scope, JSValue::encode(
         TemporalPlainYearMonth::tryCreateIfValid(
-            globalObject, globalObject->plainYearMonthStructure(), WTF::move(dateToUse))));
+            globalObject, globalObject->plainYearMonthStructure(), WTF::move(dateToUse), std::nullopt)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindate.prototype.add
@@ -343,14 +352,23 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDatePrototypeFuncToPlainDateTime, (JSGloba
     if (!plainDate)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDate.prototype.toPlainDateTime called on value that's not a PlainDate"_s);
 
+    TemporalCalendar* calendar = nullptr;
+    if (plainDate->calendar()->identifier() != iso8601CalendarID())
+        calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), plainDate->calendar()->identifier());
+
     JSValue itemValue = callFrame->argument(0); 
-    if (itemValue.isUndefined())
-        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), { })));
+    if (itemValue.isUndefined()) {
+        if (calendar)
+            RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), { }, calendar)));
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), { }, std::nullopt)));
+    }
 
     auto* plainTime = TemporalPlainTime::from(globalObject, itemValue, jsUndefined());
     RETURN_IF_EXCEPTION(scope, { });
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), plainTime->plainTime())));
+    if (calendar)
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), plainTime->plainTime(), calendar)));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), plainTime->plainTime(), std::nullopt)));  
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindate.prototype.tozoneddatetime

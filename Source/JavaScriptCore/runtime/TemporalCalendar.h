@@ -63,6 +63,7 @@ public:
 
     DECLARE_INFO;
 
+    static std::optional<CalendarID> parseTemporalCalendarString(JSGlobalObject*, StringView);
     static TemporalCalendar* toTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
     static TemporalCalendar* getTemporalCalendarWithISODefault(JSGlobalObject*, JSValue);
     static void calendarResolveFields(JSGlobalObject*, std::optional<int32_t>, unsigned, std::optional<ParsedMonthCode>, TemporalDateFormat);

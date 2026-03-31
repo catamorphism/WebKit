@@ -44,7 +44,9 @@ public:
     }
 
     static TemporalZonedDateTime* create(VM&, Structure*, ExactTime&&, TimeZone&&);
+    static TemporalZonedDateTime* create(VM&, Structure*, ExactTime&&, TimeZone&&, TemporalCalendar*);
     static TemporalZonedDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ExactTime&&, TimeZone&&);
+    static TemporalZonedDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ExactTime&&, TimeZone&&, TemporalCalendar*);
     static Structure* createStructure(VM&, JSGlobalObject*, JSValue);
 
     DECLARE_INFO;

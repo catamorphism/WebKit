@@ -110,7 +110,23 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainMonthDay, (JSGlobalObject* global
     if (argumentCount < 2)
         return throwVMRangeError(globalObject, scope, "Temporal.PlainMonthDay requires at least two arguments"_s);
 
-    // Argument 2 is calendar -- ignored for now. FIXME
+   std::optional<CalendarID> calendarID = std::nullopt;
+    if (argumentCount > 2) {
+        auto value = callFrame->uncheckedArgument(2);
+        if (!value.isUndefined()) {
+            if (!value.isString())
+                return throwVMTypeError(globalObject, scope, "Temporal.PlainMonthDay calendar must be a string"_s);
+            auto calendarString = value.toWTFString(globalObject);
+            RETURN_IF_EXCEPTION(scope, { });
+            std::optional<ISO8601::CalendarID> parsedCalendarString = ISO8601::parseCalendarIdentifier(calendarString);
+            if (!parsedCalendarString)
+                return throwVMRangeError(globalObject, scope, "invalid calendar in PlainMonthDay"_s);
+            calendarID = TemporalCalendar::parseTemporalCalendarString(globalObject, StringView(parsedCalendarString.value()));
+            RETURN_IF_EXCEPTION(scope, { });
+            if (!calendarID)
+                return throwVMRangeError(globalObject, scope, "error parsing calendar ID from PlainMonthDay"_s);
+        }
+    }
 
     double referenceYear = 1972; // First ISO leap year after the epoch
     if (argumentCount > 3) {
@@ -121,7 +137,12 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainMonthDay, (JSGlobalObject* global
         RETURN_IF_EXCEPTION(scope, { });
     }
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainMonthDay::tryCreateIfValid(globalObject, structure, ISO8601::PlainDate(referenceYear, isoMonth, isoDay))));
+    if (calendarID) {
+        TemporalCalendar* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), calendarID.value());
+        RETURN_IF_EXCEPTION(scope, { });
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainMonthDay::tryCreateIfValid(globalObject, structure, ISO8601::PlainDate(referenceYear, isoMonth, isoDay), calendar)));
+    }
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainMonthDay::tryCreateIfValid(globalObject, structure, ISO8601::PlainDate(referenceYear, isoMonth, isoDay), std::nullopt)));
 }
 
 JSC_DEFINE_HOST_FUNCTION(callTemporalPlainMonthDay, (JSGlobalObject* globalObject, CallFrame*))

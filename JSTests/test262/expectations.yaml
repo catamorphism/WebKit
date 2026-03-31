@@ -60,15 +60,6 @@ test/built-ins/Proxy/construct/trap-is-not-callable-realm.js:
 test/built-ins/Temporal/PlainDate/calendar-case-insensitive.js:
   default: 'Test262Error: Calendar is case-insensitive Expected SameValue(«undefined», «"iso8601"») to be true'
   strict mode: 'Test262Error: Calendar is case-insensitive Expected SameValue(«undefined», «"iso8601"») to be true'
-test/built-ins/Temporal/PlainDate/compare/argument-string-calendar-invalid-iso-string.js:
-  default: 'Test262Error: Unknown calendar is not a valid calendar ID (first argument) Expected a RangeError to be thrown but no exception was thrown at all'
-  strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID (first argument) Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/PlainDate/from/argument-string-calendar-invalid-iso-string.js:
-  default: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
-  strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/PlainDate/prototype/equals/argument-string-calendar-invalid-iso-string.js:
-  default: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
-  strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
 test/built-ins/Temporal/PlainDate/prototype/era/branding.js:
   default: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDate.prototype, \"era\").get')"
   strict mode: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDate.prototype, \"era\").get')"
@@ -81,27 +72,15 @@ test/built-ins/Temporal/PlainDate/prototype/eraYear/branding.js:
 test/built-ins/Temporal/PlainDate/prototype/eraYear/prop-desc.js:
   default: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
   strict mode: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
-test/built-ins/Temporal/PlainDate/prototype/since/argument-string-calendar-invalid-iso-string.js:
-  default: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
-  strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
 test/built-ins/Temporal/PlainDate/prototype/toString/order-of-operations.js:
   default: 'Test262Error: Actual [] and expected [get options.calendarName, get options.calendarName.toString, call options.calendarName.toString] should have the same contents. order of operations'
   strict mode: 'Test262Error: Actual [] and expected [get options.calendarName, get options.calendarName.toString, call options.calendarName.toString] should have the same contents. order of operations'
-test/built-ins/Temporal/PlainDate/prototype/until/argument-string-calendar-invalid-iso-string.js:
-  default: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
-  strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
 test/built-ins/Temporal/PlainDateTime/calendar-case-insensitive.js:
   default: 'Test262Error: calendar ID is capital dotted I is not lowercased Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: calendar ID is capital dotted I is not lowercased Expected a RangeError to be thrown but no exception was thrown at all'
 test/built-ins/Temporal/PlainDateTime/calendar-iso-string.js:
   default: 'Test262Error: An ISO string is not a valid calendar ID for constructor parameter Expected a RangeError to be thrown but no exception was thrown at all'
   strict mode: 'Test262Error: An ISO string is not a valid calendar ID for constructor parameter Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/PlainDateTime/compare/argument-string-calendar-invalid-iso-string.js:
-  default: 'Test262Error: Unknown calendar is not a valid calendar ID (first argument) Expected a RangeError to be thrown but no exception was thrown at all'
-  strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID (first argument) Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/PlainDateTime/from/argument-string-calendar-invalid-iso-string.js:
-  default: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
-  strict mode: 'Test262Error: Unknown calendar is not a valid calendar ID Expected a RangeError to be thrown but no exception was thrown at all'
 test/built-ins/Temporal/PlainDateTime/prototype/era/branding.js:
   default: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDateTime.prototype, \"era\").get')"
   strict mode: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDateTime.prototype, \"era\").get')"

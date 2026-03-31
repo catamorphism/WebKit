@@ -64,7 +64,7 @@ TemporalCalendar::TemporalCalendar(VM& vm, Structure* structure, CalendarID iden
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-parsetemporalcalendarstring
-static std::optional<CalendarID> parseTemporalCalendarString(JSGlobalObject* globalObject, StringView string)
+std::optional<CalendarID> TemporalCalendar::parseTemporalCalendarString(JSGlobalObject* globalObject, StringView string)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);

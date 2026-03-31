@@ -38,6 +38,14 @@ namespace JSC {
 
 const ClassInfo TemporalPlainMonthDay::s_info = { "Object"_s, &Base::s_info, nullptr, nullptr, CREATE_METHOD_TABLE(TemporalPlainMonthDay) };
 
+TemporalPlainMonthDay* TemporalPlainMonthDay::create(VM& vm, Structure* structure, ISO8601::PlainMonthDay&& plainMonthDay, TemporalCalendar* calendar)
+{
+    auto* object = new (NotNull, allocateCell<TemporalPlainMonthDay>(vm)) TemporalPlainMonthDay(vm, structure, WTF::move(plainMonthDay));
+    object->finishCreation(vm);
+    object->m_calendar.set(vm, object, calendar);
+    return object;
+}
+
 TemporalPlainMonthDay* TemporalPlainMonthDay::create(VM& vm, Structure* structure, ISO8601::PlainMonthDay&& plainMonthDay)
 {
     auto* object = new (NotNull, allocateCell<TemporalPlainMonthDay>(vm)) TemporalPlainMonthDay(vm, structure, WTF::move(plainMonthDay));
@@ -83,7 +91,7 @@ DEFINE_VISIT_CHILDREN(TemporalPlainMonthDay);
 
 // CreateTemporalMonthDay ( isoDate, calendar [, newTarget ]
 // https://tc39.es/proposal-temporal/#sec-temporal-createtemporalmonthday
-TemporalPlainMonthDay* TemporalPlainMonthDay::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::PlainDate&& plainDate)
+TemporalPlainMonthDay* TemporalPlainMonthDay::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::PlainDate&& plainDate, std::optional<TemporalCalendar*> calendar)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -98,6 +106,8 @@ TemporalPlainMonthDay* TemporalPlainMonthDay::tryCreateIfValid(JSGlobalObject* g
         return { };
     }
 
+    if (calendar)
+        return TemporalPlainMonthDay::create(vm, structure, ISO8601::PlainMonthDay(WTF::move(plainDate)), calendar.value());
     return TemporalPlainMonthDay::create(vm, structure, ISO8601::PlainMonthDay(WTF::move(plainDate)));
 }
 
@@ -195,7 +205,7 @@ TemporalPlainMonthDay* TemporalPlainMonthDay::from(JSGlobalObject* globalObject,
         }
         auto dateWithoutYear = ISO8601::PlainDate(1972, plainDate.month(), plainDate.day());
         if (!(timeZoneOptional && timeZoneOptional->m_z))
-            RELEASE_AND_RETURN(scope, TemporalPlainMonthDay::tryCreateIfValid(globalObject, globalObject->plainMonthDayStructure(), WTF::move(dateWithoutYear)));
+            RELEASE_AND_RETURN(scope, TemporalPlainMonthDay::tryCreateIfValid(globalObject, globalObject->plainMonthDayStructure(), WTF::move(dateWithoutYear), std::nullopt));
     }
 
     throwRangeError(globalObject, scope,

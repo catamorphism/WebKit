@@ -90,7 +90,8 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainDateTime, (JSGlobalObject* global
     RETURN_IF_EXCEPTION(scope, { });
 
     ISO8601::Duration duration { };
-    auto count = std::min<size_t>(callFrame->argumentCount(), numberOfTemporalPlainDateUnits + numberOfTemporalPlainTimeUnits);
+    size_t dateTimeArgs = numberOfTemporalPlainDateUnits + numberOfTemporalPlainTimeUnits;
+    auto count = std::min<size_t>(callFrame->argumentCount(), dateTimeArgs);
     for (unsigned i = 0; i < count; i++) {
         unsigned durationIndex = i >= static_cast<unsigned>(TemporalUnit::Week) ? i + 1 : i;
         if (durationIndex < numberOfTemporalPlainDateUnits)
@@ -102,7 +103,30 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainDateTime, (JSGlobalObject* global
             return throwVMRangeError(globalObject, scope, "Temporal.PlainDateTime properties must be finite"_s);
     }
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, structure, WTF::move(duration))));
+    std::optional<CalendarID> calendarID = std::nullopt;
+    if (callFrame->argumentCount() > dateTimeArgs) {
+        auto value = callFrame->uncheckedArgument(dateTimeArgs);
+        if (!value.isUndefined()) {
+            if (!value.isString())
+                return throwVMTypeError(globalObject, scope, "Temporal.PlainDateTime calendar must be a string"_s);
+            auto calendarString = value.toWTFString(globalObject);
+            RETURN_IF_EXCEPTION(scope, { });
+            std::optional<ISO8601::CalendarID> parsedCalendarString = ISO8601::parseCalendarIdentifier(calendarString);
+            if (!parsedCalendarString)
+                return throwVMRangeError(globalObject, scope, "invalid calendar in PlainDateTime"_s);
+            calendarID = TemporalCalendar::parseTemporalCalendarString(globalObject, StringView(parsedCalendarString.value()));
+            RETURN_IF_EXCEPTION(scope, { });
+            if (!calendarID)
+                return throwVMRangeError(globalObject, scope, "error parsing calendar ID from PlainDateTime"_s);
+        }
+    }
+
+    if (calendarID) {
+        TemporalCalendar* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), calendarID.value());
+        RETURN_IF_EXCEPTION(scope, { });
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, structure, WTF::move(duration), calendar)));
+    }
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, structure, WTF::move(duration), std::nullopt)));
 }
 
 JSC_DEFINE_HOST_FUNCTION(callTemporalPlainDateTime, (JSGlobalObject* globalObject, CallFrame*))

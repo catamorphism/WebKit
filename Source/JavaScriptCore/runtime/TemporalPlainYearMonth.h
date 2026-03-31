@@ -42,7 +42,8 @@ public:
     }
 
     static TemporalPlainYearMonth* create(VM&, Structure*, ISO8601::PlainYearMonth&&);
-    static TemporalPlainYearMonth* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&);
+    static TemporalPlainYearMonth* create(VM&, Structure*, ISO8601::PlainYearMonth&&, TemporalCalendar*);
+    static TemporalPlainYearMonth* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, std::optional<TemporalCalendar*>);
     static Structure* createStructure(VM&, JSGlobalObject*, JSValue);
 
     DECLARE_INFO;
