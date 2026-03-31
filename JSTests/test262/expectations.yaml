@@ -57,33 +57,6 @@ test/built-ins/Proxy/construct/return-not-object-throws-undefined-realm.js:
 test/built-ins/Proxy/construct/trap-is-not-callable-realm.js:
   default: 'Test262Error: Expected a TypeError but got a different error constructor with the same name'
   strict mode: 'Test262Error: Expected a TypeError but got a different error constructor with the same name'
-test/built-ins/Temporal/PlainDate/prototype/era/branding.js:
-  default: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDate.prototype, \"era\").get')"
-  strict mode: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDate.prototype, \"era\").get')"
-test/built-ins/Temporal/PlainDate/prototype/era/prop-desc.js:
-  default: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
-  strict mode: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
-test/built-ins/Temporal/PlainDate/prototype/eraYear/branding.js:
-  default: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDate.prototype, \"eraYear\").get')"
-  strict mode: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDate.prototype, \"eraYear\").get')"
-test/built-ins/Temporal/PlainDate/prototype/eraYear/prop-desc.js:
-  default: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
-  strict mode: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
-test/built-ins/Temporal/PlainDateTime/calendar-iso-string.js:
-  default: 'Test262Error: An ISO string is not a valid calendar ID for constructor parameter Expected a RangeError to be thrown but no exception was thrown at all'
-  strict mode: 'Test262Error: An ISO string is not a valid calendar ID for constructor parameter Expected a RangeError to be thrown but no exception was thrown at all'
-test/built-ins/Temporal/PlainDateTime/prototype/era/branding.js:
-  default: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDateTime.prototype, \"era\").get')"
-  strict mode: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDateTime.prototype, \"era\").get')"
-test/built-ins/Temporal/PlainDateTime/prototype/era/prop-desc.js:
-  default: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
-  strict mode: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
-test/built-ins/Temporal/PlainDateTime/prototype/eraYear/branding.js:
-  default: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDateTime.prototype, \"eraYear\").get')"
-  strict mode: "TypeError: undefined is not an object (evaluating 'Object.getOwnPropertyDescriptor(Temporal.PlainDateTime.prototype, \"eraYear\").get')"
-test/built-ins/Temporal/PlainDateTime/prototype/eraYear/prop-desc.js:
-  default: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
-  strict mode: "TypeError: undefined is not an object (evaluating 'descriptor.get')"
 test/built-ins/TypedArray/prototype/includes/index-compared-against-initial-length-out-of-bounds.js:
   default: 'Test262Error: Expected SameValue(«true», «false») to be true'
   strict mode: 'Test262Error: Expected SameValue(«true», «false») to be true'

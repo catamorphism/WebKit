@@ -58,6 +58,8 @@ static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncToLocaleStrin
 static JSC_DECLARE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncValueOf);
 static JSC_DECLARE_CUSTOM_GETTER(temporalPlainDateTimePrototypeGetterCalendar);
 static JSC_DECLARE_CUSTOM_GETTER(temporalPlainDateTimePrototypeGetterCalendarId);
+static JSC_DECLARE_CUSTOM_GETTER(temporalPlainDateTimePrototypeGetterEra);
+static JSC_DECLARE_CUSTOM_GETTER(temporalPlainDateTimePrototypeGetterEraYear);
 static JSC_DECLARE_CUSTOM_GETTER(temporalPlainDateTimePrototypeGetterYear);
 static JSC_DECLARE_CUSTOM_GETTER(temporalPlainDateTimePrototypeGetterMonth);
 static JSC_DECLARE_CUSTOM_GETTER(temporalPlainDateTimePrototypeGetterMonthCode);
@@ -107,6 +109,8 @@ const ClassInfo TemporalPlainDateTimePrototype::s_info = { "Temporal.PlainDateTi
   valueOf          temporalPlainDateTimePrototypeFuncValueOf            DontEnum|Function 0
   calendar         temporalPlainDateTimePrototypeGetterCalendar         DontEnum|ReadOnly|CustomAccessor
   calendarId       temporalPlainDateTimePrototypeGetterCalendarId       DontEnum|ReadOnly|CustomAccessor
+  era              temporalPlainDateTimePrototypeGetterEra              DontEnum|ReadOnly|CustomAccessor
+  eraYear          temporalPlainDateTimePrototypeGetterEraYear          DontEnum|ReadOnly|CustomAccessor
   year             temporalPlainDateTimePrototypeGetterYear             DontEnum|ReadOnly|CustomAccessor
   month            temporalPlainDateTimePrototypeGetterMonth            DontEnum|ReadOnly|CustomAccessor
   monthCode        temporalPlainDateTimePrototypeGetterMonthCode        DontEnum|ReadOnly|CustomAccessor
@@ -479,6 +483,32 @@ JSC_DEFINE_CUSTOM_GETTER(temporalPlainDateTimePrototypeGetterCalendarId, (JSGlob
 
     // FIXME: when calendars are supported, get the string ID of the calendar
     return JSValue::encode(jsString(vm, String::fromLatin1("iso8601")));
+}
+
+JSC_DEFINE_CUSTOM_GETTER(temporalPlainDateTimePrototypeGetterEra, (JSGlobalObject* globalObject, EncodedJSValue thisValue, PropertyName))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* plainDateTime = jsDynamicCast<TemporalPlainDateTime*>(JSValue::decode(thisValue));
+    if (!plainDateTime) [[unlikely]]
+        return throwVMTypeError(globalObject, scope, "Temporal.PlainDateTime.prototype.era called on value that's not a PlainDateTime"_s);
+
+    // FIXME: non-iso8601 calendars
+    return JSValue::encode(jsUndefined());
+}
+
+JSC_DEFINE_CUSTOM_GETTER(temporalPlainDateTimePrototypeGetterEraYear, (JSGlobalObject* globalObject, EncodedJSValue thisValue, PropertyName))
+{
+    VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
+    auto* plainDateTime = jsDynamicCast<TemporalPlainDateTime*>(JSValue::decode(thisValue));
+    if (!plainDateTime) [[unlikely]]
+        return throwVMTypeError(globalObject, scope, "Temporal.PlainDateTime.prototype.eraYear called on value that's not a PlainDateTime"_s);
+
+    // FIXME: non-iso8601 calendars
+    return JSValue::encode(jsUndefined());
 }
 
 JSC_DEFINE_CUSTOM_GETTER(temporalPlainDateTimePrototypeGetterYear, (JSGlobalObject* globalObject, EncodedJSValue thisValue, PropertyName))
