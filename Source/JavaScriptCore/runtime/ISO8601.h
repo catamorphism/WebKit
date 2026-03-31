@@ -513,8 +513,8 @@ String formatTimeString(char, int64_t, int64_t, int64_t, int64_t, std::optional<
 String formatTimeZone(VM&, TimeZone, bool);
 String formatUTCOffsetNanoseconds(int64_t, bool);
 String temporalTimeToString(PlainTime, std::tuple<Precision, unsigned>);
-String temporalDateToString(PlainDate);
-String temporalDateTimeToString(PlainDate, PlainTime, std::tuple<Precision, unsigned>);
+String temporalDateToString(PlainDate, StringView);
+String temporalDateTimeToString(PlainDate, PlainTime, std::tuple<Precision, unsigned>, StringView);
 String temporalYearMonthToString(PlainYearMonth, StringView);
 String temporalMonthDayToString(PlainMonthDay, StringView);
 String monthCode(uint32_t);

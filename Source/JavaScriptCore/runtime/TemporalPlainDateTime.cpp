@@ -261,7 +261,7 @@ static void incrementDay(ISO8601::Duration& duration)
     duration.setYears(year + 1);
 }
 
-String TemporalPlainDateTime::toString(JSGlobalObject* globalObject, JSValue optionsValue) const
+String TemporalPlainDateTime::toString(JSGlobalObject* globalObject, JSValue optionsValue)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -270,10 +270,9 @@ String TemporalPlainDateTime::toString(JSGlobalObject* globalObject, JSValue opt
     RETURN_IF_EXCEPTION(scope, { });
 
     if (!options)
-        return toString();
+        return toString(""_s);
 
-    // FIXME: non-iso8601 calendars
-    getTemporalShowCalendarNameOption(globalObject, options);
+    TemporalShowCalendar showCalendar = getTemporalShowCalendarNameOption(globalObject, options);
     RETURN_IF_EXCEPTION(scope, { });
 
     auto precision = temporalFractionalSecondDigits(globalObject, options);
@@ -295,7 +294,7 @@ String TemporalPlainDateTime::toString(JSGlobalObject* globalObject, JSValue opt
 
     // No need to make a new object if we were given explicit defaults.
     if (std::get<0>(data.precision) == Precision::Auto && roundingMode == RoundingMode::Trunc)
-        return toString();
+        return toString(""_s);
 
     auto duration = TemporalPlainTime::roundTime(m_plainTime, data.increment, data.unit, roundingMode, std::nullopt);
     auto plainTime = TemporalPlainTime::toPlainTime(globalObject, duration);
@@ -318,7 +317,9 @@ String TemporalPlainDateTime::toString(JSGlobalObject* globalObject, JSValue opt
         return { };
     }
 
-    return ISO8601::temporalDateTimeToString(plainDate, plainTime, data.precision);
+    String calendarString = calendar()->formatCalendarAnnotation(showCalendar);
+
+    return ISO8601::temporalDateTimeToString(plainDate, plainTime, data.precision, calendarString);
 }
 
 String TemporalPlainDateTime::monthCode() const

@@ -328,7 +328,7 @@ TemporalCalendar* TemporalCalendar::from(JSGlobalObject* globalObject, JSValue c
         if (!hasProperty) {
             if (calendarLike.inherits<TemporalCalendar>())
                 return jsCast<TemporalCalendar*>(calendarLike);
-            throwRangeError(globalObject, scope, "invalid Calendar"_s);
+            throwTypeError(globalObject, scope, "invalid Calendar"_s);
             return { };
         }
 

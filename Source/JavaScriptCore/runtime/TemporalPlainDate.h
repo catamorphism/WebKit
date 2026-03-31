@@ -73,10 +73,10 @@ public:
     uint16_t dayOfYear() const;
     uint8_t weekOfYear() const;
 
-    String toString(JSGlobalObject*, JSValue options) const;
+    String toString(JSGlobalObject*, JSValue options);
     String toString() const
     {
-        return ISO8601::temporalDateToString(m_plainDate);
+        return ISO8601::temporalDateToString(m_plainDate, ""_s);
     }
 
     ISO8601::Duration until(JSGlobalObject*, TemporalPlainDate*, JSValue options);

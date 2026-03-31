@@ -453,7 +453,7 @@ String TemporalInstant::toString(JSGlobalObject* globalObject, ISO8601::ExactTim
     auto epochNs = exactTime.epochNanoseconds();
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, outputTimeZone, exactTime);
     RETURN_IF_EXCEPTION(scope, { });
-    auto dateTimeString = ISO8601::temporalDateTimeToString(isoDateTime.date(), isoDateTime.time(), precision.precision);
+    auto dateTimeString = ISO8601::temporalDateTimeToString(isoDateTime.date(), isoDateTime.time(), precision.precision, ""_s);
     builder.append(dateTimeString);
 
     if (timeZone) {

@@ -430,7 +430,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncToJSON, (JSGlobalObje
     if (!plainDateTime)
         return throwVMTypeError(globalObject, scope, "Temporal.PlainDateTime.prototype.toJSON called on value that's not a PlainDateTime"_s);
 
-    return JSValue::encode(jsString(vm, plainDateTime->toString()));
+    return JSValue::encode(jsString(vm, plainDateTime->toString(""_s)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindatetime.prototype.tolocalestring

@@ -633,7 +633,8 @@ String TemporalZonedDateTime::temporalZonedDateTimeToString(JSGlobalObject* glob
     RETURN_IF_EXCEPTION(scope, { });
     auto isoDateTime = TemporalTimeZone::getISODateTimeFor(globalObject, timeZone, ISO8601::ExactTime(epochNs));
     RETURN_IF_EXCEPTION(scope, { });
-    auto dateTimeString = temporalDateTimeToString(isoDateTime.date(), isoDateTime.time(), precision.precision);
+    auto calendarString = TemporalCalendar::formatCalendarAnnotation(showCalendar);
+    auto dateTimeString = temporalDateTimeToString(isoDateTime.date(), isoDateTime.time(), precision.precision, ""_s);
     String offsetString;
     if (showOffset != TemporalShowOffset::Never)
         offsetString = TemporalTimeZone::formatDateTimeUTCOffsetRounded(offsetNanoseconds);
@@ -644,7 +645,6 @@ String TemporalZonedDateTime::temporalZonedDateTimeToString(JSGlobalObject* glob
             flag = "!"_s;
         timeZoneString = makeString('[', flag, formatTimeZone(vm, timeZone, false), ']');
     }
-    auto calendarString = TemporalCalendar::formatCalendarAnnotation(showCalendar);
     return makeString(dateTimeString, offsetString, timeZoneString, calendarString);
 }
 

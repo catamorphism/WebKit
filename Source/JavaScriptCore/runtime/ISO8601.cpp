@@ -1971,27 +1971,27 @@ static String temporalDateToString(int32_t year, int32_t month)
     return makeString(prefix, pad('0', yearDigits, year), '-', pad('0', 2, month));
 }
 
-static String temporalDateToString(int32_t year, int32_t month, int32_t day)
+static String temporalDateToString(int32_t year, int32_t month, int32_t day, StringView calendarString)
 {
     auto first = temporalDateToString(year, month);
-    return makeString(first, '-', pad('0', 2, day));
+    return makeString(first, '-', pad('0', 2, day), calendarString);
 }
 
-String temporalDateTimeToString(PlainDate plainDate, PlainTime plainTime, std::tuple<Precision, unsigned> precision)
+String temporalDateTimeToString(PlainDate plainDate, PlainTime plainTime, std::tuple<Precision, unsigned> precision, StringView calendarString)
 {
-    return makeString(temporalDateToString(plainDate), 'T', temporalTimeToString(plainTime, precision));
+    return makeString(temporalDateToString(plainDate, ""_s), 'T', temporalTimeToString(plainTime, precision), calendarString);
 }
 
-String temporalDateToString(PlainDate plainDate)
+String temporalDateToString(PlainDate plainDate, StringView calendarString)
 {
-    return temporalDateToString(plainDate.year(), plainDate.month(), plainDate.day());
+    return temporalDateToString(plainDate.year(), plainDate.month(), plainDate.day(), calendarString);
 }
 
 String temporalYearMonthToString(PlainYearMonth plainYearMonth, StringView calendarName)
 {
     if (calendarName == "always"_s) {
         // FIXME: Include the correct calendar ID when calendars are fully implemented.
-        return makeString(temporalDateToString(plainYearMonth.isoPlainDate()), "[u-ca=iso8601]"_s);
+        return temporalDateToString(plainYearMonth.isoPlainDate(), "[u-ca=iso8601]"_s);
     }
     return temporalDateToString(plainYearMonth.year(), plainYearMonth.month());
 }
@@ -2000,8 +2000,7 @@ String temporalMonthDayToString(PlainMonthDay plainMonthDay, StringView calendar
 {
     if (calendarName == "always"_s) {
         // FIXME: print the correct calendar ID when calendars are fully implemented
-        auto first = temporalDateToString(plainMonthDay.isoPlainDate());
-        return makeString(first, "[u-ca=iso8601]"_s);
+        return temporalDateToString(plainMonthDay.isoPlainDate(), "[u-ca=iso8601]"_s);
     }
 
     return makeString(pad('0', 2, plainMonthDay.month()), '-', pad('0', 2, plainMonthDay.day()));

@@ -90,10 +90,10 @@ public:
     uint16_t dayOfYear() const;
     uint8_t weekOfYear() const;
 
-    String toString(JSGlobalObject*, JSValue options) const;
-    String toString(std::tuple<Precision, unsigned> precision = { Precision::Auto, 0 }) const
+    String toString(JSGlobalObject*, JSValue options);
+    String toString(String calendarString, std::tuple<Precision, unsigned> precision = { Precision::Auto, 0 }) const
     {
-        return ISO8601::temporalDateTimeToString(m_plainDate, m_plainTime, precision);
+        return ISO8601::temporalDateTimeToString(m_plainDate, m_plainTime, precision, calendarString);
     }
 
     DECLARE_VISIT_CHILDREN;

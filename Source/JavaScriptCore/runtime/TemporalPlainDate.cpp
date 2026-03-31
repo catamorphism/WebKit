@@ -149,7 +149,7 @@ TemporalPlainDate* TemporalPlainDate::tryCreateIfValid(JSGlobalObject* globalObj
     RELEASE_AND_RETURN(scope, TemporalPlainDate::tryCreateIfValid(globalObject, structure,  WTF::move(plainDate), calendar));
 }
 
-String TemporalPlainDate::toString(JSGlobalObject* globalObject, JSValue optionsValue) const
+String TemporalPlainDate::toString(JSGlobalObject* globalObject, JSValue optionsValue)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -160,7 +160,11 @@ String TemporalPlainDate::toString(JSGlobalObject* globalObject, JSValue options
     if (!options)
         return toString();
 
-    return ISO8601::temporalDateToString(m_plainDate);
+    TemporalShowCalendar showCalendar = getTemporalShowCalendarNameOption(globalObject, options);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    String calendarString = calendar()->formatCalendarAnnotation(showCalendar);
+    return ISO8601::temporalDateToString(m_plainDate, calendarString);
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-totemporaldate
