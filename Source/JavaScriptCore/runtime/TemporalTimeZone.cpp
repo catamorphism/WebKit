@@ -686,7 +686,7 @@ std::optional<ISO8601::TimeZone> TemporalTimeZone::parseTimeZoneIdentifier(JSGlo
     auto scope = DECLARE_THROW_SCOPE(vm);
 
     if (isUTCTimeZoneString(identifier))
-        return ISO8601::TimeZone::offset(0);
+        return ISO8601::TimeZone::utc();
 
     auto parseResult = ISO8601::parseUTCOffset(identifier, false); // Don't accept sub-minute precision
     bool isIANAName = false;

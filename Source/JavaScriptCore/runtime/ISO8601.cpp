@@ -1840,7 +1840,8 @@ String formatTimeZone(VM& vm, TimeZone tz, bool intlDateTimeFormat)
     if (tz.isUTC()) {
         if (intlDateTimeFormat && tz.isOffset())
             return "GMT"_s;
-        return "UTC"_s;
+        if (!tz.isOffset())
+            return "UTC"_s;
     }
     if (tz.isOffset())
         return formatUTCOffsetNanoseconds(tz.offsetNanoseconds(), intlDateTimeFormat);
