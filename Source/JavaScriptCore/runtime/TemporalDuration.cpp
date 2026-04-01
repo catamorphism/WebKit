@@ -314,8 +314,11 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
         if (optionalCalendarRecord) {
             auto result = TemporalCalendar::parseTemporalCalendarString(globalObject, StringView(optionalCalendarRecord.value()));
             RETURN_IF_EXCEPTION(scope, { });
-            if (result)
-                calendarID = result.value();
+            if (!result) {
+                throwRangeError(globalObject, scope, "invalid calendar ID in relativeTo option"_s);
+                return { };
+            }
+            calendarID = result.value();
         }
         auto offsetRecord = optionalTimeZoneRecord ? optionalTimeZoneRecord->m_offset : std::nullopt;
         if (offsetRecord)

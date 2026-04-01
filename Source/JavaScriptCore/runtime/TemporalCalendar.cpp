@@ -95,13 +95,11 @@ std::optional<CalendarID> TemporalCalendar::parseTemporalCalendarString(JSGlobal
             }
         }
     }
-    if (!calendarParseResult)
-        return iso8601CalendarID();
-    if (WTF::String(calendarParseResult.value()).convertToASCIILowercase() == "iso8601"_s)
-        return iso8601CalendarID();
 
-    throwRangeError(globalObject, scope, "calendar ID not supported yet"_s);
-    return std::nullopt;
+    // FIXME: non-iso8601 calendars
+    if (calendarParseResult && !isBuiltinCalendar(StringView(calendarParseResult.value())))
+        return std::nullopt;
+    return iso8601CalendarID();
 }
 
 TemporalCalendar* TemporalCalendar::toTemporalCalendarWithISODefault(JSGlobalObject* globalObject, JSValue temporalCalendarLike)
@@ -149,7 +147,10 @@ CalendarID TemporalCalendar::toTemporalCalendarIdentifier(JSGlobalObject* global
         RETURN_IF_EXCEPTION(scope, { });
     }
 
-    ASSERT(calendarId);
+    if (!calendarId) {
+        throwRangeError(globalObject, scope, "invalid calendar ID"_s);
+        return { };
+    }
 
     // FIXME: CanonicalizeCalendar
     return calendarId.value();
@@ -213,7 +214,7 @@ std::optional<CalendarID> TemporalCalendar::isBuiltinCalendar(StringView string)
 {
     const auto& calendars = intlAvailableCalendars();
     for (unsigned index = 0; index < calendars.size(); ++index) {
-        if (calendars[index] == string)
+        if (equalIgnoringASCIICase(calendars[index], string))
             return index;
     }
     return std::nullopt;
@@ -347,7 +348,10 @@ TemporalCalendar* TemporalCalendar::from(JSGlobalObject* globalObject, JSValue c
         RETURN_IF_EXCEPTION(scope, { });
     }
 
-    ASSERT(calendarId);
+    if (!calendarId) {
+        throwRangeError(globalObject, scope, "invalid calendar ID"_s);
+        return { };
+    }
     return TemporalCalendar::create(vm, globalObject->calendarStructure(), calendarId.value());
 }
 
