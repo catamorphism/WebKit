@@ -90,6 +90,13 @@ ISO8601::Duration TemporalDuration::fromDurationLike(JSGlobalObject* globalObjec
 
     ISO8601::Duration result;
     auto hasRelevantProperty = false;
+    double doubleDays = 0;
+    double doubleHours = 0;
+    double doubleMinutes = 0;
+    double doubleSeconds = 0;
+    double doubleMilliseconds = 0;
+    double doubleMicroseconds = 0;
+    double doubleNanoseconds = 0;
     for (TemporalUnit unit : temporalUnitsInTableOrder) {
         JSValue value = durationLike->get(globalObject, temporalUnitPluralPropertyName(vm, unit));
         RETURN_IF_EXCEPTION(scope, { });
@@ -106,6 +113,13 @@ ISO8601::Duration TemporalDuration::fromDurationLike(JSGlobalObject* globalObjec
             return { };
         }
 
+        // This has to be done before converting to int64_t
+        constexpr double limit = 1ULL << 32;
+        if (std::abs(doubleValue) >= limit && (unit < TemporalUnit::Day)) {
+            throwRangeError(globalObject, scope, "Temporal.Duration property is out of range"_s);
+            return { };
+        }
+
         switch (unit) {
             case TemporalUnit::Year:
                 result.setYears(static_cast<int64_t>(doubleValue));
@@ -118,30 +132,43 @@ ISO8601::Duration TemporalDuration::fromDurationLike(JSGlobalObject* globalObjec
                 break;
             case TemporalUnit::Day:
                 result.setDays(static_cast<int64_t>(doubleValue));
+                doubleDays = doubleValue;
                 break;
             case TemporalUnit::Hour:
                 result.setHours(static_cast<int64_t>(doubleValue));
+                doubleHours = doubleValue;
                 break;
             case TemporalUnit::Minute:
                 result.setMinutes(static_cast<int64_t>(doubleValue));
+                doubleMinutes = doubleValue;
                 break;
             case TemporalUnit::Second:
                 result.setSeconds(static_cast<int64_t>(doubleValue));
+                doubleSeconds = doubleValue;
                 break;
             case TemporalUnit::Millisecond:
                 result.setMilliseconds(static_cast<int64_t>(doubleValue));
+                doubleMilliseconds = doubleValue;
                 break;
             case TemporalUnit::Microsecond:
                 result.setMicroseconds(static_cast<Int128>(doubleValue));
+                doubleMicroseconds = doubleValue;
                 break;
             case TemporalUnit::Nanosecond:
                 result.setNanoseconds(static_cast<Int128>(doubleValue));
+                doubleNanoseconds = doubleValue;
                 break;
         }
     }
 
     if (!hasRelevantProperty) {
         throwTypeError(globalObject, scope, "Object must contain at least one Temporal.Duration property"_s);
+        return { };
+    }
+
+    // This has to be checked before converting to int64_t
+    if (!ISO8601::totalNanoseconds(doubleDays, doubleHours, doubleMinutes, doubleSeconds, doubleMilliseconds, doubleMicroseconds, doubleNanoseconds)) {
+        throwRangeError(globalObject, scope, "Temporal.Duration property is out of range"_s);
         return { };
     }
 

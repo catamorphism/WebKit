@@ -233,7 +233,7 @@ static int32_t parseDecimalInt32(std::span<const CharType> characters)
 
 // DurationHandleFractions ( fHours, minutes, fMinutes, seconds, fSeconds, milliseconds, fMilliseconds, microseconds, fMicroseconds, nanoseconds, fNanoseconds )
 // https://tc39.es/proposal-temporal/#sec-temporal-durationhandlefractions
-static void handleFraction(Duration& duration, int factor, StringView fractionString, TemporalUnit fractionType)
+static std::tuple<double, double, double, double, double> handleFraction(int factor, StringView fractionString, TemporalUnit fractionType)
 {
     auto fractionLength = fractionString.length();
     ASSERT(fractionLength && fractionLength <= 9 && fractionString.containsOnlyASCII());
@@ -245,28 +245,28 @@ static void handleFraction(Duration& duration, int factor, StringView fractionSt
 
     int64_t fraction = static_cast<int64_t>(factor) * parseDecimalInt32(padded.span());
     if (!fraction)
-        return;
+        return { };
 
     static constexpr int64_t divisor = 1'000'000'000LL;
+    double doubleMinutes = 0;
+    double doubleSeconds = 0;
     if (fractionType == TemporalUnit::Hour) {
         fraction *= 60;
-        duration.setMinutes(fraction / divisor);
+        doubleMinutes = fraction / divisor;
         fraction %= divisor;
         if (!fraction)
-            return;
+            return std::tuple(doubleMinutes, 0, 0, 0, 0);
     }
 
     if (fractionType != TemporalUnit::Second) {
         fraction *= 60;
-        duration.setSeconds(fraction / divisor);
+        doubleSeconds = fraction / divisor;
         fraction %= divisor;
         if (!fraction)
-            return;
+            return std::tuple(doubleMinutes, doubleSeconds, 0, 0, 0);
     }
 
-    duration.setMilliseconds(fraction / nsPerMillisecond);
-    duration.setMicroseconds(fraction % nsPerMillisecond / nsPerMicrosecond);
-    duration.setNanoseconds(fraction % nsPerMicrosecond);
+    return std::tuple(doubleMinutes, doubleSeconds, fraction / nsPerMillisecond, fraction % nsPerMillisecond / nsPerMicrosecond, fraction % nsPerMicrosecond);
 }
 
 // ParseTemporalDurationString ( isoString )
@@ -298,6 +298,13 @@ static std::optional<Duration> parseDuration(StringParsingBuffer<CharacterType>&
         return std::nullopt;
 
     buffer.advance();
+    double doubleDays = 0;
+    double doubleHours = 0;
+    double doubleMinutes = 0;
+    double doubleSeconds = 0;
+    double doubleMilliseconds = 0;
+    double doubleMicroseconds = 0;
+    double doubleNanoseconds = 0;
     for (unsigned datePartIndex = 0; datePartIndex < 4 && buffer.hasCharactersRemaining() && isASCIIDigit(*buffer); buffer.advance()) {
         unsigned digits = 1;
         while (digits < buffer.lengthRemaining() && isASCIIDigit(buffer[digits]))
@@ -305,6 +312,11 @@ static std::optional<Duration> parseDuration(StringParsingBuffer<CharacterType>&
 
         double integer = factor * parseInt(buffer.span().first(digits), 10);
         if (!std::isfinite(integer))
+            return std::nullopt;
+
+        // This has to be done before converting to int64_t
+        constexpr double limit = 1ULL << 32;
+        if (std::abs(integer) >= limit)
             return std::nullopt;
 
         buffer.advanceBy(digits);
@@ -315,23 +327,24 @@ static std::optional<Duration> parseDuration(StringParsingBuffer<CharacterType>&
         case 'Y':
             if (datePartIndex)
                 return std::nullopt;
-            result.setYears(integer);
+            result.setYears(static_cast<int64_t>(integer));
             datePartIndex = 1;
             break;
         case 'M':
             if (datePartIndex >= 2)
                 return std::nullopt;
-            result.setMonths(integer);
+            result.setMonths(static_cast<int64_t>(integer));
             datePartIndex = 2;
             break;
         case 'W':
             if (datePartIndex >= 3)
                 return std::nullopt;
-            result.setWeeks(integer);
+            result.setWeeks(static_cast<int64_t>(integer));
             datePartIndex = 3;
             break;
         case 'D':
-            result.setDays(integer);
+            result.setDays(static_cast<int64_t>(integer));
+            doubleDays = integer;
             datePartIndex = 4;
             break;
         default:
@@ -375,9 +388,15 @@ static std::optional<Duration> parseDuration(StringParsingBuffer<CharacterType>&
         case 'H':
             if (timePartIndex)
                 return std::nullopt;
-            result.setHours(integer);
+            result.setHours(static_cast<int64_t>(integer));
+            doubleHours = integer;
             if (fractionalPart) {
-                handleFraction(result, factor, fractionalPart, TemporalUnit::Hour);
+                auto [m, s, ms, us, ns] = handleFraction(factor, fractionalPart, TemporalUnit::Hour);
+                doubleMinutes = m;
+                doubleSeconds = s;
+                doubleMilliseconds = ms;
+                doubleMicroseconds = us;
+                doubleNanoseconds = ns;
                 timePartIndex = 3;
             } else
                 timePartIndex = 1;
@@ -385,23 +404,43 @@ static std::optional<Duration> parseDuration(StringParsingBuffer<CharacterType>&
         case 'M':
             if (timePartIndex >= 2)
                 return std::nullopt;
-            result.setMinutes(integer);
+            doubleMinutes += integer;
             if (fractionalPart) {
-                handleFraction(result, factor, fractionalPart, TemporalUnit::Minute);
+                auto [m, s, ms, us, ns] = handleFraction(factor, fractionalPart, TemporalUnit::Minute);
+                doubleMinutes += m;
+                doubleSeconds = s;
+                doubleMilliseconds = ms;
+                doubleMicroseconds = us;
+                doubleNanoseconds = ns;
                 timePartIndex = 3;
             } else
                 timePartIndex = 2;
             break;
         case 'S':
-            result.setSeconds(integer);
-            if (fractionalPart)
-                handleFraction(result, factor, fractionalPart, TemporalUnit::Second);
+            doubleSeconds += integer;
+            if (fractionalPart) {
+                auto [m, s, ms, us, ns] = handleFraction(factor, fractionalPart, TemporalUnit::Second);
+                doubleSeconds += s;
+                doubleMilliseconds = ms;
+                doubleMicroseconds = us;
+                doubleNanoseconds = ns;
+            }
             timePartIndex = 3;
             break;
         default:
             return std::nullopt;
         }
     }
+
+  // This has to be checked before converting to int64_t
+    if (!totalNanoseconds(doubleDays, doubleHours, doubleMinutes, doubleSeconds, doubleMilliseconds, doubleMicroseconds, doubleNanoseconds))
+        return std::nullopt;
+
+    result.setMinutes(static_cast<int64_t>(doubleMinutes));
+    result.setSeconds(static_cast<int64_t>(doubleSeconds));
+    result.setMilliseconds(static_cast<int64_t>(doubleMilliseconds));
+    result.setMicroseconds(static_cast<Int128>(doubleMicroseconds));
+    result.setNanoseconds(static_cast<Int128>(doubleNanoseconds));
 
     if (buffer.hasCharactersRemaining())
         return std::nullopt;
