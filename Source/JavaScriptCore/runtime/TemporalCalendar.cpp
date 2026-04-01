@@ -1006,8 +1006,8 @@ ISO8601::PlainDate TemporalCalendar::isoDateAdd(JSGlobalObject* globalObject, co
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    double years = plainDate.year() + duration.years();
-    double months = plainDate.month() + duration.months();
+    double years = static_cast<double>(plainDate.year()) + static_cast<double>(duration.years());
+    double months = static_cast<double>(plainDate.month()) + static_cast<double>(duration.months());
     uint8_t days = plainDate.day();
     ISO8601::PlainYearMonth intermediate = balanceISOYearMonth(years, months);
     std::optional<ISO8601::PlainDate> intermediate1 = TemporalPlainDate::regulateISODate(intermediate.year(), intermediate.month(), days, overflow);
@@ -1015,8 +1015,8 @@ ISO8601::PlainDate TemporalCalendar::isoDateAdd(JSGlobalObject* globalObject, co
         throwRangeError(globalObject, scope, "date time is out of range of ECMAScript representation"_s);
         return { };
     }
-    auto d = intermediate1.value().day() + duration.days() + (7 * duration.weeks());
-    auto result = balanceISODate(globalObject, intermediate1.value().year(), intermediate1.value().month(), d);
+    Int128 d = static_cast<Int128>(intermediate1.value().day()) + static_cast<Int128>(duration.days()) + (7 * static_cast<Int128>(duration.weeks()));
+    auto result = balanceISODate(globalObject, static_cast<Int128>(intermediate1.value().year()), static_cast<Int128>(intermediate1.value().month()), d);
     if (!ISO8601::isDateTimeWithinLimits(result.year(), result.month(), result.day(), 12, 0, 0, 0, 0, 0)) [[unlikely]] {
         throwRangeError(globalObject, scope, "date time is out of range of ECMAScript representation"_s);
         return { };
@@ -1024,7 +1024,7 @@ ISO8601::PlainDate TemporalCalendar::isoDateAdd(JSGlobalObject* globalObject, co
     return result;
 }
 
-static ISO8601::Duration dateDuration(double y, double m, double w, double d)
+static ISO8601::Duration dateDuration(int32_t y, int32_t m, int32_t w, int32_t d)
 {
     return ISO8601::Duration { y, m, w, d, 0, 0, 0, 0, 0, 0 };
 }

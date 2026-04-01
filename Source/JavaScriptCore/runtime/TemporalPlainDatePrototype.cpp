@@ -360,19 +360,22 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDatePrototypeFuncToPlainDateTime, (JSGloba
     if (plainDate->calendar()->identifier() != iso8601CalendarID())
         calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), plainDate->calendar()->identifier());
 
-    JSValue itemValue = callFrame->argument(0); 
+    JSValue itemValue = callFrame->argument(0);
+    ISO8601::PlainDateTime plainDateTime(plainDate->plainDate(), { });
+
     if (itemValue.isUndefined()) {
         if (calendar)
-            RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), { }, calendar)));
-        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), { }, std::nullopt)));
+            RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), WTF::move(plainDateTime), calendar)));
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), WTF::move(plainDateTime), std::nullopt)));
     }
 
     auto* plainTime = TemporalPlainTime::from(globalObject, itemValue, jsUndefined());
     RETURN_IF_EXCEPTION(scope, { });
+    plainDateTime = ISO8601::PlainDateTime(plainDate->plainDate(), plainTime->plainTime());
 
     if (calendar)
-        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), plainTime->plainTime(), calendar)));
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDate->plainDate(), plainTime->plainTime(), std::nullopt)));  
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), WTF::move(plainDateTime), calendar)));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), WTF::move(plainDateTime), std::nullopt)));  
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindate.prototype.tozoneddatetime

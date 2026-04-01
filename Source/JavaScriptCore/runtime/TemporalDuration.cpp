@@ -98,12 +98,45 @@ ISO8601::Duration TemporalDuration::fromDurationLike(JSGlobalObject* globalObjec
             continue;
 
         hasRelevantProperty = true;
-        result[unit] = value.toNumber(globalObject) + 0.0;
+        double doubleValue = value.toNumber(globalObject) + 0.0;
         RETURN_IF_EXCEPTION(scope, { });
 
-        if (!isInteger(result[unit])) {
+        if (!isInteger(doubleValue)) {
             throwRangeError(globalObject, scope, "Temporal.Duration properties must be integers"_s);
             return { };
+        }
+
+        switch (unit) {
+            case TemporalUnit::Year:
+                result.setYears(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Month:
+                result.setMonths(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Week:
+                result.setWeeks(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Day:
+                result.setDays(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Hour:
+                result.setHours(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Minute:
+                result.setMinutes(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Second:
+                result.setSeconds(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Millisecond:
+                result.setMilliseconds(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Microsecond:
+                result.setMicroseconds(static_cast<Int128>(doubleValue));
+                break;
+            case TemporalUnit::Nanosecond:
+                result.setNanoseconds(static_cast<Int128>(doubleValue));
+                break;
         }
     }
 
@@ -167,31 +200,6 @@ TemporalDuration* TemporalDuration::toTemporalDuration(JSGlobalObject* globalObj
     RETURN_IF_EXCEPTION(scope, nullptr);
 
     return TemporalDuration::create(vm, globalObject->durationStructure(), WTF::move(result));
-}
-
-// ToLimitedTemporalDuration ( temporalDurationLike, disallowedFields )
-// https://tc39.es/proposal-temporal/#sec-temporal-tolimitedtemporalduration
-ISO8601::Duration TemporalDuration::toLimitedDuration(JSGlobalObject* globalObject, JSValue itemValue, std::initializer_list<TemporalUnit> disallowedUnits)
-{
-    VM& vm = globalObject->vm();
-    auto scope = DECLARE_THROW_SCOPE(vm);
-
-    ISO8601::Duration duration = toISO8601Duration(globalObject, itemValue);
-    RETURN_IF_EXCEPTION(scope, { });
-
-    if (!isValidDuration(duration)) {
-        throwRangeError(globalObject, scope, "Temporal.Duration properties must be finite and of consistent sign"_s);
-        return { };
-    }
-
-    for (TemporalUnit unit : disallowedUnits) {
-        if (duration[unit]) {
-            throwRangeError(globalObject, scope, makeString("Adding "_s, temporalUnitPluralPropertyName(vm, unit).publicName(), " not supported by Temporal.Instant. Try Temporal.ZonedDateTime instead"_s));
-            return { };
-        }
-    }
-
-    return duration;
 }
 
 TemporalDuration* TemporalDuration::from(JSGlobalObject* globalObject, JSValue itemValue)
@@ -379,12 +387,27 @@ getTemporalRelativeToOption(JSGlobalObject* globalObject, JSObject* options)
 
 // DefaultTemporalLargestUnit ( years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds )
 // https://tc39.es/proposal-temporal/#sec-temporal-defaulttemporallargestunit
-static TemporalUnit largestSubduration(const ISO8601::Duration& duration)
+TemporalUnit TemporalDuration::largestSubduration(const ISO8601::Duration& duration)
 {
-    uint8_t index = 0;
-    while (index < numberOfTemporalUnits - 1 && !duration[index])
-        index++;
-    return static_cast<TemporalUnit>(index);
+    if (duration.years())
+        return TemporalUnit::Year;
+    if (duration.months())
+        return TemporalUnit::Month;
+    if (duration.weeks())
+        return TemporalUnit::Week;
+    if (duration.days())
+        return TemporalUnit::Day;
+    if (duration.hours())
+        return TemporalUnit::Hour;
+    if (duration.minutes())
+        return TemporalUnit::Minute;
+    if (duration.seconds())
+        return TemporalUnit::Second;
+    if (duration.milliseconds())
+        return TemporalUnit::Millisecond;
+    if (duration.microseconds())
+        return TemporalUnit::Microsecond;
+    return TemporalUnit::Nanosecond;
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-datedurationdays
@@ -493,19 +516,6 @@ JSValue TemporalDuration::compare(JSGlobalObject* globalObject, JSValue valueOne
     return jsNumber(timeDuration1 > timeDuration2 ? 1 : timeDuration1 < timeDuration2 ? -1 : 0);
 }
 
-int TemporalDuration::sign(const ISO8601::Duration& duration)
-{
-    for (auto value : duration) {
-        if (value < 0)
-            return -1;
-
-        if (value > 0)
-            return 1;
-    }
-
-    return 0;
-}
-
 ISO8601::Duration TemporalDuration::with(JSGlobalObject* globalObject, JSObject* durationLike) const
 {
     VM& vm = globalObject->vm();
@@ -518,18 +528,82 @@ ISO8601::Duration TemporalDuration::with(JSGlobalObject* globalObject, JSObject*
         RETURN_IF_EXCEPTION(scope, { });
 
         if (value.isUndefined()) {
-            result[unit] = m_duration[unit];
+            switch (unit) {
+            case TemporalUnit::Year:
+                result.setYears(m_duration.years());
+                break;
+            case TemporalUnit::Month:
+                result.setMonths(m_duration.months());
+                break;
+            case TemporalUnit::Week:
+                result.setWeeks(m_duration.weeks());
+                break;
+            case TemporalUnit::Day:
+                result.setDays(m_duration.days());
+                break;
+            case TemporalUnit::Hour:
+                result.setHours(m_duration.hours());
+                break;
+            case TemporalUnit::Minute:
+                result.setMinutes(m_duration.minutes());
+                break;
+            case TemporalUnit::Second:
+                result.setSeconds(m_duration.seconds());
+                break;
+            case TemporalUnit::Millisecond:
+                result.setMilliseconds(m_duration.milliseconds());
+                break;
+            case TemporalUnit::Microsecond:
+                result.setMicroseconds(m_duration.microseconds());
+                break;
+            case TemporalUnit::Nanosecond:
+                result.setNanoseconds(m_duration.nanoseconds());
+                break;
+            }
             continue;
         }
 
         hasRelevantProperty = true;
-        result[unit] = value.toNumber(globalObject);
+        double doubleValue = value.toNumber(globalObject);
         RETURN_IF_EXCEPTION(scope, { });
 
-        if (!isInteger(result[unit])) {
+        if (!isInteger(doubleValue)) {
             throwRangeError(globalObject, scope, "Temporal.Duration properties must be integers"_s);
             return { };
         }
+
+        switch (unit) {
+            case TemporalUnit::Year:
+                result.setYears(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Month:
+                result.setMonths(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Week:
+                result.setWeeks(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Day:
+                result.setDays(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Hour:
+                result.setHours(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Minute:
+                result.setMinutes(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Second:
+                result.setSeconds(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Millisecond:
+                result.setMilliseconds(static_cast<int64_t>(doubleValue));
+                break;
+            case TemporalUnit::Microsecond:
+                result.setMicroseconds(static_cast<Int128>(doubleValue));
+                break;
+            case TemporalUnit::Nanosecond:
+                result.setNanoseconds(static_cast<Int128>(doubleValue));
+                break;
+            }
     }
 
     if (!hasRelevantProperty) {
@@ -547,10 +621,7 @@ ISO8601::Duration TemporalDuration::negated() const
 
 ISO8601::Duration TemporalDuration::abs() const
 {
-    ISO8601::Duration result;
-    for (size_t i = 0; i < numberOfTemporalUnits; i++)
-        result[i] = std::abs(m_duration[i]);
-    return result;
+    return ISO8601::Duration(std::abs(m_duration.years()), std::abs(m_duration.months()), std::abs(m_duration.weeks()), std::abs(m_duration.days()), std::abs(m_duration.hours()), std::abs(m_duration.minutes()), std::abs(m_duration.seconds()), std::abs(m_duration.milliseconds()), absInt128(m_duration.microseconds()), absInt128(m_duration.nanoseconds()));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-timedurationfromcomponents
@@ -596,7 +667,7 @@ ISO8601::Duration TemporalDuration::toDateDurationRecordWithoutTime(JSGlobalObje
     auto internalDuration = toInternalDurationRecordWith24HourDays(globalObject, duration);
     RETURN_IF_EXCEPTION(scope, { });
     auto days = internalDuration.time() / ISO8601::ExactTime::nsPerDay;
-    return ISO8601::Duration { internalDuration.dateDuration().years(), internalDuration.dateDuration().months(), internalDuration.dateDuration().weeks(), static_cast<double>(days), 0, 0, 0, 0, 0, 0 };
+    return ISO8601::Duration { internalDuration.dateDuration().years(), internalDuration.dateDuration().months(), internalDuration.dateDuration().weeks(), static_cast<int64_t>(days), 0, 0, 0, 0, 0, 0 };
 }
 
 // BalanceDuration ( days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds, largestUnit [ , relativeTo ] )
@@ -786,9 +857,10 @@ ISO8601::Duration TemporalDuration::temporalDurationFromInternal(JSGlobalObject*
         nanoseconds *= sign;
     auto result = ISO8601::Duration { internalDuration.dateDuration().years(),
         internalDuration.dateDuration().months(), internalDuration.dateDuration().weeks(),
-        internalDuration.dateDuration().days() + days * sign, hours, minutes,
-        static_cast<double>(seconds), static_cast<double>(milliseconds),
-        static_cast<double>(microseconds), static_cast<double>(nanoseconds) };
+        static_cast<int64_t>(internalDuration.dateDuration().days() + days * sign),
+        static_cast<int64_t>(hours), static_cast<int64_t>(minutes),
+        static_cast<int64_t>(seconds), static_cast<int64_t>(milliseconds),
+        static_cast<Int128>(microseconds), static_cast<Int128>(nanoseconds) };
     if (!ISO8601::isValidDuration(result)) {
         throwRangeError(globalObject, scope,
             "total of duration time units cannot exceed 9007199254740991.999999999 s"_s);
@@ -858,7 +930,7 @@ static void appendInteger(JSGlobalObject* globalObject, StringBuilder& builder, 
 }
 */
 
-ISO8601::Duration TemporalDuration::adjustDateDurationRecord(JSGlobalObject* globalObject, const ISO8601::Duration& dateDuration, double days, std::optional<double> weeks, std::optional<double> months)
+ISO8601::Duration TemporalDuration::adjustDateDurationRecord(JSGlobalObject* globalObject, const ISO8601::Duration& dateDuration, int64_t days, std::optional<int32_t> weeks, std::optional<int32_t> months)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -906,8 +978,8 @@ NudgeWindow TemporalDuration::computeNudgeWindow(JSGlobalObject* globalObject, i
         else
             r1 = static_cast<double>(years) + static_cast<int32_t>(increment) * sign;
         r2 = r1 + static_cast<int32_t>(increment) * sign;
-        startDuration = ISO8601::Duration { r1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        endDuration = ISO8601::Duration { r2, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        startDuration = ISO8601::Duration { static_cast<int64_t>(r1), 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        endDuration = ISO8601::Duration { static_cast<int64_t>(r2), 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         break;
     }
     case TemporalUnit::Month: {
@@ -928,7 +1000,7 @@ NudgeWindow TemporalDuration::computeNudgeWindow(JSGlobalObject* globalObject, i
         RETURN_IF_EXCEPTION(scope, { });
         auto weeksStart = TemporalCalendar::isoDateAdd(globalObject, isoDate, yearsMonths, TemporalOverflow::Constrain);
         RETURN_IF_EXCEPTION(scope, { });
-        auto weeksEnd = TemporalCalendar::balanceISODate(globalObject, weeksStart.year(), weeksStart.month(), weeksStart.day() + duration.dateDuration().days());
+        auto weeksEnd = TemporalCalendar::balanceISODate(globalObject, static_cast<Int128>(weeksStart.year()), static_cast<Int128>(weeksStart.month()), static_cast<Int128>(weeksStart.day()) + static_cast<Int128>(duration.dateDuration().days()));
         auto untilResult = TemporalCalendar::calendarDateUntil(weeksStart, weeksEnd, TemporalUnit::Week);
         Int128 weeks = roundNumberToIncrementInt128(static_cast<Int128>(duration.dateDuration().weeks() + untilResult.weeks()), static_cast<Int128>(increment), RoundingMode::Trunc);
         r1 = static_cast<double>(weeks);
@@ -1309,7 +1381,7 @@ ISO8601::InternalDuration TemporalDuration::round(JSGlobalObject* globalObject, 
         double fractionalDays = totalTimeDuration(internalDuration.time(), TemporalUnit::Day);
         double days = roundNumberToIncrementDouble(fractionalDays, increment, mode);
         return ISO8601::InternalDuration::combineDateAndTimeDuration(
-            ISO8601::Duration { 0, 0, 0, (double) days, 0, 0, 0, 0, 0, 0 },
+            ISO8601::Duration { 0, 0, 0, static_cast<int64_t>(days), 0, 0, 0, 0, 0, 0 },
             0);
     } else  {
         std::optional<Int128> timeDuration =
@@ -1659,7 +1731,7 @@ String TemporalDuration::toString(JSGlobalObject* globalObject, const ISO8601::D
     auto scope = DECLARE_THROW_SCOPE(vm);
 
     StringBuilder builder;
-    auto sign = TemporalDuration::sign(duration);
+    auto sign = duration.sign();
     if (sign < 0)
         builder.append('-');
 

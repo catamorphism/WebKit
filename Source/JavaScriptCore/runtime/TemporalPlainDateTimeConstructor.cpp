@@ -89,23 +89,105 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainDateTime, (JSGlobalObject* global
     Structure* structure = JSC_GET_DERIVED_STRUCTURE(vm, plainDateTimeStructure, newTarget, callFrame->jsCallee());
     RETURN_IF_EXCEPTION(scope, { });
 
-    ISO8601::Duration duration { };
-    size_t dateTimeArgs = numberOfTemporalPlainDateUnits + numberOfTemporalPlainTimeUnits;
-    auto count = std::min<size_t>(callFrame->argumentCount(), dateTimeArgs);
-    for (unsigned i = 0; i < count; i++) {
-        unsigned durationIndex = i >= static_cast<unsigned>(TemporalUnit::Week) ? i + 1 : i;
-        if (durationIndex < numberOfTemporalPlainDateUnits)
-            duration[durationIndex] = callFrame->uncheckedArgument(i).toIntegerWithTruncation(globalObject);
-        else
-            duration[durationIndex] = callFrame->uncheckedArgument(i).toIntegerOrInfinity(globalObject);
+    int32_t year = 0;
+    unsigned month = 1;
+    unsigned day = 1;
+    uint8_t hour = 0;
+    uint8_t minute = 0;
+    uint8_t second = 0;
+    int32_t millisecond = 0;
+    int32_t microsecond = 0;
+    int32_t nanosecond = 0;
+
+    if (callFrame->argumentCount() < 1)
+        return throwVMRangeError(globalObject, scope, "not enough arguments to Temporal.PlainDateTime constructor"_s);
+
+    JSValue arg = callFrame->uncheckedArgument(0);
+    double doubleValue = 0;
+    if (arg.isUndefined())
+        return throwVMRangeError(globalObject, scope, "in Temporal.PlainDateTime constructor, year must be defined"_s);
+    doubleValue = arg.toIntegerWithTruncation(globalObject);
+    RETURN_IF_EXCEPTION(scope, { });
+    if (!std::isfinite(doubleValue))
+        return throwVMRangeError(globalObject, scope, "Temporal.PlainDateTime properties must be finite"_s);
+    year = static_cast<int32_t>(doubleValue);
+
+    if (callFrame->argumentCount() < 2)
+        return throwVMRangeError(globalObject, scope, "not enough arguments to Temporal.PlainDateTime constructor"_s);
+    
+    arg = callFrame->uncheckedArgument(1);
+    if (arg.isUndefined())
+        return throwVMRangeError(globalObject, scope, "in Temporal.PlainDateTime constructor, month must be defined"_s);
+    doubleValue = arg.toIntegerWithTruncation(globalObject);
+    RETURN_IF_EXCEPTION(scope, { });
+    if (!std::isfinite(doubleValue))
+        return throwVMRangeError(globalObject, scope, "Temporal.PlainDateTime properties must be finite"_s);
+    month = static_cast<unsigned>(doubleValue);
+
+    if (callFrame->argumentCount() < 3)
+        return throwVMRangeError(globalObject, scope, "not enough arguments to Temporal.PlainDateTime constructor"_s);
+
+    arg = callFrame->uncheckedArgument(2);
+    if (arg.isUndefined())
+        return throwVMRangeError(globalObject, scope, "in Temporal.PlainDateTime constructor, day must be defined"_s);
+    doubleValue = arg.toIntegerWithTruncation(globalObject);
+    RETURN_IF_EXCEPTION(scope, { });
+    if (!std::isfinite(doubleValue))
+        return throwVMRangeError(globalObject, scope, "Temporal.PlainDateTime properties must be finite"_s);
+    day = static_cast<unsigned>(doubleValue);
+
+    arg = callFrame->argument(3);
+    if (!arg.isUndefined()) {
+        doubleValue = arg.toIntegerWithTruncation(globalObject);
         RETURN_IF_EXCEPTION(scope, { });
-        if (!std::isfinite(duration[durationIndex]))
+        if (!std::isfinite(doubleValue))
             return throwVMRangeError(globalObject, scope, "Temporal.PlainDateTime properties must be finite"_s);
+        hour = static_cast<uint8_t>(doubleValue);
+    }
+    arg = callFrame->argument(4);
+    if (!arg.isUndefined()) {
+        doubleValue = arg.toIntegerWithTruncation(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+        if (!std::isfinite(doubleValue))
+            return throwVMRangeError(globalObject, scope, "Temporal.PlainDateTime properties must be finite"_s);
+        minute = static_cast<uint8_t>(doubleValue);
+    }
+    arg = callFrame->argument(5);
+    if (!arg.isUndefined()) {
+        doubleValue = arg.toIntegerWithTruncation(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+        if (!std::isfinite(doubleValue))
+            return throwVMRangeError(globalObject, scope, "Temporal.PlainDateTime properties must be finite"_s);
+        second = static_cast<uint8_t>(doubleValue);
+    }
+    arg = callFrame->argument(6);
+    if (!arg.isUndefined()) {
+        doubleValue = arg.toIntegerWithTruncation(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+        if (!std::isfinite(doubleValue))
+            return throwVMRangeError(globalObject, scope, "Temporal.PlainDateTime properties must be finite"_s);
+        millisecond = static_cast<int32_t>(doubleValue);
+    }
+    arg = callFrame->argument(7);
+    if (!arg.isUndefined()) {
+        doubleValue = arg.toIntegerWithTruncation(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+        if (!std::isfinite(doubleValue))
+            return throwVMRangeError(globalObject, scope, "Temporal.PlainDateTime properties must be finite"_s);
+        microsecond = static_cast<int32_t>(doubleValue);
+    }
+    arg = callFrame->argument(8);
+    if (!arg.isUndefined()) {
+        doubleValue = arg.toIntegerWithTruncation(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+        if (!std::isfinite(doubleValue))
+            return throwVMRangeError(globalObject, scope, "Temporal.PlainDateTime properties must be finite"_s);
+        nanosecond = static_cast<int32_t>(doubleValue);
     }
 
     std::optional<CalendarID> calendarID = std::nullopt;
-    if (callFrame->argumentCount() > dateTimeArgs) {
-        auto value = callFrame->uncheckedArgument(dateTimeArgs);
+    if (callFrame->argumentCount() > 9) {
+        auto value = callFrame->uncheckedArgument(9);
         if (!value.isUndefined()) {
             if (!value.isString())
                 return throwVMTypeError(globalObject, scope, "Temporal.PlainDateTime calendar must be a string"_s);
@@ -121,12 +203,16 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainDateTime, (JSGlobalObject* global
         }
     }
 
+    ISO8601::PlainDate plainDate = ISO8601::PlainDate(year, month, day);
+    ISO8601::PlainTime plainTime = ISO8601::PlainTime(hour, minute, second, millisecond, microsecond, nanosecond);
+    ISO8601::PlainDateTime plainDateTime = ISO8601::PlainDateTime(WTF::move(plainDate), WTF::move(plainTime));
+
     if (calendarID) {
         TemporalCalendar* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), calendarID.value());
         RETURN_IF_EXCEPTION(scope, { });
-        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, structure, WTF::move(duration), calendar)));
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, structure, WTF::move(plainDateTime), calendar)));
     }
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, structure, WTF::move(duration), std::nullopt)));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, structure, WTF::move(plainDateTime), std::nullopt)));
 }
 
 JSC_DEFINE_HOST_FUNCTION(callTemporalPlainDateTime, (JSGlobalObject* globalObject, CallFrame*))
@@ -152,7 +238,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimeConstructorFuncFrom, (JSGlobalObje
         toTemporalOverflow(globalObject, options);
         RETURN_IF_EXCEPTION(scope, { });
 
-        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(), jsCast<TemporalPlainDateTime*>(itemValue)->plainDate(), jsCast<TemporalPlainDateTime*>(itemValue)->plainTime())));
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(), jsCast<TemporalPlainDateTime*>(itemValue)->plainDateTime())));
     }
 
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::from(globalObject, itemValue, callFrame->argument(1))));

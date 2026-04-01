@@ -241,6 +241,19 @@ const TemporalUnit temporalUnitsInTableOrder[numberOfTemporalUnits] = {
     TemporalUnit::Year,
 };
 
+const TemporalUnit temporalUnitsInSizeOrder[numberOfTemporalUnits] = {
+    TemporalUnit::Year,
+    TemporalUnit::Month,
+    TemporalUnit::Week,
+    TemporalUnit::Day,
+    TemporalUnit::Hour,
+    TemporalUnit::Minute,
+    TemporalUnit::Second,
+    TemporalUnit::Millisecond,
+    TemporalUnit::Microsecond,
+    TemporalUnit::Nanosecond,
+};
+
 std::optional<TemporalUnit> temporalUnitType(StringView unit)
 {
     StringView singular = singularUnit(unit);

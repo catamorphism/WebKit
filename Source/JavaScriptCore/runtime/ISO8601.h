@@ -41,53 +41,78 @@ static constexpr int32_t outOfRangeYear = minYear - 1;
 class Duration {
     WTF_MAKE_TZONE_ALLOCATED(Duration);
 public:
-    using const_iterator = std::array<double, numberOfTemporalUnits>::const_iterator;
 
     Duration() = default;
-    Duration(double years, double months, double weeks, double days, double hours, double minutes, double seconds, double milliseconds, double microseconds, double nanoseconds)
-        : m_data {
-            years,
-            months,
-            weeks,
-            days,
-            hours,
-            minutes,
-            seconds,
-            milliseconds,
-            microseconds,
-            nanoseconds,
-        }
+    Duration(int64_t years, int64_t months, int64_t weeks, int64_t days, int64_t hours, int64_t minutes, int64_t seconds, int64_t milliseconds, Int128 microseconds, Int128 nanoseconds)
+        : m_years(years),
+          m_months(months),
+          m_weeks(weeks),
+          m_days(days),
+          m_hours(hours),
+          m_minutes(minutes),
+          m_seconds(seconds),
+          m_milliseconds(milliseconds),
+          m_microseconds(microseconds),
+          m_nanoseconds(nanoseconds)
     { }
 
-#define JSC_DEFINE_ISO8601_DURATION_FIELD(name, capitalizedName) \
-    double name##s() const { return m_data[static_cast<uint8_t>(TemporalUnit::capitalizedName)]; } \
-    void set##capitalizedName##s(double value) { m_data[static_cast<uint8_t>(TemporalUnit::capitalizedName)] = !value ? 0 : value; }
-    JSC_TEMPORAL_UNITS(JSC_DEFINE_ISO8601_DURATION_FIELD);
-#undef JSC_DEFINE_ISO8601_DURATION_FIELD
+    int64_t years() const { return m_years; }
+    int64_t months() const { return m_months; }
+    int64_t weeks() const { return m_weeks; }
+    int64_t days() const { return m_days; }
+    int64_t hours() const { return m_hours; }
+    int64_t minutes() const { return m_minutes; }
+    int64_t seconds() const { return m_seconds; }
+    int64_t milliseconds() const { return m_milliseconds; }
+    Int128 microseconds() const { return m_microseconds; }
+    Int128 nanoseconds() const { return m_nanoseconds; }
 
-    double& operator[](size_t i) { return m_data[i]; }
-    const double& operator[](size_t i) const { return m_data[i]; }
-    double& operator[](TemporalUnit u) { return m_data[static_cast<uint8_t>(u)]; }
-    const double& operator[](TemporalUnit u) const { return m_data[static_cast<uint8_t>(u)]; }
-    const_iterator begin() const { return m_data.begin(); }
-    const_iterator end() const { return m_data.end(); }
-    void clear() { m_data.fill(0); }
+    void setYears(int64_t value) { m_years = !value ? 0 : value; }
+    void setMonths(int64_t value) { m_months = !value ? 0 : value; }
+    void setWeeks(int64_t value) { m_weeks = !value ? 0 : value; }
+    void setDays(int64_t value) { m_days = !value ? 0 : value; }
+    void setHours(int64_t value) { m_hours = !value ? 0 : value; }
+    void setMinutes(int64_t value) { m_minutes = !value ? 0 : value; }
+    void setSeconds(int64_t value) { m_seconds = !value ? 0 : value; }
+    void setMilliseconds(int64_t value) { m_milliseconds = !value ? 0 : value; }
+    void setMicroseconds(Int128 value) { m_microseconds = !value ? 0 : value; }
+    void setNanoseconds(Int128 value) { m_nanoseconds = !value ? 0 : value; }
+
+    void clear() {
+        m_years = 0;
+        m_months = 0;
+        m_weeks = 0;
+        m_days = 0;
+        m_hours = 0;
+        m_minutes = 0;
+        m_seconds = 0;
+        m_milliseconds = 0;
+        m_microseconds = 0;
+        m_nanoseconds = 0;
+    }
 
     template<TemporalUnit unit>
     std::optional<Int128> totalNanoseconds() const;
 
     Duration operator-() const
     {
-        Duration result(*this);
-        for (auto& value : result.m_data) {
-            if (value)
-                value = -value;
-        }
-        return result;
+        return Duration(-m_years, -m_months, -m_weeks, -m_days, -m_hours, -m_minutes, -m_seconds, -m_milliseconds, -m_microseconds, -m_nanoseconds);
     }
 
+    int sign() const;
+
 private:
-    std::array<double, numberOfTemporalUnits> m_data { };
+    // Need int64_t to represent unbalanced durations.
+    int64_t m_years = 0;
+    int64_t m_months = 0;
+    int64_t m_weeks = 0;
+    int64_t m_days = 0;
+    int64_t m_hours = 0;
+    int64_t m_minutes = 0;
+    int64_t m_seconds = 0;
+    int64_t m_milliseconds = 0;
+    Int128 m_microseconds = 0;
+    Int128 m_nanoseconds = 0;
 };
 
 class InternalDuration;
@@ -163,7 +188,7 @@ public:
         return (one < two ? -1 : one == two ? 0 : 1);
     }
 
-    std::optional<ExactTime> add(Duration) const;
+    std::optional<ExactTime> add(Int128) const;
     InternalDuration difference(JSGlobalObject*, ExactTime, unsigned, TemporalUnit, RoundingMode) const;
     ExactTime round(JSGlobalObject*, unsigned, TemporalUnit, RoundingMode) const;
 
@@ -624,6 +649,10 @@ Int128 roundTimeDurationToIncrement(JSGlobalObject*, Int128, Int128, RoundingMod
 int32_t compareTimeRecord(const PlainTime&, const PlainTime&);
 
 Int128 roundTemporalInstant(Int128, unsigned, TemporalUnit, RoundingMode);
+
+static inline int sign(int32_t value) { return value > 0 ? 1 : -1; }
+
+std::optional<Int128> totalNanoseconds(double days, double hours, double minutes, double seconds, double milliseconds, double microseconds, double nanoseconds);
 
 } // namespace ISO8601
 

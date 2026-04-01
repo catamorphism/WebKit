@@ -107,7 +107,7 @@ static constexpr std::initializer_list<TemporalUnit> disallowedAdditionUnits = {
     TemporalUnit::Day,
 };
 
-JSC_DEFINE_HOST_FUNCTION(temporalInstantPrototypeFuncAdd, (JSGlobalObject* globalObject, CallFrame* callFrame))
+static EncodedJSValue addOrSubtract(JSGlobalObject* globalObject, CallFrame* callFrame, AddOrSubtract op)
 {
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
@@ -116,37 +116,35 @@ JSC_DEFINE_HOST_FUNCTION(temporalInstantPrototypeFuncAdd, (JSGlobalObject* globa
     if (!instant)
         return throwVMTypeError(globalObject, scope, "Temporal.Instant.prototype.add called on value that's not a Instant"_s);
 
-    ISO8601::Duration duration = TemporalDuration::toLimitedDuration(globalObject, callFrame->argument(0), disallowedAdditionUnits);
+    ISO8601::Duration duration = TemporalDuration::toISO8601Duration(globalObject, callFrame->argument(0));
     RETURN_IF_EXCEPTION(scope, { });
 
-    std::optional<ISO8601::ExactTime> newExactTime = instant->exactTime().add(duration);
-    if (!newExactTime) {
+    if (op == AddOrSubtract::Subtract)
+        duration = -duration;
+
+    TemporalUnit largestUnit = TemporalDuration::largestSubduration(duration);
+    if (largestUnit < TemporalUnit::Hour)
+        return throwVMRangeError(globalObject, scope, "invalid unit in Temporal.Instant.prototype.add"_s);
+
+    ISO8601::InternalDuration internalDuration = TemporalDuration::toInternalDurationRecordWith24HourDays(globalObject, duration);
+    RETURN_IF_EXCEPTION(scope, { });
+    std::optional<ISO8601::ExactTime> ns = instant->exactTime().add(internalDuration.time());
+    if (!ns) {
         throwRangeError(globalObject, scope, "Addition is outside of supported range for Temporal.Instant"_s);
         return { };
     }
 
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalInstant::tryCreateIfValid(globalObject, *newExactTime)));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalInstant::tryCreateIfValid(globalObject, *ns)));
+}
+
+JSC_DEFINE_HOST_FUNCTION(temporalInstantPrototypeFuncAdd, (JSGlobalObject* globalObject, CallFrame* callFrame))
+{
+    return addOrSubtract(globalObject, callFrame, AddOrSubtract::Add);
 }
 
 JSC_DEFINE_HOST_FUNCTION(temporalInstantPrototypeFuncSubtract, (JSGlobalObject* globalObject, CallFrame* callFrame))
 {
-    VM& vm = globalObject->vm();
-    auto scope = DECLARE_THROW_SCOPE(vm);
-
-    TemporalInstant* instant = jsDynamicCast<TemporalInstant*>(callFrame->thisValue());
-    if (!instant)
-        return throwVMTypeError(globalObject, scope, "Temporal.Instant.prototype.subtract called on value that's not a Instant"_s);
-
-    ISO8601::Duration duration = TemporalDuration::toLimitedDuration(globalObject, callFrame->argument(0), disallowedAdditionUnits);
-    RETURN_IF_EXCEPTION(scope, { });
-
-    std::optional<ISO8601::ExactTime> newExactTime = instant->exactTime().add(-duration);
-    if (!newExactTime) {
-        throwRangeError(globalObject, scope, "Subtraction is outside of supported range for Temporal.Instant"_s);
-        return { };
-    }
-
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalInstant::tryCreateIfValid(globalObject, *newExactTime)));
+    return addOrSubtract(globalObject, callFrame, AddOrSubtract::Subtract);
 }
 
 JSC_DEFINE_HOST_FUNCTION(temporalInstantPrototypeFuncUntil, (JSGlobalObject* globalObject, CallFrame* callFrame))

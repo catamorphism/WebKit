@@ -296,7 +296,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncWithCalendar, (JSGlob
     RETURN_IF_EXCEPTION(scope, { });
     TemporalCalendar* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), calendarID);
 
-    return JSValue::encode(TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(), plainDateTime->plainDate(), plainDateTime->plainTime(), WTF::move(calendar)));
+    return JSValue::encode(TemporalPlainDateTime::create(vm, globalObject->plainDateTimeStructure(), plainDateTime->plainDateTime(), WTF::move(calendar)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindatetime.prototype.withplaintime
@@ -316,12 +316,14 @@ JSC_DEFINE_HOST_FUNCTION(temporalPlainDateTimePrototypeFuncWithPlainTime, (JSGlo
         RETURN_IF_EXCEPTION(scope, { });
     }
 
+    ISO8601::PlainDateTime isoPlainDateTime(plainDateTime->plainDate(), plainTime ? plainTime->plainTime() : ISO8601::PlainTime());
+
     if (plainDateTime->calendar()->identifier() != iso8601CalendarID()) {
         TemporalCalendar* calendar = TemporalCalendar::create(vm, globalObject->calendarStructure(), plainDateTime->calendar()->identifier());
-        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDateTime->plainDate(), plainTime ? plainTime->plainTime() : ISO8601::PlainTime(), calendar)));
+        RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), WTF::move(isoPlainDateTime), calendar)));
     }
         
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), plainDateTime->plainDate(), plainTime ? plainTime->plainTime() : ISO8601::PlainTime(), std::nullopt)));
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainDateTime::tryCreateIfValid(globalObject, globalObject->plainDateTimeStructure(), WTF::move(isoPlainDateTime), std::nullopt)));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal.plaindatetime.prototype.round

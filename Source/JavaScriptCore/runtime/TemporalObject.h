@@ -70,6 +70,7 @@ static constexpr unsigned numberOfTemporalPlainMonthDayUnits = 0 JSC_TEMPORAL_PL
 #undef JSC_COUNT_TEMPORAL_UNITS
 
 extern const TemporalUnit temporalUnitsInTableOrder[numberOfTemporalUnits];
+extern const TemporalUnit temporalUnitsInSizeOrder[numberOfTemporalUnits];
 
 class TemporalObject final : public JSNonFinalObject {
 public:

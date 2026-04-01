@@ -304,6 +304,9 @@ static std::optional<Duration> parseDuration(StringParsingBuffer<CharacterType>&
             digits++;
 
         double integer = factor * parseInt(buffer.span().first(digits), 10);
+        if (!std::isfinite(integer))
+            return std::nullopt;
+
         buffer.advanceBy(digits);
         if (buffer.atEnd())
             return std::nullopt;
@@ -2122,29 +2125,68 @@ std::optional<Int128> Duration::totalNanoseconds() const
 
     return resultNs;
 }
+
+std::optional<Int128> totalNanoseconds(double days, double hours, double minutes, double seconds, double milliseconds, double microseconds, double nanoseconds)
+{
+    CheckedInt128 resultNs { 0 };
+
+    CheckedInt128 daysInt = checkedCastDoubleToInt128(days);
+    resultNs += daysInt * ExactTime::nsPerDay;
+    CheckedInt128 hoursInt = checkedCastDoubleToInt128(hours);
+    resultNs += hoursInt * ExactTime::nsPerHour;
+    CheckedInt128 minutesInt = checkedCastDoubleToInt128(minutes);
+    resultNs += minutesInt * ExactTime::nsPerMinute;
+    CheckedInt128 secondsInt = checkedCastDoubleToInt128(seconds);
+    resultNs += secondsInt * ExactTime::nsPerSecond;
+    CheckedInt128 millisecondsInt = checkedCastDoubleToInt128(milliseconds);
+    resultNs += millisecondsInt * ExactTime::nsPerMillisecond;
+    CheckedInt128 microsecondsInt = checkedCastDoubleToInt128(microseconds);
+    resultNs += microsecondsInt * ExactTime::nsPerMicrosecond;
+    CheckedInt128 nanosecondsInt = checkedCastDoubleToInt128(nanoseconds);
+    resultNs += nanosecondsInt;
+
+    if (resultNs.hasOverflowed())
+        return std::nullopt;
+    return resultNs;
+}
+
 template std::optional<Int128> Duration::totalNanoseconds<TemporalUnit::Day>() const;
 template std::optional<Int128> Duration::totalNanoseconds<TemporalUnit::Second>() const;
 template std::optional<Int128> Duration::totalNanoseconds<TemporalUnit::Millisecond>() const;
 template std::optional<Int128> Duration::totalNanoseconds<TemporalUnit::Microsecond>() const;
 
+static bool checkDurationField(int64_t value, int sign)
+{
+    return !((value < 0 && sign > 0) || (value > 0 && sign < 0));
+}
+
+static bool checkDurationField(Int128 value, int sign)
+{
+    return !((value < 0 && sign > 0) || (value > 0 && sign < 0));
+}
+
 // IsValidDuration ( years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds )
 // https://tc39.es/proposal-temporal/#sec-temporal-isvalidduration
 bool isValidDuration(const Duration& duration)
 {
-    int sign = 0;
-    for (auto value : duration) {
-        if (!std::isfinite(value) || (value < 0 && sign > 0) || (value > 0 && sign < 0))
-            return false;
-
-        if (!sign && value)
-            sign = value > 0 ? 1 : -1;
-    }
+    int32_t sign = duration.sign();
+    if (!checkDurationField(duration.years(), sign)
+        || !checkDurationField(duration.months(), sign)
+        || !checkDurationField(duration.weeks(), sign)
+        || !checkDurationField(duration.days(), sign)
+        || !checkDurationField(duration.hours(), sign)
+        || !checkDurationField(duration.minutes(), sign)
+        || !checkDurationField(duration.seconds(), sign)
+        || !checkDurationField(duration.milliseconds(), sign)
+        || !checkDurationField(duration.microseconds(), sign)
+        || !checkDurationField(duration.nanoseconds(), sign))
+        return false;
 
     // 3. If abs(years) ≥ 2^32, return false.
     // 4. If abs(months) ≥ 2^32, return false.
     // 5. If abs(weeks) ≥ 2^32, return false.
     constexpr double limit = 1ULL << 32;
-    if (std::abs(duration[TemporalUnit::Year]) >= limit || std::abs(duration[TemporalUnit::Month]) >= limit || std::abs(duration[TemporalUnit::Week]) >= limit)
+    if (std::abs(duration.years()) >= limit || std::abs(duration.months()) >= limit || std::abs(duration.weeks()) >= limit)
         return false;
 
     // 6. Let normalizedSeconds be days × 86,400 + hours × 3600 + minutes × 60 + seconds + ℝ(𝔽(milliseconds)) × 10^-3 + ℝ(𝔽(microseconds)) × 10^-6 + ℝ(𝔽(nanoseconds)) × 10^-9.
@@ -2157,31 +2199,10 @@ bool isValidDuration(const Duration& duration)
     return true;
 }
 
-std::optional<ExactTime> ExactTime::add(Duration duration) const
+std::optional<ExactTime> ExactTime::add(Int128 timeDuration) const
 {
-    ASSERT(!duration.years());
-    ASSERT(!duration.months());
-    ASSERT(!duration.weeks());
-    ASSERT(!duration.days());
+    CheckedInt128 resultNs { m_epochNanoseconds + timeDuration };
 
-    CheckedInt128 resultNs { m_epochNanoseconds };
-
-    // The duration's hours, minutes, seconds, and milliseconds should be
-    // able to be cast into a 64-bit int. 2*1e8 24-hour days is the maximum
-    // time span for exact time, so if we already know that the duration exceeds
-    // that, then we can bail out.
-
-    CheckedInt128 hours = checkedCastDoubleToInt128(duration.hours());
-    resultNs += hours * ExactTime::nsPerHour;
-    CheckedInt128 minutes = checkedCastDoubleToInt128(duration.minutes());
-    resultNs += minutes * ExactTime::nsPerMinute;
-    CheckedInt128 seconds = checkedCastDoubleToInt128(duration.seconds());
-    resultNs += seconds * ExactTime::nsPerSecond;
-    CheckedInt128 milliseconds = checkedCastDoubleToInt128(duration.milliseconds());
-    resultNs += milliseconds * ExactTime::nsPerMillisecond;
-    CheckedInt128 microseconds = checkedCastDoubleToInt128(duration.microseconds());
-    resultNs += microseconds * ExactTime::nsPerMicrosecond;
-    resultNs += checkedCastDoubleToInt128(duration.nanoseconds());
     if (resultNs.hasOverflowed())
         return std::nullopt;
 
@@ -2402,6 +2423,51 @@ int32_t compareTimeRecord(const PlainTime& time1, const PlainTime& time2)
         return 1;
     if (time1.nanosecond() < time2.nanosecond())
         return -1;
+    return 0;
+}
+
+int Duration::sign() const
+{
+    if (years() < 0)
+        return -1;
+    if (years() > 0)
+        return 1;
+    if (months() < 0)
+        return -1;
+    if (months() > 0)
+        return 1;
+    if (weeks() < 0)
+        return -1;
+    if (weeks() > 0)
+        return 1;
+    if (days() < 0)
+        return -1;
+    if (days() > 0)
+        return 1;
+    if (hours() < 0)
+        return -1;
+    if (hours() > 0)
+        return 1;
+    if (minutes() < 0)
+        return -1;
+    if (minutes() > 0)
+        return 1;
+    if (seconds() < 0)
+        return -1;
+    if (seconds() > 0)
+        return 1;
+    if (milliseconds() < 0)
+        return -1;
+    if (milliseconds() > 0)
+        return 1;
+    if (microseconds() < 0)
+        return -1;
+    if (microseconds() > 0)
+        return 1;
+    if (nanoseconds() < 0)
+        return -1;
+    if (nanoseconds() > 0)
+        return 1;
     return 0;
 }
 

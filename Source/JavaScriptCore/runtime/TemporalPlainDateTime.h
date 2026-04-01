@@ -42,10 +42,9 @@ public:
         return vm.temporalPlainDateTimeSpace<mode>();
     }
 
-    static TemporalPlainDateTime* create(VM&, Structure*, ISO8601::PlainDate&&, ISO8601::PlainTime&&);
-    static TemporalPlainDateTime* create(VM&, Structure*, ISO8601::PlainDate&&, ISO8601::PlainTime&&, TemporalCalendar*);
-    static TemporalPlainDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDate&&, ISO8601::PlainTime&&, std::optional<TemporalCalendar*>);
-    static TemporalPlainDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::Duration&&, std::optional<TemporalCalendar*>);
+    static TemporalPlainDateTime* create(VM&, Structure*, ISO8601::PlainDateTime&&);
+    static TemporalPlainDateTime* create(VM&, Structure*, ISO8601::PlainDateTime&&, TemporalCalendar*);
+    static TemporalPlainDateTime* tryCreateIfValid(JSGlobalObject*, Structure*, ISO8601::PlainDateTime&&, std::optional<TemporalCalendar*>);
     static Structure* createStructure(VM&, JSGlobalObject*, JSValue);
 
     DECLARE_INFO;
@@ -56,6 +55,7 @@ public:
     TemporalCalendar* calendar() LIFETIME_BOUND { return m_calendar.get(this); }
     ISO8601::PlainDate plainDate() const { return m_plainDate; }
     ISO8601::PlainTime plainTime() const { return m_plainTime; }
+    ISO8601::PlainDateTime plainDateTime() const { return ISO8601::PlainDateTime(m_plainDate, m_plainTime); }
 
 #define JSC_DEFINE_TEMPORAL_PLAIN_DATE_FIELD(name, capitalizedName) \
     decltype(auto) name() const { return m_plainDate.name(); }

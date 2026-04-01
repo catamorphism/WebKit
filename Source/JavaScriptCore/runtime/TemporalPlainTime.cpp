@@ -138,15 +138,9 @@ ISO8601::PlainTime TemporalPlainTime::toPlainTime(JSGlobalObject* globalObject, 
 
 // CreateTemporalPlainTime ( years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds [ , newTarget ] )
 // https://tc39.es/proposal-temporal/#sec-temporal-createtemporalplainTime
-TemporalPlainTime* TemporalPlainTime::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::Duration&& duration)
+TemporalPlainTime* TemporalPlainTime::tryCreateIfValid(JSGlobalObject* globalObject, Structure* structure, ISO8601::PlainTime&& plainTime)
 {
-    VM& vm = globalObject->vm();
-    auto scope = DECLARE_THROW_SCOPE(vm);
-
-    auto plainTime = toPlainTime(globalObject, duration);
-    RETURN_IF_EXCEPTION(scope, { });
-
-    return TemporalPlainTime::create(vm, structure, WTF::move(plainTime));
+    return TemporalPlainTime::create(globalObject->vm(), structure, WTF::move(plainTime));
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-balancetime
@@ -371,7 +365,39 @@ ISO8601::Duration TemporalPlainTime::toTemporalTimeRecord(JSGlobalObject* global
             throwRangeError(globalObject, scope, "Temporal time properties must be finite"_s);
             return { };
         }
-        duration[unit] = integer;
+
+        switch (unit) {
+            case TemporalUnit::Year:
+                duration.setYears(static_cast<int32_t>(integer));
+                break;
+            case TemporalUnit::Month:
+                duration.setMonths(static_cast<int32_t>(integer));
+                break;
+            case TemporalUnit::Week:
+                duration.setWeeks(static_cast<int32_t>(integer));
+                break;
+            case TemporalUnit::Day:
+                duration.setDays(static_cast<int32_t>(integer));
+                break;
+            case TemporalUnit::Hour:
+                duration.setHours(static_cast<int64_t>(integer));
+                break;
+            case TemporalUnit::Minute:
+                duration.setMinutes(static_cast<int64_t>(integer));
+                break;
+            case TemporalUnit::Second:
+                duration.setSeconds(static_cast<int64_t>(integer));
+                break;
+            case TemporalUnit::Millisecond:
+                duration.setMilliseconds(static_cast<int64_t>(integer));
+                break;
+            case TemporalUnit::Microsecond:
+                duration.setMicroseconds(static_cast<Int128>(integer));
+                break;
+            case TemporalUnit::Nanosecond:
+                duration.setNanoseconds(static_cast<Int128>(integer));
+                break;
+        }
     }
 
     if (!hasRelevantProperty && !skipRelevantPropertyCheck) {

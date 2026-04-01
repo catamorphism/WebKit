@@ -90,19 +90,77 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalDuration, (JSGlobalObject* globalObjec
     RETURN_IF_EXCEPTION(scope, { });
 
     ISO8601::Duration result;
-    auto count = std::min<size_t>(callFrame->argumentCount(), numberOfTemporalUnits);
-    for (size_t i = 0; i < count; i++) {
-        JSValue value = callFrame->uncheckedArgument(i);
+    int64_t count = 0;
+    int64_t max = callFrame->argumentCount();
+    double doubleDays = 0;
+    double doubleHours = 0;
+    double doubleMinutes = 0;
+    double doubleSeconds = 0;
+    double doubleMilliseconds = 0;
+    double doubleMicroseconds = 0;
+    double doubleNanoseconds = 0;
+    for (TemporalUnit unit : temporalUnitsInSizeOrder) {
+        if (count >= max)
+            break;
+        JSValue value = callFrame->uncheckedArgument(count++);
         if (value.isUndefined())
             continue;
 
-        result[i] = value.toNumber(globalObject) + 0.0;
+        double doubleValue = value.toNumber(globalObject) + 0.0;
         RETURN_IF_EXCEPTION(scope, { });
 
-        if (!isInteger(result[i]))
+        if (!isInteger(doubleValue))
             return throwVMRangeError(globalObject, scope, "Temporal.Duration properties must be integers"_s);
+
+        // This has to be done before converting to int64_t
+        constexpr double limit = 1ULL << 32;
+        if (std::abs(doubleValue) >= limit && (unit < TemporalUnit::Day))
+            return throwVMRangeError(globalObject, scope, "Temporal.Duration property is out of range"_s);
+
+        switch (unit) {
+        case TemporalUnit::Year:
+            result.setYears(static_cast<int64_t>(doubleValue));
+            break;
+        case TemporalUnit::Month:
+            result.setMonths(static_cast<int64_t>(doubleValue));
+            break;
+        case TemporalUnit::Week:
+            result.setWeeks(static_cast<int64_t>(doubleValue));
+            break;
+        case TemporalUnit::Day:
+            result.setDays(static_cast<int64_t>(doubleValue));
+            doubleDays = doubleValue;
+            break;
+        case TemporalUnit::Hour:
+            result.setHours(static_cast<int64_t>(doubleValue));
+            doubleHours = doubleValue;
+            break;
+        case TemporalUnit::Minute:
+            result.setMinutes(static_cast<int64_t>(doubleValue));
+            doubleMinutes = doubleValue;
+            break;
+        case TemporalUnit::Second:
+            result.setSeconds(static_cast<int64_t>(doubleValue));
+            doubleSeconds = doubleValue;
+            break;
+        case TemporalUnit::Millisecond:
+            result.setMilliseconds(static_cast<int64_t>(doubleValue));
+            doubleMilliseconds = doubleValue;
+            break;
+        case TemporalUnit::Microsecond:
+            result.setMicroseconds(static_cast<Int128>(doubleValue));
+            doubleMicroseconds = doubleValue;
+            break;
+        case TemporalUnit::Nanosecond:
+            result.setNanoseconds(static_cast<Int128>(doubleValue));
+            doubleNanoseconds = doubleValue;
+            break;
+        }
     }
 
+    // This has to be checked before converting to int64_t
+    if (!ISO8601::totalNanoseconds(doubleDays, doubleHours, doubleMinutes, doubleSeconds, doubleMilliseconds, doubleMicroseconds, doubleNanoseconds))
+        return throwVMRangeError(globalObject, scope, "Temporal.Duration property is out of range"_s);
     RELEASE_AND_RETURN(scope, JSValue::encode(TemporalDuration::tryCreateIfValid(globalObject, WTF::move(result), structure)));
 }
 

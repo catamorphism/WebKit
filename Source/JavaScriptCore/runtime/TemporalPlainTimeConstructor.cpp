@@ -89,21 +89,66 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalPlainTime, (JSGlobalObject* globalObje
     Structure* structure = JSC_GET_DERIVED_STRUCTURE(vm, plainTimeStructure, newTarget, callFrame->jsCallee());
     RETURN_IF_EXCEPTION(scope, { });
 
-    ISO8601::Duration duration { };
-    auto count = std::min<size_t>(callFrame->argumentCount(), numberOfTemporalPlainTimeUnits);
-    for (unsigned i = 0; i < count; i++) {
-        unsigned durationIndex = i + static_cast<unsigned>(TemporalUnit::Hour);
-        auto arg = callFrame->uncheckedArgument(i);
-        if (arg.isUndefined())
-            duration[durationIndex] = 0;
-        else {
-            duration[durationIndex] = arg.toIntegerWithTruncation(globalObject);
-            RETURN_IF_EXCEPTION(scope, { });
-        }
-        if (!std::isfinite(duration[durationIndex]))
+    uint8_t hour = 0;
+    uint8_t minute = 0;
+    uint8_t second = 0;
+    int32_t millisecond = 0;
+    int32_t microsecond = 0;
+    int32_t nanosecond = 0;
+    JSValue arg = callFrame->argument(0);
+    double doubleValue = 0;
+    if (!arg.isUndefined()) {
+        doubleValue = arg.toIntegerWithTruncation(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+        if (!std::isfinite(doubleValue))
             return throwVMRangeError(globalObject, scope, "Temporal.PlainTime properties must be finite"_s);
+        hour = static_cast<uint8_t>(doubleValue);
     }
-    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainTime::tryCreateIfValid(globalObject, structure, WTF::move(duration))));
+    arg = callFrame->argument(1);
+    if (!arg.isUndefined()) {
+        doubleValue = arg.toIntegerWithTruncation(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+        if (!std::isfinite(doubleValue))
+            return throwVMRangeError(globalObject, scope, "Temporal.PlainTime properties must be finite"_s);
+        minute = static_cast<uint8_t>(doubleValue);
+    }
+    arg = callFrame->argument(2);
+    if (!arg.isUndefined()) {
+        doubleValue = arg.toIntegerWithTruncation(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+        if (!std::isfinite(doubleValue))
+            return throwVMRangeError(globalObject, scope, "Temporal.PlainTime properties must be finite"_s);
+        second = static_cast<uint8_t>(doubleValue);
+    }
+    arg = callFrame->argument(3);
+    if (!arg.isUndefined()) {
+        doubleValue = arg.toIntegerWithTruncation(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+        if (!std::isfinite(doubleValue))
+            return throwVMRangeError(globalObject, scope, "Temporal.PlainTime properties must be finite"_s);
+        millisecond = static_cast<int32_t>(doubleValue);
+    }
+    arg = callFrame->argument(4);
+    if (!arg.isUndefined()) {
+        doubleValue = arg.toIntegerWithTruncation(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+        if (!std::isfinite(doubleValue))
+            return throwVMRangeError(globalObject, scope, "Temporal.PlainTime properties must be finite"_s);
+        microsecond = static_cast<int32_t>(doubleValue);
+    }
+    arg = callFrame->argument(5);
+    if (!arg.isUndefined()) {
+        doubleValue = arg.toIntegerWithTruncation(globalObject);
+        RETURN_IF_EXCEPTION(scope, { });
+        if (!std::isfinite(doubleValue))
+            return throwVMRangeError(globalObject, scope, "Temporal.PlainTime properties must be finite"_s);
+        nanosecond = static_cast<int32_t>(doubleValue);
+    }
+
+    ISO8601::PlainTime plainTime = TemporalPlainTime::toPlainTime(globalObject, hour, minute, second, millisecond, microsecond, nanosecond);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    RELEASE_AND_RETURN(scope, JSValue::encode(TemporalPlainTime::tryCreateIfValid(globalObject, structure, WTF::move(plainTime))));
 }
 
 JSC_DEFINE_HOST_FUNCTION(callTemporalPlainTime, (JSGlobalObject* globalObject, CallFrame*))

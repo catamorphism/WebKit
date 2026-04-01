@@ -263,8 +263,7 @@ JSC_DEFINE_HOST_FUNCTION(temporalDurationPrototypeFuncToLocaleString, (JSGlobalO
     durationFormat->initializeDurationFormat(globalObject, callFrame->argument(0), callFrame->argument(1));
     RETURN_IF_EXCEPTION(scope, { });
 
-    ISO8601::Duration isoDuration = duration->toLimitedDuration(globalObject, duration, { });
-    RETURN_IF_EXCEPTION(scope, { });
+    ISO8601::Duration isoDuration = duration->iso8601Duration();
 
     RELEASE_AND_RETURN(scope, JSValue::encode(durationFormat->format(globalObject, isoDuration)));
 }

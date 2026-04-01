@@ -641,6 +641,8 @@ bool TemporalPlainDate::isValidISODate(int32_t year, unsigned month, unsigned da
 // https://tc39.es/proposal-temporal/#sec-temporal-regulateisodate
 std::optional<ISO8601::PlainDate> TemporalPlainDate::regulateISODate(int32_t year, unsigned month, unsigned day, TemporalOverflow overflow)
 {
+    if (year == ISO8601::outOfRangeYear)
+        return std::nullopt;
     if (overflow == TemporalOverflow::Constrain) {
         if (month < 1)
             month = 1;
