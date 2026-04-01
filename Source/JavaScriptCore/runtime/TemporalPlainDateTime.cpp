@@ -451,6 +451,7 @@ TemporalPlainDateTime* TemporalPlainDateTime::round(JSGlobalObject* globalObject
         std::optional<String> smallestUnitString = temporalSmallestUnit(globalObject, options);
         RETURN_IF_EXCEPTION(scope, { });
         smallest = validateSmallestUnit(globalObject, smallestUnitString, { TemporalUnit::Year, TemporalUnit::Month, TemporalUnit::Week });
+        RETURN_IF_EXCEPTION(scope, { });
         if (!smallest) {
             throwRangeError(globalObject, scope, "Cannot round without a smallestUnit option"_s);
             return { };
