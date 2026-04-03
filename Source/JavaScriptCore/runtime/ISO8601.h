@@ -38,7 +38,7 @@ static constexpr int32_t maxYear = 275760;
 static constexpr int32_t minYear = -271821;
 static constexpr int32_t outOfRangeYear = minYear - 1;
 
-class Duration {
+class alignas(16) Duration {
     WTF_MAKE_TZONE_ALLOCATED(Duration);
 public:
 
@@ -55,6 +55,38 @@ public:
           m_microseconds(microseconds),
           m_nanoseconds(nanoseconds)
     { }
+
+    Duration(Duration&& d)
+    {
+        m_years = d.m_years;
+        m_months = d.m_months;
+        m_weeks = d.m_weeks;
+        m_days = d.m_days;
+        m_hours = d.m_hours;
+        m_minutes = d.m_minutes;
+        m_seconds = d.m_seconds;
+        m_milliseconds = d.m_milliseconds;
+        m_microseconds = WTF::move(d.m_microseconds);
+        m_nanoseconds = WTF::move(d.m_nanoseconds);
+    }
+
+    Duration& operator=(Duration&& d)
+    {
+        m_years = d.m_years;
+        m_months = d.m_months;
+        m_weeks = d.m_weeks;
+        m_days = d.m_days;
+        m_hours = d.m_hours;
+        m_minutes = d.m_minutes;
+        m_seconds = d.m_seconds;
+        m_milliseconds = d.m_milliseconds;
+        m_microseconds = WTF::move(d.m_microseconds);
+        m_nanoseconds = WTF::move(d.m_nanoseconds);
+        return *this;
+    }
+
+    Duration(const Duration& d) = default;
+    Duration& operator=(const Duration& d) = default;
 
     int64_t years() const { return m_years; }
     int64_t months() const { return m_months; }
@@ -211,8 +243,8 @@ private:
 // of all time fields. Used to avoid losing precision in intermediate calculations.
 class InternalDuration final {
 public:
-    InternalDuration(Duration d, Int128 t)
-        : m_dateDuration(d), m_time(t) { }
+    InternalDuration(Duration&& d, Int128 t)
+        : m_dateDuration(WTF::move(d)), m_time(t) { }
     InternalDuration()
         : m_dateDuration(Duration()), m_time(0) { }
     static constexpr Int128 maxTimeDuration = 9'007'199'254'740'992 * ExactTime::nsPerSecond - 1;
@@ -226,7 +258,7 @@ public:
 
     Int128 time() const { return m_time; }
 
-    Duration dateDuration() const { return m_dateDuration; }
+    const Duration& dateDuration() const { return m_dateDuration; }
 
     static InternalDuration combineDateAndTimeDuration(Duration, Int128);
 private:

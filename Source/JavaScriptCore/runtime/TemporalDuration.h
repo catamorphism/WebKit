@@ -36,8 +36,8 @@ public:
     Int128 m_nudgedEpochNs;
     bool m_didExpandCalendarUnit;
     NudgeResult() { }
-    NudgeResult(ISO8601::InternalDuration d, Int128 ns, bool expanded)
-        : m_duration(d), m_nudgedEpochNs(ns), m_didExpandCalendarUnit(expanded) { }
+    NudgeResult(ISO8601::InternalDuration&& d, Int128 ns, bool expanded)
+        : m_duration(WTF::move(d)), m_nudgedEpochNs(ns), m_didExpandCalendarUnit(expanded) { }
 };
 
 class Nudged final {
@@ -45,8 +45,8 @@ public:
     NudgeResult m_nudgeResult;
     double m_total;
     Nudged() { }
-    Nudged(NudgeResult n, double t)
-        : m_nudgeResult(n), m_total(t) { }
+    Nudged(NudgeResult&& n, double t)
+        : m_nudgeResult(WTF::move(n)), m_total(t) { }
 };
 
 class NudgeWindow final {
@@ -58,8 +58,8 @@ public:
     ISO8601::InternalDuration m_startDuration;
     ISO8601::InternalDuration m_endDuration;
     NudgeWindow() { };
-    NudgeWindow(double r1, double r2, Int128 startEpochNs, Int128 endEpochNs, ISO8601::InternalDuration startDuration, ISO8601::InternalDuration endDuration)
-        : m_r1(r1), m_r2(r2), m_startEpochNs(startEpochNs), m_endEpochNs(endEpochNs), m_startDuration(startDuration), m_endDuration(endDuration) { }
+    NudgeWindow(double r1, double r2, Int128 startEpochNs, Int128 endEpochNs, ISO8601::InternalDuration&& startDuration, ISO8601::InternalDuration&& endDuration)
+        : m_r1(r1), m_r2(r2), m_startEpochNs(startEpochNs), m_endEpochNs(endEpochNs), m_startDuration(WTF::move(startDuration)), m_endDuration(WTF::move(endDuration)) { }
 };
 
 class TemporalDuration final : public JSNonFinalObject {
@@ -89,7 +89,7 @@ public:
 #undef JSC_DEFINE_TEMPORAL_DURATION_FIELD
 
     int sign() const { return m_duration.sign(); }
-    ISO8601::Duration iso8601Duration() const { return m_duration; }
+    const ISO8601::Duration& iso8601Duration() const { return m_duration; }
 
     ISO8601::Duration with(JSGlobalObject*, JSObject* durationLike) const;
     ISO8601::Duration negated() const;

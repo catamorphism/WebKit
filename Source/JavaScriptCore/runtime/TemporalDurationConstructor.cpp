@@ -89,7 +89,7 @@ JSC_DEFINE_HOST_FUNCTION(constructTemporalDuration, (JSGlobalObject* globalObjec
     Structure* structure = JSC_GET_DERIVED_STRUCTURE(vm, durationStructure, newTarget, callFrame->jsCallee());
     RETURN_IF_EXCEPTION(scope, { });
 
-    ISO8601::Duration result;
+    ISO8601::Duration result = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     int64_t count = 0;
     int64_t max = callFrame->argumentCount();
     double doubleDays = 0;

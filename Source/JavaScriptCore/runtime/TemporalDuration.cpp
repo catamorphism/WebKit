@@ -47,7 +47,11 @@ const ClassInfo TemporalDuration::s_info = { "Object"_s, &Base::s_info, nullptr,
 
 TemporalDuration* TemporalDuration::create(VM& vm, Structure* structure, ISO8601::Duration&& duration)
 {
-    auto* object = new (NotNull, allocateCell<TemporalDuration>(vm)) TemporalDuration(vm, structure, WTF::move(duration));
+    dataLogLn(RawPointer(&duration));
+    auto cell = allocateCell<TemporalDuration>(vm);
+    dataLogLn(RawPointer(&cell));
+    dataLogLn(RawPointer(cell));
+    auto* object = new (NotNull, cell) TemporalDuration(vm, structure, WTF::move(duration));
     object->finishCreation(vm);
     return object;
 }
@@ -70,11 +74,16 @@ TemporalDuration* TemporalDuration::tryCreateIfValid(JSGlobalObject* globalObjec
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
+    dataLogLn(RawPointer(structure));
+    dataLogLn(RawPointer(globalObject));
+    dataLogLn(RawPointer(globalObject->durationStructure()));
+    WTF::compilerFence();
     if (!ISO8601::isValidDuration(duration)) {
         throwRangeError(globalObject, scope, "Temporal.Duration properties must be finite and of consistent sign"_s);
         return { };
     }
 
+    WTF::compilerFence();
     return TemporalDuration::create(vm, structure ? structure : globalObject->durationStructure(), WTF::move(duration));
 }
 
@@ -1146,8 +1155,8 @@ Nudged TemporalDuration::nudgeToCalendarUnit(JSGlobalObject* globalObject, int32
         resultDuration = endDuration;
         nudgedEpochNs = endEpochNs;
     }
-    auto nudgeResult = NudgeResult(resultDuration, nudgedEpochNs, didExpandCalendarUnit);
-    return Nudged(nudgeResult, total);
+    auto nudgeResult = NudgeResult(WTF::move(resultDuration), nudgedEpochNs, didExpandCalendarUnit);
+    return Nudged(WTF::move(nudgeResult), total);
 }
 
 // https://tc39.es/proposal-temporal/#sec-temporal-nudgetodayortime
@@ -1179,7 +1188,7 @@ static NudgeResult nudgeToDayOrTime(JSGlobalObject* globalObject, ISO8601::Inter
     RETURN_IF_EXCEPTION(scope, { });
     auto resultDuration = ISO8601::InternalDuration::combineDateAndTimeDuration(dateDuration, remainder);
     RETURN_IF_EXCEPTION(scope, { });
-    return NudgeResult(resultDuration, nudgedEpochNs, didExpandDays);
+    return NudgeResult(WTF::move(resultDuration), nudgedEpochNs, didExpandDays);
 }
 
 static constexpr int32_t unitIndexInTable(TemporalUnit unit)
@@ -1355,7 +1364,7 @@ NudgeResult TemporalDuration::nudgeToZonedTime(JSGlobalObject* globalObject, int
     RETURN_IF_EXCEPTION(scope, { });
     auto resultDuration = ISO8601::InternalDuration::combineDateAndTimeDuration(
         dateDuration, roundedTimeDuration);
-    return NudgeResult(resultDuration, nudgedEpochNs, didRoundBeyondDay);
+    return NudgeResult(WTF::move(resultDuration), nudgedEpochNs, didRoundBeyondDay);
 }
 
 // RoundRelativeDuration ( duration, destEpochNs, isoDateTime, timeZone, calendar, largestUnit, increment, smallestUnit, roundingMode )
