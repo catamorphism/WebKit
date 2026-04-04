@@ -38,7 +38,8 @@ static constexpr int32_t maxYear = 275760;
 static constexpr int32_t minYear = -271821;
 static constexpr int32_t outOfRangeYear = minYear - 1;
 
-class alignas(16) Duration {
+// class alignas(16) Duration {
+class Duration {
     WTF_MAKE_TZONE_ALLOCATED(Duration);
 public:
 
@@ -51,39 +52,14 @@ public:
           m_hours(hours),
           m_minutes(minutes),
           m_seconds(seconds),
-          m_milliseconds(milliseconds),
-          m_microseconds(microseconds),
-          m_nanoseconds(nanoseconds)
-    { }
-
-    Duration(Duration&& d)
+          m_milliseconds(milliseconds)
     {
-        m_years = d.m_years;
-        m_months = d.m_months;
-        m_weeks = d.m_weeks;
-        m_days = d.m_days;
-        m_hours = d.m_hours;
-        m_minutes = d.m_minutes;
-        m_seconds = d.m_seconds;
-        m_milliseconds = d.m_milliseconds;
-        m_microseconds = WTF::move(d.m_microseconds);
-        m_nanoseconds = WTF::move(d.m_nanoseconds);
+        setMicroseconds(microseconds);
+        setNanoseconds(nanoseconds);
     }
 
-    Duration& operator=(Duration&& d)
-    {
-        m_years = d.m_years;
-        m_months = d.m_months;
-        m_weeks = d.m_weeks;
-        m_days = d.m_days;
-        m_hours = d.m_hours;
-        m_minutes = d.m_minutes;
-        m_seconds = d.m_seconds;
-        m_milliseconds = d.m_milliseconds;
-        m_microseconds = WTF::move(d.m_microseconds);
-        m_nanoseconds = WTF::move(d.m_nanoseconds);
-        return *this;
-    }
+    Duration(Duration&& d) = default;
+    Duration& operator=(Duration&& d) = default;
 
     Duration(const Duration& d) = default;
     Duration& operator=(const Duration& d) = default;
@@ -96,8 +72,18 @@ public:
     int64_t minutes() const { return m_minutes; }
     int64_t seconds() const { return m_seconds; }
     int64_t milliseconds() const { return m_milliseconds; }
-    Int128 microseconds() const { return m_microseconds; }
-    Int128 nanoseconds() const { return m_nanoseconds; }
+    Int128 microseconds() const
+    {
+        UInt128 hi = (static_cast<UInt128>(m_microseconds_hi)) << 64;
+        UInt128 lo = static_cast<UInt128>(m_microseconds_lo);
+        return std::bit_cast<Int128>(hi | lo);
+    }
+    Int128 nanoseconds() const
+    {
+        UInt128 hi = (static_cast<UInt128>(m_nanoseconds_hi)) << 64;
+        UInt128 lo = static_cast<UInt128>(m_nanoseconds_lo);
+        return std::bit_cast<Int128>(hi | lo);
+    }
 
     void setYears(int64_t value) { m_years = !value ? 0 : value; }
     void setMonths(int64_t value) { m_months = !value ? 0 : value; }
@@ -107,8 +93,30 @@ public:
     void setMinutes(int64_t value) { m_minutes = !value ? 0 : value; }
     void setSeconds(int64_t value) { m_seconds = !value ? 0 : value; }
     void setMilliseconds(int64_t value) { m_milliseconds = !value ? 0 : value; }
-    void setMicroseconds(Int128 value) { m_microseconds = !value ? 0 : value; }
-    void setNanoseconds(Int128 value) { m_nanoseconds = !value ? 0 : value; }
+    void setMicroseconds(Int128 value)
+    {
+        if (!value) {
+            m_microseconds_hi = 0;
+            m_microseconds_lo = 0;
+            return;
+        }
+        UInt128 hi = (std::bit_cast<UInt128>(value)) >> 64;
+        UInt128 lo = (std::bit_cast<UInt128>(value) & 0xFFFFFFFFFFFFFFFF);
+        m_microseconds_hi = static_cast<uint64_t>(hi);
+        m_microseconds_lo = static_cast<uint64_t>(lo);
+    }
+    void setNanoseconds(Int128 value)
+    {
+        if (!value) {
+            m_nanoseconds_hi = 0;
+            m_nanoseconds_lo = 0;
+            return;
+        }
+        UInt128 hi = (std::bit_cast<UInt128>(value)) >> 64;
+        UInt128 lo = (std::bit_cast<UInt128>(value) & 0xFFFFFFFFFFFFFFFF);
+        m_nanoseconds_hi = static_cast<uint64_t>(hi);
+        m_nanoseconds_lo = static_cast<uint64_t>(lo);
+    }
 
     void clear() {
         m_years = 0;
@@ -119,8 +127,10 @@ public:
         m_minutes = 0;
         m_seconds = 0;
         m_milliseconds = 0;
-        m_microseconds = 0;
-        m_nanoseconds = 0;
+        m_microseconds_hi = 0;
+        m_microseconds_lo = 0;
+        m_nanoseconds_hi = 0;
+        m_nanoseconds_lo = 0;
     }
 
     template<TemporalUnit unit>
@@ -128,7 +138,10 @@ public:
 
     Duration operator-() const
     {
-        return Duration(-m_years, -m_months, -m_weeks, -m_days, -m_hours, -m_minutes, -m_seconds, -m_milliseconds, -m_microseconds, -m_nanoseconds);
+        Int128 us = -microseconds();
+        Int128 ns = -nanoseconds();
+
+        return Duration(-m_years, -m_months, -m_weeks, -m_days, -m_hours, -m_minutes, -m_seconds, -m_milliseconds, us, ns);
     }
 
     int sign() const;
@@ -143,9 +156,18 @@ private:
     int64_t m_minutes = 0;
     int64_t m_seconds = 0;
     int64_t m_milliseconds = 0;
-    Int128 m_microseconds = 0;
-    Int128 m_nanoseconds = 0;
+// This has to be stored as two uint64_ts and not an Int128
+// because Int128 has to be 16-bit aligned but JS cells must be
+// 8-bit aligned (and ISO8601::Duration is stored as the single
+// field of TemporalDuration).
+    uint64_t m_microseconds_hi = 0;
+    uint64_t m_microseconds_lo = 0;
+    uint64_t m_nanoseconds_hi = 0;
+    uint64_t m_nanoseconds_lo = 0;
 };
+
+
+static_assert(alignof(Duration) == 8);
 
 class InternalDuration;
 

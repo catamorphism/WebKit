@@ -314,14 +314,11 @@ static std::optional<Duration> parseDuration(StringParsingBuffer<CharacterType>&
         if (!std::isfinite(integer))
             return std::nullopt;
 
-        // This has to be done before converting to int64_t
-        constexpr double limit = 1ULL << 32;
-        if (std::abs(integer) >= limit)
-            return std::nullopt;
-
         buffer.advanceBy(digits);
         if (buffer.atEnd())
             return std::nullopt;
+
+        bool isDays = false;
 
         switch (toASCIIUpper(*buffer)) {
         case 'Y':
@@ -345,10 +342,18 @@ static std::optional<Duration> parseDuration(StringParsingBuffer<CharacterType>&
         case 'D':
             result.setDays(static_cast<int64_t>(integer));
             doubleDays = integer;
+            isDays = true;
             datePartIndex = 4;
             break;
         default:
             return std::nullopt;
+        }
+
+        if (!isDays) {
+            // This has to be done before converting to int64_t
+            constexpr double limit = 1ULL << 32;
+            if (std::abs(integer) >= limit)
+                return std::nullopt;
         }
     }
 
@@ -2499,13 +2504,15 @@ int Duration::sign() const
         return -1;
     if (milliseconds() > 0)
         return 1;
-    if (microseconds() < 0)
+    Int128 us = microseconds();
+    if (us < 0)
         return -1;
-    if (microseconds() > 0)
+    if (us > 0)
         return 1;
-    if (nanoseconds() < 0)
+    Int128 ns = nanoseconds();
+    if (ns < 0)
         return -1;
-    if (nanoseconds() > 0)
+    if (ns > 0)
         return 1;
     return 0;
 }

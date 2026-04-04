@@ -47,10 +47,7 @@ const ClassInfo TemporalDuration::s_info = { "Object"_s, &Base::s_info, nullptr,
 
 TemporalDuration* TemporalDuration::create(VM& vm, Structure* structure, ISO8601::Duration&& duration)
 {
-    dataLogLn(RawPointer(&duration));
     auto cell = allocateCell<TemporalDuration>(vm);
-    dataLogLn(RawPointer(&cell));
-    dataLogLn(RawPointer(cell));
     auto* object = new (NotNull, cell) TemporalDuration(vm, structure, WTF::move(duration));
     object->finishCreation(vm);
     return object;
@@ -64,8 +61,7 @@ Structure* TemporalDuration::createStructure(VM& vm, JSGlobalObject* globalObjec
 TemporalDuration::TemporalDuration(VM& vm, Structure* structure, ISO8601::Duration&& duration)
     : Base(vm, structure)
     , m_duration(WTF::move(duration))
-{
-}
+{ }
 
 // CreateTemporalDuration ( years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds [ , newTarget ] )
 // https://tc39.es/proposal-temporal/#sec-temporal-createtemporalduration
@@ -74,9 +70,6 @@ TemporalDuration* TemporalDuration::tryCreateIfValid(JSGlobalObject* globalObjec
     VM& vm = globalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
 
-    dataLogLn(RawPointer(structure));
-    dataLogLn(RawPointer(globalObject));
-    dataLogLn(RawPointer(globalObject->durationStructure()));
     WTF::compilerFence();
     if (!ISO8601::isValidDuration(duration)) {
         throwRangeError(globalObject, scope, "Temporal.Duration properties must be finite and of consistent sign"_s);
